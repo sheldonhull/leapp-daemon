@@ -6,7 +6,7 @@ type HomeServiceResponse struct {
 	Data string
 }
 
-func (serviceResponse *HomeServiceResponse) ToDto() *response_dto.HomeResponseDto {
+func (serviceResponse *HomeServiceResponse) ToDto() response_dto.IResponseDto {
 	return &response_dto.HomeResponseDto{
 		Message: "success",
 		Data: serviceResponse.Data,
