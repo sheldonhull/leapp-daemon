@@ -14,6 +14,6 @@ func (requestDto *HomeRequestDto) Build(context *gin.Context) error {
 	return err
 }
 
-func (requestDto *HomeRequestDto) ToServiceRequest() interface{} { // service_requests.IServiceRequest {
+func (requestDto *HomeRequestDto) ToServiceRequest() interface{} {
 	return &service_requests.HomeServiceRequest{Name: requestDto.Name}
 }

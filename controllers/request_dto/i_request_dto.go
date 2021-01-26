@@ -6,7 +6,5 @@ import (
 
 type IRequestDto interface {
 	Build(*gin.Context) error
-	// GetFieldByName(fieldName string) interface{}
-	// ToMap() map[string]interface{}
-	ToServiceRequest() interface{} // service_requests.IServiceRequest
+	ToServiceRequest() interface{}
 }
