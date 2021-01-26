@@ -1,7 +1,7 @@
 package service_responses
 
 import (
-	"leapp_daemon/controllers/response_dto"
+	"leapp-daemon/controllers/response_dto"
 )
 
 type IServiceResponse interface {

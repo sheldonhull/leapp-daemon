@@ -1,4 +1,4 @@
-module leapp_daemon
+module leapp-daemon
 
 go 1.14
 

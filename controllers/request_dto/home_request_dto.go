@@ -2,7 +2,7 @@ package request_dto
 
 import (
 	"github.com/gin-gonic/gin"
-	"leapp_daemon/services/service_requests"
+	"leapp-daemon/services/service_requests"
 )
 
 type HomeRequestDto struct {
