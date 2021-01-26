@@ -2,8 +2,8 @@ package services
 
 import (
 	"fmt"
-	"leapp-daemon/services/service_requests"
-	"leapp-daemon/services/service_responses"
+	"leapp_daemon/services/service_requests"
+	"leapp_daemon/services/service_responses"
 )
 
 func HomeService(serviceRequest service_requests.HomeServiceRequest) (*service_responses.HomeServiceResponse, error) {
