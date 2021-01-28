@@ -9,7 +9,7 @@ type Configuration struct {
 type ProxyConfiguration struct {
 	ProxyProtocol string
 	ProxyUrl string
-	proxyPort int
+	ProxyPort int
 	Username string
 	Password string
 }

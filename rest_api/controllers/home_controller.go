@@ -6,7 +6,6 @@ import (
 	"leapp_daemon/rest_api/controllers/response_dto"
 	"leapp_daemon/rest_api/error_handling"
 	"leapp_daemon/services"
-	"leapp_daemon/services/service_requests"
 	"net/http"
 )
 
@@ -18,12 +17,12 @@ func HomeController(context *gin.Context) {
 		return
 	}
 
-	serviceResponse, err2 := services.HomeService(service_requests.HomeServiceRequest{Name: requestDto.Name})
+	serviceResponse, err2 := services.HomeService(requestDto.Name)
 	if err2 != nil {
 		error_handling.ErrorHandler.Handle(context, err2)
 		return
 	}
 
-	responseDto := response_dto.HomeResponseDto{Message: "success", Data: serviceResponse.Data}
+	responseDto := response_dto.HomeResponseDto{Message: "success", Data: serviceResponse}
 	context.JSON(http.StatusOK, responseDto.ToMap())
 }
