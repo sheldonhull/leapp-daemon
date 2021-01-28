@@ -1,6 +1,6 @@
 package services
 
-func CreateConfigurationService() error {
+func CreateConfiguration() error {
 	/*configuration := domain.Configuration{
 		SsoUrl:             "",
 		ProxyConfiguration: domain.ProxyConfiguration{

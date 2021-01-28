@@ -17,7 +17,7 @@ func HomeController(context *gin.Context) {
 		return
 	}
 
-	serviceResponse, err2 := services.HomeService(requestDto.Name)
+	serviceResponse, err2 := services.Home(requestDto.Name)
 	if err2 != nil {
 		error_handling.ErrorHandler.Handle(context, err2)
 		return
