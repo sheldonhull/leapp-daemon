@@ -3,7 +3,7 @@ package error_handling
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"leapp_daemon/controllers/utils"
+	"leapp_daemon/rest_api/controllers/utils"
 	"log"
 	"net/http"
 )

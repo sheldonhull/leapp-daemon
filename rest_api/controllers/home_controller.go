@@ -2,9 +2,9 @@ package controllers
 
 import (
 	"github.com/gin-gonic/gin"
-	"leapp_daemon/controllers/request_dto"
-	"leapp_daemon/controllers/response_dto"
-	"leapp_daemon/error_handling"
+	"leapp_daemon/rest_api/controllers/request_dto"
+	"leapp_daemon/rest_api/controllers/response_dto"
+	"leapp_daemon/rest_api/error_handling"
 	"leapp_daemon/services"
 	"leapp_daemon/services/service_requests"
 	"net/http"

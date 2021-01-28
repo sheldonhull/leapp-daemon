@@ -1,6 +1,6 @@
 package main
 
-import "leapp_daemon/engine"
+import "leapp_daemon/rest_api/engine"
 
 func main() {
 	// TODO: add JSON parsing and encoding

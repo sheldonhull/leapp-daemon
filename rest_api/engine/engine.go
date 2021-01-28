@@ -3,7 +3,7 @@ package engine
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"leapp_daemon/controllers"
+	"leapp_daemon/rest_api/controllers"
 	"log"
 )
 
