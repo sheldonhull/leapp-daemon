@@ -11,7 +11,9 @@ type engineWrapper struct {
 	ginEngine *gin.Engine
 }
 
-func New() *engineWrapper {
+var engineWrapperInstance *engineWrapper = nil
+
+func newEngineWrapper() *engineWrapper {
 	ginEngine := gin.New()
 
 	engineWrapper := engineWrapper{
@@ -23,10 +25,21 @@ func New() *engineWrapper {
 	return &engineWrapper
 }
 
+func Engine() *engineWrapper {
+	log.Println("engineWrapperInstance:", engineWrapperInstance)
+	if engineWrapperInstance != nil {
+		log.Println("engineWrapperInstance:", engineWrapperInstance)
+		return engineWrapperInstance
+	} else {
+		engineWrapperInstance = newEngineWrapper()
+		log.Println("engineWrapperInstance:", engineWrapperInstance)
+		return engineWrapperInstance
+	}
+}
+
 func (engineWrapper *engineWrapper) initialize() {
 	engineWrapper.ginEngine.Use(gin.Logger())
 	engineWrapper.ginEngine.Use(gin.Recovery())
-
 	initializeRoutes(engineWrapper.ginEngine)
 }
 
@@ -34,7 +47,7 @@ func (engineWrapper *engineWrapper) Serve(port int) {
 	err := engineWrapper.ginEngine.Run(fmt.Sprintf(":%d", port))
 
 	if err != nil {
-		log.Fatalln("Error -", err)
+		log.Fatalln("Error:", fmt.Sprintf("%+v", err))
 	}
 }
 

@@ -22,6 +22,6 @@ func main() {
 	// TODO: add authentication
 	// TODO: add HTTPS
 	// TODO: are there different web/application servers to host Gin application?
-	eng := engine.New()
+	eng := engine.Engine()
 	eng.Serve(8080)
 }

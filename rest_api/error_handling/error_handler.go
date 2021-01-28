@@ -12,6 +12,7 @@ type errorHandler struct{}
 
 func (*errorHandler) Handle(context *gin.Context, err error) {
 	log.Println(fmt.Sprintf("%+v", err))
+
 	var code int
 
 	switch err.(type) {
