@@ -6,12 +6,11 @@ import (
 	"github.com/tidwall/gjson"
 	"io/ioutil"
 	"leapp_daemon/services/domain"
-	"log"
 	"os"
 )
 
-func CreateConfiguration() error {
-	configuration := domain.Configuration{
+func getInitialConfiguration() domain.Configuration {
+	return domain.Configuration{
 		SsoUrl: "",
 		ProxyConfiguration: domain.ProxyConfiguration{
 			ProxyProtocol: "https",
@@ -22,28 +21,12 @@ func CreateConfiguration() error {
 		},
 		Sessions: make([]domain.Session, 0),
 	}
+}
 
-	homeDir, err := GetHomeDir()
+func CreateConfiguration() error {
+	configuration := getInitialConfiguration()
+	err := UpdateConfiguration(&configuration, false)
 	if err != nil { return err }
-
-	configurationFilePath := fmt.Sprintf("%s/%s", homeDir, domain.ConfigurationFilePath)
-
-	if DoesFileExist(configurationFilePath) {
-		err = os.Remove(configurationFilePath)
-		if err != nil { return err }
-	}
-
-	configurationJson, err := json.Marshal(configuration)
-	if err != nil { return err }
-
-	log.Println("configurationJson:", string(configurationJson))
-
-	encryptedConfigurationJson, err := Encrypt(string(configurationJson))
-	if err != nil { return err }
-
-	err = ioutil.WriteFile(configurationFilePath, []byte(encryptedConfigurationJson), 0644)
-	if err != nil { return err }
-	
 	return nil
 }
 
@@ -59,10 +42,37 @@ func ReadConfiguration() (*domain.Configuration, error) {
 	plainText, err := Decrypt(string(encryptedText))
 	if err != nil { return nil, err }
 
-	return UnmarshalConfiguration(plainText), nil
+	return unmarshalConfiguration(plainText), nil
 }
 
-func UnmarshalConfiguration(configurationJson string) *domain.Configuration {
+func UpdateConfiguration(configuration *domain.Configuration, deleteExistingFile bool) error {
+	homeDir, err := GetHomeDir()
+	if err != nil { return err }
+
+	configurationFilePath := fmt.Sprintf("%s/%s", homeDir, domain.ConfigurationFilePath)
+
+	if deleteExistingFile == true {
+		if DoesFileExist(configurationFilePath) {
+			err = os.Remove(configurationFilePath)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	configurationJson, err := json.Marshal(configuration)
+	if err != nil { return err }
+
+	encryptedConfigurationJson, err := Encrypt(string(configurationJson))
+	if err != nil { return err }
+
+	err = ioutil.WriteFile(configurationFilePath, []byte(encryptedConfigurationJson), 0644)
+	if err != nil { return err }
+
+	return nil
+}
+
+func unmarshalConfiguration(configurationJson string) *domain.Configuration {
 	var configuration domain.Configuration
 	configuration.SsoUrl = gjson.Get(configurationJson, "SsoUrl").String()
 
@@ -70,8 +80,8 @@ func UnmarshalConfiguration(configurationJson string) *domain.Configuration {
 	proxyConfiguration.ProxyProtocol = gjson.Get(configurationJson, "ProxyConfiguration.ProxyProtocol").String()
 	proxyConfiguration.ProxyUrl = gjson.Get(configurationJson, "ProxyConfiguration.ProxyUrl").String()
 	proxyConfiguration.ProxyPort = gjson.Get(configurationJson, "ProxyConfiguration.ProxyPort").Uint()
-	proxyConfiguration.ProxyUrl = gjson.Get(configurationJson, "ProxyConfiguration.ProxyUrl").String()
-	proxyConfiguration.ProxyUrl = gjson.Get(configurationJson, "ProxyConfiguration.ProxyUrl").String()
+	proxyConfiguration.Username = gjson.Get(configurationJson, "ProxyConfiguration.Username").String()
+	proxyConfiguration.Password = gjson.Get(configurationJson, "ProxyConfiguration.Password").String()
 
 	configuration.ProxyConfiguration = proxyConfiguration
 
