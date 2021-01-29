@@ -1,10 +1,9 @@
 package services
 
 import (
-	"github.com/pkg/errors"
+	"fmt"
 )
 
 func Home(name string) (string, error) {
-	return "", errors.New("fake error")
-	//return fmt.Sprintf("hello %s", name), nil
+	return fmt.Sprintf("hello %s", name), nil
 }

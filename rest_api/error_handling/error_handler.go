@@ -1,11 +1,11 @@
 package error_handling
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
+	"leapp_daemon/logging"
 	"leapp_daemon/rest_api/controllers/utils"
-	"log"
 	"net/http"
 )
 
@@ -22,15 +22,11 @@ func (*errorHandler) Handle(context *gin.Context, err error) {
 	}
 
 	errorMap := gin.H{ "statusCode": code, "error": err.Error(), "context": utils.NewContext(context) }
-	errorJson, marshallingError := json.MarshalIndent(errorMap, "", "  ")
 
-	if marshallingError != nil {
-		log.Println(fmt.Sprintf("%+v", errorMap))
-		context.JSON(code, errorMap)
-	} else {
-		log.Println(fmt.Sprintf("%+v", string(errorJson)))
-		context.JSON(code, errorMap)
-	}
+	logging.CtxLogger(context).
+		WithFields(logrus.Fields{"statusCode": code}).
+		Error(fmt.Sprintf("%s", err.Error()))
+	context.JSON(code, errorMap)
 }
 
 var ErrorHandler = &errorHandler{}

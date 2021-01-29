@@ -1,6 +1,9 @@
 package main
 
-import "leapp_daemon/rest_api/engine"
+import (
+	"leapp_daemon/logging"
+	"leapp_daemon/rest_api/engine"
+)
 
 func main() {
 	// TODO: create specific accounts models
@@ -18,6 +21,7 @@ func main() {
 	// TODO: add authentication
 	// TODO: add HTTPS
 	// TODO: are there different web/application servers to host Gin application?
+	defer logging.CloseLogFile()
 	eng := engine.Engine()
 	eng.Serve(8080)
 

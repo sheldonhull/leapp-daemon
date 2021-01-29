@@ -11,7 +11,7 @@ type BadRequestError struct{
 }
 
 func (err BadRequestError) Error() string {
-	return fmt.Sprintf(`[%d] %+v`, err.StatusCode, err.Message)
+	return fmt.Sprintf(`%+v`, err.Message)
 }
 
 func NewBadRequestError(err error) error {

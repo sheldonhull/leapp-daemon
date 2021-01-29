@@ -3,8 +3,9 @@ package engine
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
+	"leapp_daemon/logging"
 	"leapp_daemon/rest_api/controllers"
-	"log"
 )
 
 type engineWrapper struct {
@@ -35,25 +36,16 @@ func Engine() *engineWrapper {
 }
 
 func (engineWrapper *engineWrapper) initialize() {
-	// TODO: configure logging the proper way
-	/*
-	file, err := os.OpenFile("logs.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
-	    if err != nil {
-	        log.Fatal(err)
-	    }
-
-	    log.SetOutput(file)
-	 */
-	//engineWrapper.ginEngine.Use(gin.Logger())
+	logging.InitializeLogger()
+	engineWrapper.ginEngine.Use(gin.Logger())
 	engineWrapper.ginEngine.Use(gin.Recovery())
 	initializeRoutes(engineWrapper.ginEngine)
 }
 
 func (engineWrapper *engineWrapper) Serve(port int) {
 	err := engineWrapper.ginEngine.Run(fmt.Sprintf(":%d", port))
-
 	if err != nil {
-		log.Fatalln("Error:", fmt.Sprintf("%+v", err))
+		logrus.Fatalln("error:", err.Error())
 	}
 }
 

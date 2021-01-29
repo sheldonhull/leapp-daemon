@@ -6,7 +6,7 @@ import (
 )
 
 type HomeRequestDto struct {
-	Name string `uri:"Name" binding:"required"`
+	Name string `uri:"name" binding:"required"`
 }
 
 func (requestDto *HomeRequestDto) Build(context *gin.Context) error {
