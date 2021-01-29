@@ -26,19 +26,25 @@ func newEngineWrapper() *engineWrapper {
 }
 
 func Engine() *engineWrapper {
-	log.Println("engineWrapperInstance:", engineWrapperInstance)
 	if engineWrapperInstance != nil {
-		log.Println("engineWrapperInstance:", engineWrapperInstance)
 		return engineWrapperInstance
 	} else {
 		engineWrapperInstance = newEngineWrapper()
-		log.Println("engineWrapperInstance:", engineWrapperInstance)
 		return engineWrapperInstance
 	}
 }
 
 func (engineWrapper *engineWrapper) initialize() {
-	engineWrapper.ginEngine.Use(gin.Logger())
+	// TODO: configure logging the proper way
+	/*
+	file, err := os.OpenFile("logs.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+	    if err != nil {
+	        log.Fatal(err)
+	    }
+
+	    log.SetOutput(file)
+	 */
+	//engineWrapper.ginEngine.Use(gin.Logger())
 	engineWrapper.ginEngine.Use(gin.Recovery())
 	initializeRoutes(engineWrapper.ginEngine)
 }

@@ -5,6 +5,7 @@ import (
 	"crypto/cipher"
 	"crypto/rand"
 	"github.com/denisbrodbeck/machineid"
+	"github.com/pkg/errors"
 	"io"
 )
 
@@ -14,6 +15,7 @@ func getMachineId() (string, error) {
 	return id, nil
 }
 
+// TODO: read random-generated key from keychain
 func getAesKey() ([]byte, error) {
 	machineId, err := getMachineId()
 	if err != nil { return nil, err }
@@ -69,6 +71,11 @@ func Decrypt(encryptedText string) (string, error) {
 
 	nonceSize := gcm.NonceSize()
 	encryptedTextByteSlice := []byte(encryptedText)
+
+	if len(encryptedTextByteSlice) <= nonceSize {
+		return "", errors.New("encrypted file's length is shorter than the expected nonce size")
+	}
+
 	nonce, ciphertext := encryptedTextByteSlice[:nonceSize], encryptedTextByteSlice[nonceSize:]
 
 	plainText, err := gcm.Open(nil, nonce, ciphertext, nil)

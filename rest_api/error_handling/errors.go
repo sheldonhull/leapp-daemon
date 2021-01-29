@@ -7,14 +7,14 @@ import (
 
 type BadRequestError struct{
 	StatusCode int
-	Err error
+	Message    error
 }
 
 func (err BadRequestError) Error() string {
-	return fmt.Sprintf(`{ statuscode: %d, error: %+v }`, err.StatusCode, err.Err)
+	return fmt.Sprintf(`[%d] %+v`, err.StatusCode, err.Message)
 }
 
 func NewBadRequestError(err error) error {
 	if err == nil { return nil }
-	return BadRequestError{ StatusCode: http.StatusBadRequest, Err: err }
+	return BadRequestError{ StatusCode: http.StatusBadRequest, Message: err }
 }

@@ -25,7 +25,7 @@ func getInitialConfiguration() domain.Configuration {
 
 func CreateConfiguration() error {
 	configuration := getInitialConfiguration()
-	err := UpdateConfiguration(&configuration, false)
+	err := UpdateConfiguration(&configuration, true)
 	if err != nil { return err }
 	return nil
 }
