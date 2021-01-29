@@ -1,38 +1,38 @@
 package domain
 
 type Configuration struct {
-	SsoUrl             string
+	SsoUrl string
 	ProxyConfiguration ProxyConfiguration
-	Sessions           []Session
+	Sessions []Session
 }
 
 type ProxyConfiguration struct {
 	ProxyProtocol string
 	ProxyUrl string
-	ProxyPort int
+	ProxyPort uint64
 	Username string
 	Password string
 }
 
 type Session struct {
-	Id           string
-	Active       bool
-	Loading      bool
+	Id string
+	Active bool
+	Loading bool
 	LastStopDate string
-	Account      Account
+	Account Account
 }
 
 type Account struct {
-	Id              string
-	Name            string
-	AccountNumber   string
-	Role            Role
-	IdpArn          string
-	Region          string
-	SsoUrl          string
-	Type            string
+	Id string
+	Name string
+	AccountNumber string
+	Role Role
+	IdpArn string
+	Region string
+	SsoUrl string
+	Type string
 	ParentSessionId string
-	ParentRole      string
+	ParentRole string
 }
 
 type Role struct {

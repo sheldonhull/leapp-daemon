@@ -1,6 +1,9 @@
 package main
 
-import "leapp_daemon/rest_api/engine"
+import (
+	"leapp_daemon/services"
+	"log"
+)
 
 func main() {
 	// TODO: add JSON parsing and encoding
@@ -22,6 +25,9 @@ func main() {
 	// TODO: add authentication
 	// TODO: add HTTPS
 	// TODO: are there different web/application servers to host Gin application?
-	eng := engine.Engine()
-	eng.Serve(8080)
+	//eng := engine.Engine()
+	//eng.Serve(8080)
+	services.CreateConfiguration()
+	c, _ := services.ReadConfiguration()
+	log.Printf("configuration: %+v\n", *c)
 }
