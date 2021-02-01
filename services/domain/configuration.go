@@ -3,7 +3,7 @@ package domain
 type Configuration struct {
 	SsoUrl string
 	ProxyConfiguration ProxyConfiguration
-	Sessions []Session
+	FederatedAwsAccountSessions []FederatedAwsAccountSession
 }
 
 type ProxyConfiguration struct {
@@ -14,30 +14,29 @@ type ProxyConfiguration struct {
 	Password string
 }
 
-type Session struct {
-	Id string
-	Active bool
-	Loading bool
+type FederatedAwsAccountSession struct {
+	Id           string
+	Active       bool
+	Loading      bool
 	LastStopDate string
-	Account Account
+	Account      FederatedAwsAccount
 }
 
-type Account struct {
-	Id string
-	Name string
+type FederatedAwsAccount struct {
 	AccountNumber string
-	Role Role
-	IdpArn string
-	Region string
-	SsoUrl string
-	Type string
-	ParentSessionId string
-	ParentRole string
+	Name          string
+	Role          FederatedAwsRole
+	IdpArn        string
+	Region        string
+	SsoUrl        string
+	// Type            string
+	// ParentSessionId string
+	// ParentRole      string
 }
 
-type Role struct {
+type FederatedAwsRole struct {
 	Name string
-	RoleArn string
-	Parent string
-	ParentRole string
+	Arn  string
+	// Parent string
+	// ParentRole string
 }

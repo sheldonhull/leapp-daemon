@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
+	"leapp_daemon/controllers/utils"
 	"leapp_daemon/logging"
-	"leapp_daemon/rest_api/controllers/utils"
 	"net/http"
 )
 

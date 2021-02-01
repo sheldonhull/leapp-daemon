@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
+	"leapp_daemon/controllers"
 	"leapp_daemon/logging"
-	"leapp_daemon/rest_api/controllers"
 )
 
 type engineWrapper struct {
@@ -52,6 +52,9 @@ func (engineWrapper *engineWrapper) Serve(port int) {
 func initializeRoutes(ginEngine *gin.Engine) {
 	v1 := ginEngine.Group("/api/v1")
 	{
-		v1.GET("/home/:name", controllers.HomeController)
+		v1.GET("/echo/:text", controllers.EchoController)
+		v1.POST("/configuration/create", controllers.CreateConfigurationController)
+		v1.GET("/configuration/read", controllers.ReadConfigurationController)
+		v1.POST("/federated_aws_account/create", controllers.CreateFederatedAccountController)
 	}
 }

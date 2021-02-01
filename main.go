@@ -1,27 +1,17 @@
 package main
 
 import (
+	"leapp_daemon/engine"
 	"leapp_daemon/logging"
-	"leapp_daemon/rest_api/engine"
 )
 
 func main() {
-	// TODO: create specific accounts models
-	// TODO: implement keychain service
-	// TODO: implement plain account creation service
-	// TODO: implement tmp credentials generation flow
-	// TODO: implement plain account strategy (with STS)
-	// TODO: test suite
-
-	// TODO: how to protect REST API from outside?
-	// TODO: integrate with gRPC plugins
-
-	// TODO: documentation
-
-	// TODO: add authentication
-	// TODO: add HTTPS
-	// TODO: are there different web/application servers to host Gin application?
 	defer logging.CloseLogFile()
 	eng := engine.Engine()
 	eng.Serve(8080)
+
+	//conf, _ := services.ReadConfiguration()
+	//log.Printf("conf: %+v\n", *conf)
+
+	//_ = services.CreateConfiguration()
 }
