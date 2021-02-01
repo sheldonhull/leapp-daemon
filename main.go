@@ -24,12 +24,4 @@ func main() {
 	defer logging.CloseLogFile()
 	eng := engine.Engine()
 	eng.Serve(8080)
-
-	/*services.CreateConfiguration()
-	c, err := services.ReadConfiguration()
-	if err != nil { log.Fatalln(err) }
-	c.ProxyConfiguration.Username = `eric`
-	services.UpdateConfiguration(c, false)
-	c, _ = services.ReadConfiguration()
-	log.Printf("configuration: %+v\n", *c)*/
 }
