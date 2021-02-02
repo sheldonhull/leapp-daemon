@@ -6,7 +6,7 @@ import (
 )
 
 type EchoRequestDto struct {
-	Text string `uri:"Text" binding:"required"`
+	Text string `uri:"text" binding:"required"`
 }
 
 func (requestDto *EchoRequestDto) Build(context *gin.Context) error {

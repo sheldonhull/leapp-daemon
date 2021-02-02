@@ -11,7 +11,6 @@ func CreateConfigurationController(context *gin.Context) {
 	err := services.CreateConfiguration()
 	if err != nil {
 		_ = context.Error(err)
-		//custom_errors.ErrorHandler.Handle(context, err)
 		return
 	}
 
@@ -23,7 +22,6 @@ func ReadConfigurationController(context *gin.Context) {
 	configuration, err := services.ReadConfiguration()
 	if err != nil {
 		_ = context.Error(err)
-		//custom_errors.ErrorHandler.Handle(context, err)
 		return
 	}
 

@@ -13,7 +13,6 @@ func CreateFederatedAccountController(context *gin.Context) {
 	err := (&requestDto).Build(context)
 	if err != nil {
 		_ = context.Error(err)
-		//custom_errors.ErrorHandler.Handle(context, err)
 		return
 	}
 
