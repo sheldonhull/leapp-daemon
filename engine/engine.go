@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"leapp_daemon/controllers"
+	"leapp_daemon/controllers/middleware"
 	"leapp_daemon/logging"
 )
 
@@ -37,7 +38,7 @@ func Engine() *engineWrapper {
 
 func (engineWrapper *engineWrapper) initialize() {
 	logging.InitializeLogger()
-	engineWrapper.ginEngine.Use(gin.Logger())
+	engineWrapper.ginEngine.Use(middleware.ErrorHandler.Handle)
 	engineWrapper.ginEngine.Use(gin.Recovery())
 	initializeRoutes(engineWrapper.ginEngine)
 }

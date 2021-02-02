@@ -13,9 +13,6 @@ import (
 var logFile *os.File = nil
 
 func InitializeLogger() {
-	logrus.SetLevel(logrus.ErrorLevel)
-	logrus.SetFormatter(&logrus.JSONFormatter{ PrettyPrint: true})
-
 	err := createLogDir()
 	if err != nil {
 		logrus.Fatalln("error: %s", err.Error())
@@ -26,7 +23,9 @@ func InitializeLogger() {
 		logrus.Fatalln("error: %s", err.Error())
 	}
 
-	writer := io.MultiWriter(os.Stdout, logFile)
+	logrus.SetLevel(logrus.ErrorLevel)
+	logrus.SetFormatter(&logrus.JSONFormatter{ PrettyPrint: true})
+	writer := io.MultiWriter(os.Stderr, logFile)
 	logrus.SetOutput(writer)
 }
 
@@ -36,7 +35,7 @@ func CtxLogger(context *gin.Context) *logrus.Entry {
 	if _, err := os.Stat(logFilePath); os.IsNotExist(err) {
 		logFile = nil
 		_ = createLogFile()
-		writer := io.MultiWriter(os.Stdout, logFile)
+		writer := io.MultiWriter(os.Stderr, logFile)
 		logrus.SetOutput(writer)
 	}
 
@@ -91,7 +90,7 @@ func getLogFilePath() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	logFilePath := fmt.Sprintf("%s/Library/logs/Leapp/daemon/log.log", homeDir)
+	logFilePath := fmt.Sprintf("%s/Library/logs/Leapp/daemon/error.log", homeDir)
 	return logFilePath, nil
 }
 
@@ -111,3 +110,5 @@ func getHomeDir() (string, error) {
 	}
 	return usr.HomeDir, nil
 }
+
+type LogWriter struct{}

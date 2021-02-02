@@ -3,7 +3,7 @@ package services
 import (
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
-	"leapp_daemon/error_handling"
+	"leapp_daemon/custom_errors"
 	"leapp_daemon/services/domain"
 	"strings"
 )
@@ -20,7 +20,7 @@ func CreateFederatedAwsAccount(name string, accountNumber string, roleName strin
 	for _, session := range sessions {
 		account := session.Account
 		if account.AccountNumber == accountNumber && account.Role.Name == roleName {
-			err = error_handling.NewBadRequestError(errors.New("an account with the same account number and " +
+			err = custom_errors.NewBadRequestError(errors.New("an account with the same account number and " +
 				"role name is already present"))
 			return err
 		}

@@ -1,4 +1,4 @@
-package error_handling
+package custom_errors
 
 import (
 	"fmt"

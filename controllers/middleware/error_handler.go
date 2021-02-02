@@ -1,21 +1,31 @@
-package error_handling
+package middleware
 
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"leapp_daemon/controllers/utils"
+	"leapp_daemon/custom_errors"
 	"leapp_daemon/logging"
 	"net/http"
 )
 
 type errorHandler struct{}
 
-func (*errorHandler) Handle(context *gin.Context, err error) {
+func (*errorHandler) Handle(context *gin.Context) {
 	var code int
+	var err error
+
+	context.Next()
+
+	if len(context.Errors) > 0 {
+		err = context.Errors[0]
+	} else {
+		return
+	}
 
 	switch err.(type) {
-	case BadRequestError:
+	case custom_errors.BadRequestError:
 		code = http.StatusBadRequest
 	default:
 		code = http.StatusInternalServerError
@@ -26,6 +36,7 @@ func (*errorHandler) Handle(context *gin.Context, err error) {
 	logging.CtxLogger(context).
 		WithFields(logrus.Fields{"statusCode": code}).
 		Error(fmt.Sprintf("%s", err.Error()))
+
 	context.JSON(code, errorMap)
 }
 

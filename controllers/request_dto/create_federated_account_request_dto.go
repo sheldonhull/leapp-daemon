@@ -2,7 +2,7 @@ package request_dto
 
 import (
 	"github.com/gin-gonic/gin"
-	"leapp_daemon/error_handling"
+	"leapp_daemon/custom_errors"
 )
 
 type CreateFederatedAccountRequestDto struct {
@@ -16,6 +16,6 @@ type CreateFederatedAccountRequestDto struct {
 }
 
 func (requestDto *CreateFederatedAccountRequestDto) Build(context *gin.Context) error {
-	err := error_handling.NewBadRequestError(context.ShouldBindJSON(requestDto))
+	err := custom_errors.NewBadRequestError(context.ShouldBindJSON(requestDto))
 	return err
 }
