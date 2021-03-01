@@ -4,6 +4,7 @@ go 1.14
 
 require (
 	github.com/PuerkitoBio/goquery v1.6.1
+	github.com/aws/aws-sdk-go v1.37.20
 	github.com/denisbrodbeck/machineid v1.0.1
 	github.com/gin-gonic/gin v1.6.3
 	github.com/google/uuid v1.2.0
@@ -11,5 +12,5 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.7.0
 	github.com/tidwall/gjson v1.6.8
-	golang.org/x/net v0.0.0-20200202094626-16171245cfb2
+	golang.org/x/net v0.0.0-20210226172049-e18ecbb05110
 )
