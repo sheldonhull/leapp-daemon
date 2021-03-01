@@ -57,5 +57,9 @@ func initializeRoutes(ginEngine *gin.Engine) {
 		v1.POST("/configuration/create", controllers.CreateConfigurationController)
 		v1.GET("/configuration/read", controllers.ReadConfigurationController)
 		v1.POST("/federated_aws_account/create", controllers.CreateFederatedAccountController)
+		v1.POST("/g_suite_auth/first_step", controllers.GSuiteAuthFirstStepController)
+		v1.POST("/g_suite_auth/second_step", controllers.GSuiteAuthSecondStepController)
+		v1.POST("g_suite_auth/third_step", controllers.GSuiteAuthThirdStepController)
+		v1.GET("/ws/:roomId", controllers.WsController)
 	}
 }
