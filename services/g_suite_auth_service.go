@@ -4,6 +4,8 @@ import (
 	"crypto/tls"
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/sts"
 	"github.com/pkg/errors"
 	"golang.org/x/net/publicsuffix"
 	"log"
@@ -40,7 +42,7 @@ func GSuiteAuthFirstStepService(username string, password string) (url.Values, s
 		Jar: jar,
 	}
 
-	firstPageURL := "https://accounts.google.com/o/saml2/initsso?idpid=C03eqis8s&spid=1033946587263&forceauthn=false"
+	firstPageURL := ""
 
 	//=====================
 	// BEGIN loadFirstPage
@@ -686,7 +688,23 @@ func GSuiteAuthThirdStepService(isMfaTokenRequested bool, responseForm url.Value
 		log.Println("SAML assertion not found")
 	}
 
-	return samlAssertion
+	var durationSeconds int64 = 3600
+	var principalArn = ""
+	var roleArn = ""
+
+	request := sts.AssumeRoleWithSAMLInput{
+		DurationSeconds: &durationSeconds,
+		Policy:          nil,
+		PolicyArns:      nil,
+		PrincipalArn:    &principalArn,
+		RoleArn:         &roleArn,
+		SAMLAssertion:   &samlAssertion,
+	}
+
+	sess := session.Must(session.NewSession())
+	response, _ := sts.New(sess).AssumeRoleWithSAML(&request)
+
+	return response.Credentials.String()
 }
 
 func extractInputsByFormID(doc *goquery.Document, formID ...string) (url.Values, string, error) {
