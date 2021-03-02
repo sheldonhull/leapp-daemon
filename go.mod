@@ -4,7 +4,7 @@ go 1.14
 
 require (
 	github.com/PuerkitoBio/goquery v1.6.1
-	github.com/aws/aws-sdk-go v1.37.20
+	github.com/aws/aws-sdk-go v1.37.21
 	github.com/denisbrodbeck/machineid v1.0.1
 	github.com/gin-gonic/gin v1.6.3
 	github.com/google/uuid v1.2.0
