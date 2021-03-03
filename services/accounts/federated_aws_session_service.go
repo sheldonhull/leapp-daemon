@@ -1,16 +1,17 @@
-package services
+package accounts
 
 import (
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"leapp_daemon/custom_errors"
+	"leapp_daemon/services"
 	"leapp_daemon/services/domain"
 	"strings"
 )
 
-func CreateFederatedAwsAccount(name string, accountNumber string, roleName string, roleArn string, idpArn string,
+func CreateFederatedAwsSession(name string, accountNumber string, roleName string, roleArn string, idpArn string,
 	region string, ssoUrl string) error {
-	configuration, err := ReadConfiguration()
+	configuration, err := services.ReadConfiguration()
 	if err != nil {
 		return err
 	}
@@ -53,16 +54,10 @@ func CreateFederatedAwsAccount(name string, accountNumber string, roleName strin
 
 	configuration.FederatedAwsAccountSessions = append(configuration.FederatedAwsAccountSessions, session)
 
-	err = UpdateConfiguration(configuration, false)
+	err = services.UpdateConfiguration(configuration, false)
 	if err != nil {
 		return err
 	}
-
-	return nil
-}
-
-func CreatePlainAwsAccount(name string, accountNumber string, region string, user string, mfaDevice string) error {
-
 
 	return nil
 }
