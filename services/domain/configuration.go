@@ -4,6 +4,7 @@ type Configuration struct {
 	SsoUrl string
 	ProxyConfiguration ProxyConfiguration
 	FederatedAwsAccountSessions []FederatedAwsAccountSession
+	PlainAwsAccountSessions []PlainAwsAccountSession
 }
 
 type ProxyConfiguration struct {
@@ -20,6 +21,14 @@ type FederatedAwsAccountSession struct {
 	Loading      bool
 	LastStopDate string
 	Account      FederatedAwsAccount
+}
+
+type PlainAwsAccountSession struct {
+	Id           string
+	Active       bool
+	Loading      bool
+	LastStopDate string
+	Account      PlainAwsAccount
 }
 
 type FederatedAwsAccount struct {
@@ -39,4 +48,12 @@ type FederatedAwsRole struct {
 	Arn  string
 	// Parent string
 	// ParentRole string
+}
+
+type PlainAwsAccount struct {
+	AccountNumber string
+	Name          string
+	Region        string
+	User          string
+	MfaDevice     string
 }

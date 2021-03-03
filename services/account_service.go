@@ -60,3 +60,9 @@ func CreateFederatedAwsAccount(name string, accountNumber string, roleName strin
 
 	return nil
 }
+
+func CreatePlainAwsAccount(name string, accountNumber string, region string, user string, mfaDevice string) error {
+
+
+	return nil
+}

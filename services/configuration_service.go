@@ -20,6 +20,7 @@ func getInitialConfiguration() domain.Configuration {
 			Password: "",
 		},
 		FederatedAwsAccountSessions: make([]domain.FederatedAwsAccountSession, 0),
+		PlainAwsAccountSessions: make([]domain.PlainAwsAccountSession, 0),
 	}
 }
 
@@ -85,6 +86,14 @@ func unmarshalConfiguration(configurationJson string) *domain.Configuration {
 
 	configuration.ProxyConfiguration = proxyConfiguration
 
+	configuration.FederatedAwsAccountSessions = unrollFederatedAwsAccountSessions(configurationJson)
+
+	configuration.PlainAwsAccountSessions = unrollPlainAwsAccountSessions(configurationJson)
+
+	return &configuration
+}
+
+func unrollFederatedAwsAccountSessions(configurationJson string) []domain.FederatedAwsAccountSession {
 	var federatedAwsAccountSessions []domain.FederatedAwsAccountSession
 	federatedAwsAccountSessionsJsonArray := gjson.Get(configurationJson, "FederatedAwsAccountSessions").Array()
 
@@ -138,7 +147,42 @@ func unmarshalConfiguration(configurationJson string) *domain.Configuration {
 			federatedAwsAccountSessions = append(federatedAwsAccountSessions, federatedAwsAccountSession)
 		}
 	}
+	return federatedAwsAccountSessions
+}
 
-	configuration.FederatedAwsAccountSessions = federatedAwsAccountSessions
-	return &configuration
+func unrollPlainAwsAccountSessions(configurationJson string) []domain.PlainAwsAccountSession {
+	var plainAwsAccountSessions []domain.PlainAwsAccountSession
+	plainAwsAccountSessionsJsonArray := gjson.Get(configurationJson, "PlainAwsAccountSessions").Array()
+
+	if len(plainAwsAccountSessionsJsonArray) > 0 {
+		for _, sessionJsonValue := range plainAwsAccountSessionsJsonArray {
+			plainAwsAccountSessionJson := sessionJsonValue.String()
+			var plainAwsAccountSession domain.PlainAwsAccountSession
+
+			plainAwsAccountSession.Id = gjson.Get(plainAwsAccountSessionJson, "Id").String()
+			plainAwsAccountSession.Active = gjson.Get(plainAwsAccountSessionJson, "Active").Bool()
+			plainAwsAccountSession.Loading = gjson.Get(plainAwsAccountSessionJson, "Loading").Bool()
+			plainAwsAccountSession.LastStopDate = gjson.Get(plainAwsAccountSessionJson, "LastStopDate").String()
+
+			plainAwsAccountJsonValue := gjson.Get(plainAwsAccountSessionJson, "Account").Value()
+
+			if plainAwsAccountJsonValue != nil {
+				plainAwsAccountJson := gjson.Get(plainAwsAccountSessionJson, "Account").String()
+				var plainAwsAccount domain.PlainAwsAccount
+
+				plainAwsAccount.AccountNumber = gjson.Get(plainAwsAccountJson, "AccountNumber").String()
+				plainAwsAccount.Name = gjson.Get(plainAwsAccountJson, "Name").String()
+				plainAwsAccount.Region = gjson.Get(plainAwsAccountJson, "Region").String()
+				plainAwsAccount.User = gjson.Get(plainAwsAccountJson, "User").String()
+				plainAwsAccount.MfaDevice = gjson.Get(plainAwsAccountJson, "MfaDevice").String()
+
+				plainAwsAccountSession.Account = plainAwsAccount
+			} else {
+				plainAwsAccountSession.Account = domain.PlainAwsAccount{}
+			}
+
+			plainAwsAccountSessions = append(plainAwsAccountSessions, plainAwsAccountSession)
+		}
+	}
+	return plainAwsAccountSessions
 }
