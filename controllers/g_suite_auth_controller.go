@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"leapp_daemon/controllers/request_dto"
 	"leapp_daemon/controllers/response_dto"
+	"leapp_daemon/logging"
 	"leapp_daemon/services"
 	"net/http"
 	"net/url"
@@ -27,6 +28,8 @@ type GSuiteAuthSecondStepResponse struct {
 }
 
 func GSuiteAuthFirstStepController(context *gin.Context) {
+	logging.SetContext(context)
+
 	requestDto := request_dto.GSuiteAuthFirstStepRequestDto{}
 	err := (&requestDto).Build(context)
 	if err != nil {
@@ -56,6 +59,8 @@ func GSuiteAuthFirstStepController(context *gin.Context) {
 }
 
 func GSuiteAuthSecondStepController(context *gin.Context) {
+	logging.SetContext(context)
+
 	requestDto := request_dto.GSuiteAuthSecondStepRequestDto{}
 	err := (&requestDto).Build(context)
 	if err != nil {
@@ -92,6 +97,8 @@ func GSuiteAuthSecondStepController(context *gin.Context) {
 }
 
 func GSuiteAuthThirdStepController(context *gin.Context) {
+	logging.SetContext(context)
+
 	requestDto := request_dto.GSuiteAuthThirdStepRequestDto{}
 	err := (&requestDto).Build(context)
 	if err != nil {

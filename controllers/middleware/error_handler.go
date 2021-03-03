@@ -33,7 +33,7 @@ func (*errorHandler) Handle(context *gin.Context) {
 
 	errorMap := gin.H{ "statusCode": code, "error": err.Error(), "context": utils.NewContext(context) }
 
-	logging.CtxLogger(context).
+	logging.CtxEntry().
 		WithFields(logrus.Fields{"statusCode": code}).
 		Error(fmt.Sprintf("%s", err.Error()))
 

@@ -4,11 +4,14 @@ import (
 	"github.com/gin-gonic/gin"
 	"leapp_daemon/controllers/request_dto"
 	"leapp_daemon/controllers/response_dto"
+	"leapp_daemon/logging"
 	"leapp_daemon/services"
 	"net/http"
 )
 
 func EchoController(context *gin.Context) {
+	logging.SetContext(context)
+
 	requestDto := request_dto.EchoRequestDto{}
 	err := (&requestDto).Build(context)
 	if err != nil {
