@@ -3,6 +3,7 @@ package controllers
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
+	"leapp_daemon/logging"
 	"log"
 	"net/http"
 	"time"
@@ -23,6 +24,8 @@ const (
 )
 
 func WsController(context *gin.Context) {
+	logging.SetContext(context)
+
 	roomId := context.Param("roomId")
 	serveWs(context.Writer, context.Request, roomId)
 }

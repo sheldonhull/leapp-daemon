@@ -11,6 +11,7 @@ import (
 )
 
 var logFile *os.File = nil
+var context utils.Context
 
 func InitializeLogger() {
 	err := createLogDir()
@@ -29,7 +30,7 @@ func InitializeLogger() {
 	logrus.SetOutput(writer)
 }
 
-func CtxLogger(context *gin.Context) *logrus.Entry {
+func SetContext(ctx *gin.Context) {
 	_ = createLogDir()
 	logFilePath, _ := getLogFilePath()
 	if _, err := os.Stat(logFilePath); os.IsNotExist(err) {
@@ -39,15 +40,18 @@ func CtxLogger(context *gin.Context) *logrus.Entry {
 		logrus.SetOutput(writer)
 	}
 
-	contextInfo := utils.NewContext(context)
+	context = utils.NewContext(ctx)
+}
+
+func CtxEntry() *logrus.Entry {
 	return logrus.WithFields(logrus.Fields{
-		"requestUri": contextInfo.RequestUri,
-		"host": contextInfo.Host,
-		"remoteAddress": contextInfo.RemoteAddress,
-		"method": contextInfo.Method,
-		"body": contextInfo.Body,
-		"params": contextInfo.Params,
-		"header": contextInfo.Header,
+		"requestUri": context.RequestUri,
+		"host": context.Host,
+		"remoteAddress": context.RemoteAddress,
+		"method": context.Method,
+		"body": context.Body,
+		"params": context.Params,
+		"header": context.Header,
 	})
 }
 

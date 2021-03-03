@@ -5,10 +5,13 @@ import (
 	"leapp_daemon/controllers/request_dto"
 	"leapp_daemon/controllers/response_dto"
 	"leapp_daemon/services/accounts"
+	"leapp_daemon/logging"
 	"net/http"
 )
 
 func CreateFederatedAccountController(context *gin.Context) {
+	logging.SetContext(context)
+
 	requestDto := request_dto.CreateFederatedAccountRequestDto{}
 	err := (&requestDto).Build(context)
 	if err != nil {
