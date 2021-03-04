@@ -62,4 +62,38 @@ func main() {
 	if err != nil {
 		println(err.Error())
 	}
+
+	// Test list
+	// a) add another session
+	_ = accounts.CreatePlainAwsSession("Test Session Alpha", "0011001100", "us-east-2", "panzor", "arn:1111:etzy")
+	// b) list
+	println("------------------------------")
+	println("List without filters")
+	list, _ := accounts.ListPlainAwsSession("")
+	for index, _ := range list { println(list[index].Account.Name) }
+	// c) apply some filters
+	println("------------------------------")
+	println("Find second by name")
+	list, _ = accounts.ListPlainAwsSession("Alpha")
+	println(list[0].Account.Name)
+	println("------------------------------")
+	println("Find first by account number")
+	list, _ = accounts.ListPlainAwsSession("911")
+	println(list[0].Account.Name)
+	println("------------------------------")
+	println("Find second by region")
+	list, _ = accounts.ListPlainAwsSession("east")
+	println(list[0].Account.Name)
+	println("------------------------------")
+	println("Find first by user")
+	list, _ = accounts.ListPlainAwsSession("cicc")
+	println(list[0].Account.Name)
+	println("------------------------------")
+	println("Find second by Mfa device")
+	list, _ = accounts.ListPlainAwsSession("rn:111")
+	println(list[0].Account.Name)
+	println("------------------------------")
+	println("No found if query doesn't match")
+	list, _ = accounts.ListPlainAwsSession("rn:9uiuhu")
+	for index, _ := range list { println(list[index].Account.Name) }
 }

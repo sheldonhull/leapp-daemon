@@ -9,6 +9,32 @@ import (
 	"strings"
 )
 
+func ListPlainAwsSession(query string) ([]domain.PlainAwsAccountSession, error) {
+	configuration, err := services.ReadConfiguration()
+	if err != nil {
+		return nil, err
+	}
+
+	if query == "" {
+		return configuration.PlainAwsAccountSessions, nil
+	} else {
+		filteredList := make([]domain.PlainAwsAccountSession, 0)
+
+		for _, session := range configuration.PlainAwsAccountSessions {
+			if strings.Contains(session.Account.Name, query) ||
+			   strings.Contains(session.Account.MfaDevice, query) ||
+			   strings.Contains(session.Account.User, query) ||
+			   strings.Contains(session.Account.Region, query) ||
+			   strings.Contains(session.Account.AccountNumber, query) {
+
+				filteredList = append(filteredList, session)
+			}
+		}
+
+		return filteredList, nil
+	}
+}
+
 func CreatePlainAwsSession(name string, accountNumber string, region string, user string, mfaDevice string) error {
 
 	configuration, err := services.ReadConfiguration()
