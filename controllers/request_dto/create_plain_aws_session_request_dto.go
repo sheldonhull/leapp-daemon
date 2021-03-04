@@ -5,17 +5,15 @@ import (
 	"leapp_daemon/custom_errors"
 )
 
-type CreateFederatedAccountRequestDto struct {
+type CreatePlainAwsSessionRequestDto struct {
 	Name string `json:"name" binding:"required"`
 	AccountNumber string `json:"accountNumber" binding:"required"`
-	RoleName string `json:"roleName" binding:"required"`
-	RoleArn string `json:"roleArn" binding:"required"`
-	IdpArn string `json:"idpArn" binding:"required"`
 	Region string `json:"region" binding:"required"`
-	SsoUrl string `json:"ssoUrl" binding:"required"`
+	User string `json:"user" binding:"required"`
+	MfaDevice string `json:"mfaDevice"`
 }
 
-func (requestDto *CreateFederatedAccountRequestDto) Build(context *gin.Context) error {
+func (requestDto *CreatePlainAwsSessionRequestDto) Build(context *gin.Context) error {
 	err := custom_errors.NewBadRequestError(context.ShouldBindJSON(requestDto))
 	return err
 }

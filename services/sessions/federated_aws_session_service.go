@@ -1,4 +1,4 @@
-package accounts
+package sessions
 
 import (
 	"github.com/google/uuid"

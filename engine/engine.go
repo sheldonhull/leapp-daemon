@@ -54,12 +54,22 @@ func initializeRoutes(ginEngine *gin.Engine) {
 	v1 := ginEngine.Group("/api/v1")
 	{
 		v1.GET("/echo/:text", controllers.EchoController)
-		v1.POST("/configuration/create", controllers.CreateConfigurationController)
+
+		v1.POST("/configuration/", controllers.CreateConfigurationController)
 		v1.GET("/configuration/read", controllers.ReadConfigurationController)
-		v1.POST("/federated_aws_account/create", controllers.CreateFederatedAccountController)
+
+		v1.POST("/federated_aws_session/", controllers.CreateFederatedAwsSessionController)
+
+		v1.GET("/plain_aws_session/", controllers.ListAwsSessionController)
+		v1.GET("/plain_aws_session/:id", controllers.GetAwsSessionController)
+		v1.POST("/plain_aws_session/", controllers.CreateAwsPlainSessionController)
+		v1.PUT("/plain_aws_session/:id", controllers.EditAwsPlainSessionController)
+		v1.DELETE("/plain_aws_session/:id", controllers.DeleteAwsPlainSessionController)
+
 		v1.POST("/g_suite_auth/first_step", controllers.GSuiteAuthFirstStepController)
 		v1.POST("/g_suite_auth/second_step", controllers.GSuiteAuthSecondStepController)
 		v1.POST("/g_suite_auth/third_step", controllers.GSuiteAuthThirdStepController)
+
 		v1.GET("/ws/:roomId", controllers.WsController)
 	}
 }

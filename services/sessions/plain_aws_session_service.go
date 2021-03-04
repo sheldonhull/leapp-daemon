@@ -1,4 +1,4 @@
-package accounts
+package sessions
 
 import (
 	"github.com/google/uuid"
@@ -8,6 +8,22 @@ import (
 	"leapp_daemon/services/domain"
 	"strings"
 )
+
+func GetPlainAwsSession(id string) (*domain.PlainAwsAccountSession, error) {
+	configuration, err := services.ReadConfiguration()
+	if err != nil {
+		return nil, err
+	}
+
+	sessions := configuration.PlainAwsAccountSessions
+	for index, _ := range sessions {
+		if sessions[index].Id == id {
+			return &sessions[index], nil
+		}
+	}
+
+	return nil, custom_errors.NewBadRequestError(errors.New("No session found with id:" + id))
+}
 
 func ListPlainAwsSession(query string) ([]domain.PlainAwsAccountSession, error) {
 	configuration, err := services.ReadConfiguration()
