@@ -9,6 +9,50 @@ import (
 	"strings"
 )
 
+
+func GetFederatedAwsSession(id string) (*domain.FederatedAwsAccountSession, error) {
+	configuration, err := services.ReadConfiguration()
+	if err != nil {
+		return nil, err
+	}
+
+	sessions := configuration.FederatedAwsAccountSessions
+	for index, _ := range sessions {
+		if sessions[index].Id == id {
+			return &sessions[index], nil
+		}
+	}
+
+	return nil, custom_errors.NewBadRequestError(errors.New("No session found with id:" + id))
+}
+
+func ListFederatedAwsSession(query string) ([]domain.FederatedAwsAccountSession, error) {
+	configuration, err := services.ReadConfiguration()
+	if err != nil {
+		return nil, err
+	}
+
+	filteredList := make([]domain.FederatedAwsAccountSession, 0)
+
+	if query == "" {
+		return append(filteredList, configuration.FederatedAwsAccountSessions...), nil
+	} else {
+		for _, session := range configuration.FederatedAwsAccountSessions {
+			if  strings.Contains(session.Id, query) ||
+			    strings.Contains(session.Account.Name, query) ||
+				strings.Contains(session.Account.IdpArn, query) ||
+				strings.Contains(session.Account.SsoUrl, query) ||
+				strings.Contains(session.Account.Region, query) ||
+				strings.Contains(session.Account.AccountNumber, query) {
+				// TODO: add also role filters
+				filteredList = append(filteredList, session)
+			}
+		}
+
+		return filteredList, nil
+	}
+}
+
 func CreateFederatedAwsSession(name string, accountNumber string, roleName string, roleArn string, idpArn string,
 	region string, ssoUrl string) error {
 	configuration, err := services.ReadConfiguration()

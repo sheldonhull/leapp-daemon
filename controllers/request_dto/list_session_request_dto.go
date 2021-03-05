@@ -5,11 +5,12 @@ import (
 	"leapp_daemon/custom_errors"
 )
 
-type ListPlainAwsSessionRequestDto struct {
+type ListSessionRequestDto struct {
 	Query string `query:"query"`
+	Type  string `query:"type"`
 }
 
-func (requestDto *ListPlainAwsSessionRequestDto) Build(context *gin.Context) error {
+func (requestDto *ListSessionRequestDto) Build(context *gin.Context) error {
 	err := custom_errors.NewBadRequestError(context.ShouldBindJSON(requestDto))
 	return err
 }

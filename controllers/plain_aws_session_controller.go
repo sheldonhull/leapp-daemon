@@ -9,27 +9,7 @@ import (
 	"net/http"
 )
 
-func ListAwsSessionController(context *gin.Context) {
-	logging.SetContext(context)
-
-	requestDto := request_dto.ListPlainAwsSessionRequestDto{}
-	err := (&requestDto).Build(context)
-	if err != nil {
-		_ = context.Error(err)
-		return
-	}
-
-	sessionList, err2 := sessions.ListPlainAwsSession(requestDto.Query)
-	if err2 != nil {
-		_ = context.Error(err2)
-		return
-	}
-
-	responseDto := response_dto.MessageAndDataResponseDto{Message: "success", Data: sessionList}
-	context.JSON(http.StatusOK, responseDto.ToMap())
-}
-
-func GetAwsSessionController(context *gin.Context) {
+func GetAwsPlainSessionController(context *gin.Context) {
 	logging.SetContext(context)
 
 	requestDto := request_dto.GetPlainAwsSessionRequestDto{}
@@ -79,14 +59,14 @@ func EditAwsPlainSessionController(context *gin.Context) {
 	logging.SetContext(context)
 
 	requestUriDto := request_dto.EditPlainAwsSessionUriRequestDto{}
-	err := (&requestUriDto).BuildURI(context)
+	err := (&requestUriDto).Build(context)
 	if err != nil {
 		_ = context.Error(err)
 		return
 	}
 
 	requestDto := request_dto.EditPlainAwsSessionRequestDto{}
-	err = (&requestDto).BuildJSON(context)
+	err = (&requestDto).Build(context)
 	if err != nil {
 		_ = context.Error(err)
 		return

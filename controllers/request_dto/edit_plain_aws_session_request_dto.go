@@ -17,12 +17,12 @@ type EditPlainAwsSessionRequestDto struct {
 	MfaDevice string `json:"mfaDevice"`
 }
 
-func (requestDto *EditPlainAwsSessionRequestDto) BuildJSON(context *gin.Context) error {
+func (requestDto *EditPlainAwsSessionRequestDto) Build(context *gin.Context) error {
 	err := custom_errors.NewBadRequestError(context.ShouldBindJSON(requestDto))
 	return err
 }
 
-func (requestDto *EditPlainAwsSessionUriRequestDto) BuildURI(context *gin.Context) error {
+func (requestDto *EditPlainAwsSessionUriRequestDto) Build(context *gin.Context) error {
 	err := custom_errors.NewBadRequestError(context.ShouldBindUri(requestDto))
 	return err
 }

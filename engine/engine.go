@@ -58,13 +58,16 @@ func initializeRoutes(ginEngine *gin.Engine) {
 		v1.POST("/configuration/", controllers.CreateConfigurationController)
 		v1.GET("/configuration/read", controllers.ReadConfigurationController)
 
-		v1.POST("/federated_aws_session/", controllers.CreateFederatedAwsSessionController)
+		v1.GET("/session/list", controllers.ListSessionController)
 
-		v1.GET("/plain_aws_session/", controllers.ListAwsSessionController)
-		v1.GET("/plain_aws_session/:id", controllers.GetAwsSessionController)
-		v1.POST("/plain_aws_session/", controllers.CreateAwsPlainSessionController)
-		v1.PUT("/plain_aws_session/:id", controllers.EditAwsPlainSessionController)
-		v1.DELETE("/plain_aws_session/:id", controllers.DeleteAwsPlainSessionController)
+		v1.GET("/session/plain/:id", controllers.GetAwsPlainSessionController)
+		v1.POST("/session/plain", controllers.CreateAwsPlainSessionController)
+		v1.PUT("/session/plain/:id", controllers.EditAwsPlainSessionController)
+		v1.DELETE("/session/plain/:id", controllers.DeleteAwsPlainSessionController)
+		// v1.POST("/session/plain/:id/start", controllers.StartAwsPlainSessionController)
+		// v1.POST("/session/plain/:id/stop", controllers.StopAwsPlainSessionController)
+
+		v1.POST("/session/federated", controllers.CreateFederatedAwsSessionController)
 
 		v1.POST("/g_suite_auth/first_step", controllers.GSuiteAuthFirstStepController)
 		v1.POST("/g_suite_auth/second_step", controllers.GSuiteAuthSecondStepController)

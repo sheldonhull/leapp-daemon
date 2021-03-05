@@ -31,13 +31,14 @@ func ListPlainAwsSession(query string) ([]domain.PlainAwsAccountSession, error) 
 		return nil, err
 	}
 
-	if query == "" {
-		return configuration.PlainAwsAccountSessions, nil
-	} else {
-		filteredList := make([]domain.PlainAwsAccountSession, 0)
+	filteredList := make([]domain.PlainAwsAccountSession, 0)
 
+	if query == "" {
+		return append(filteredList, configuration.PlainAwsAccountSessions...), nil
+	} else {
 		for _, session := range configuration.PlainAwsAccountSessions {
-			if strings.Contains(session.Account.Name, query) ||
+			if strings.Contains(session.Id, query) ||
+			   strings.Contains(session.Account.Name, query) ||
 			   strings.Contains(session.Account.MfaDevice, query) ||
 			   strings.Contains(session.Account.User, query) ||
 			   strings.Contains(session.Account.Region, query) ||
