@@ -2,17 +2,17 @@ package controllers
 
 import (
 	"github.com/gin-gonic/gin"
-	"leapp_daemon/controllers/request_dto"
+	"leapp_daemon/controllers/request_dto/plain_aws_session"
 	"leapp_daemon/controllers/response_dto"
 	"leapp_daemon/logging"
 	"leapp_daemon/services/sessions"
 	"net/http"
 )
 
-func GetAwsPlainSessionController(context *gin.Context) {
+func GetPlainAwsSessionController(context *gin.Context) {
 	logging.SetContext(context)
 
-	requestDto := request_dto.GetPlainAwsSessionRequestDto{}
+	requestDto := plain_aws_session.GetPlainAwsSessionRequestDto{}
 	err := (&requestDto).Build(context)
 	if err != nil {
 		_ = context.Error(err)
@@ -29,10 +29,10 @@ func GetAwsPlainSessionController(context *gin.Context) {
 	context.JSON(http.StatusOK, responseDto.ToMap())
 }
 
-func CreateAwsPlainSessionController(context *gin.Context) {
+func CreatePlainAwsSessionController(context *gin.Context) {
 	logging.SetContext(context)
 
-	requestDto := request_dto.CreatePlainAwsSessionRequestDto{}
+	requestDto := plain_aws_session.CreatePlainAwsSessionRequestDto{}
 	err := (&requestDto).Build(context)
 	if err != nil {
 		_ = context.Error(err)
@@ -55,17 +55,17 @@ func CreateAwsPlainSessionController(context *gin.Context) {
 	context.JSON(http.StatusOK, responseDto.ToMap())
 }
 
-func EditAwsPlainSessionController(context *gin.Context) {
+func EditPlainAwsSessionController(context *gin.Context) {
 	logging.SetContext(context)
 
-	requestUriDto := request_dto.EditPlainAwsSessionUriRequestDto{}
+	requestUriDto := plain_aws_session.EditPlainAwsSessionUriRequestDto{}
 	err := (&requestUriDto).Build(context)
 	if err != nil {
 		_ = context.Error(err)
 		return
 	}
 
-	requestDto := request_dto.EditPlainAwsSessionRequestDto{}
+	requestDto := plain_aws_session.EditPlainAwsSessionRequestDto{}
 	err = (&requestDto).Build(context)
 	if err != nil {
 		_ = context.Error(err)
@@ -89,10 +89,10 @@ func EditAwsPlainSessionController(context *gin.Context) {
 	context.JSON(http.StatusOK, responseDto.ToMap())
 }
 
-func DeleteAwsPlainSessionController(context *gin.Context) {
+func DeletePlainAwsSessionController(context *gin.Context) {
 	logging.SetContext(context)
 
-	requestDto := request_dto.DeletePlainAwsSessionRequestDto{}
+	requestDto := plain_aws_session.DeletePlainAwsSessionRequestDto{}
 	err := (&requestDto).Build(context)
 	if err != nil {
 		_ = context.Error(err)

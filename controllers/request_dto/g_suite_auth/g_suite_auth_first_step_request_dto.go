@@ -1,4 +1,4 @@
-package request_dto
+package g_suite_auth
 
 import (
 	"github.com/gin-gonic/gin"

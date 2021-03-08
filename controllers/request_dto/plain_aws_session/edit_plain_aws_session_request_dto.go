@@ -1,4 +1,4 @@
-package request_dto
+package plain_aws_session
 
 import (
 	"github.com/gin-gonic/gin"

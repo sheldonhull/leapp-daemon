@@ -60,10 +60,10 @@ func initializeRoutes(ginEngine *gin.Engine) {
 
 		v1.GET("/session/list", controllers.ListSessionController)
 
-		v1.GET("/session/plain/:id", controllers.GetAwsPlainSessionController)
-		v1.POST("/session/plain", controllers.CreateAwsPlainSessionController)
-		v1.PUT("/session/plain/:id", controllers.EditAwsPlainSessionController)
-		v1.DELETE("/session/plain/:id", controllers.DeleteAwsPlainSessionController)
+		v1.GET("/session/plain/:id", controllers.GetPlainAwsSessionController)
+		v1.POST("/session/plain", controllers.CreatePlainAwsSessionController)
+		v1.PUT("/session/plain/:id", controllers.EditPlainAwsSessionController)
+		v1.DELETE("/session/plain/:id", controllers.DeletePlainAwsSessionController)
 		// v1.POST("/session/plain/:id/start", controllers.StartAwsPlainSessionController)
 		// v1.POST("/session/plain/:id/stop", controllers.StopAwsPlainSessionController)
 
