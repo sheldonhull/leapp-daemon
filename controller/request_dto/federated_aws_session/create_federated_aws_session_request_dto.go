@@ -1,11 +1,11 @@
-package request_dto
+package federated_aws_session
 
 import (
 	"github.com/gin-gonic/gin"
 	"leapp_daemon/custom_errors"
 )
 
-type CreateFederatedAccountRequestDto struct {
+type CreateFederatedAwsSessionRequestDto struct {
 	Name string `json:"name" binding:"required"`
 	AccountNumber string `json:"accountNumber" binding:"required"`
 	RoleName string `json:"roleName" binding:"required"`
@@ -15,7 +15,7 @@ type CreateFederatedAccountRequestDto struct {
 	SsoUrl string `json:"ssoUrl" binding:"required"`
 }
 
-func (requestDto *CreateFederatedAccountRequestDto) Build(context *gin.Context) error {
+func (requestDto *CreateFederatedAwsSessionRequestDto) Build(context *gin.Context) error {
 	err := custom_errors.NewBadRequestError(context.ShouldBindJSON(requestDto))
 	return err
 }
