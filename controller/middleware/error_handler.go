@@ -15,6 +15,28 @@ type errorHandler struct{}
 func (*errorHandler) Handle(context *gin.Context) {
 	var code int
 	var err error
+	var errString string
+
+	defer func() {
+		panicErr := recover()
+
+		if panicErr != nil || len(context.Errors) > 0 {
+			if panicErr != nil {
+				code = http.StatusInternalServerError
+				errString = fmt.Sprintf("%s", panicErr)
+			} else if len(context.Errors) > 0 {
+				errString = err.Error()
+			}
+
+			errorMap := gin.H{"statusCode": code, "error": errString, "context": util.NewContext(context)}
+
+			logging.Entry().
+				WithFields(logrus.Fields{"statusCode": code}).
+				Error(fmt.Sprintf("%s", err))
+
+			context.JSON(code, errorMap)
+		}
+	}()
 
 	context.Next()
 
@@ -30,14 +52,6 @@ func (*errorHandler) Handle(context *gin.Context) {
 	default:
 		code = http.StatusInternalServerError
 	}
-
-	errorMap := gin.H{ "statusCode": code, "error": err.Error(), "context": util.NewContext(context) }
-
-	logging.CtxEntry().
-		WithFields(logrus.Fields{"statusCode": code}).
-		Error(fmt.Sprintf("%s", err.Error()))
-
-	context.JSON(code, errorMap)
 }
 
 var ErrorHandler = &errorHandler{}

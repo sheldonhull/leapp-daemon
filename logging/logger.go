@@ -43,7 +43,16 @@ func SetContext(ctx *gin.Context) {
 	context = util.NewContext(ctx)
 }
 
-func CtxEntry() *logrus.Entry {
+func Entry() *logrus.Entry {
+	_ = createLogDir()
+	logFilePath, _ := getLogFilePath()
+	if _, err := os.Stat(logFilePath); os.IsNotExist(err) {
+		logFile = nil
+		_ = createLogFile()
+		writer := io.MultiWriter(os.Stderr, logFile)
+		logrus.SetOutput(writer)
+	}
+
 	return logrus.WithFields(logrus.Fields{
 		"requestUri": context.RequestUri,
 		"host": context.Host,
@@ -53,6 +62,10 @@ func CtxEntry() *logrus.Entry {
 		"params": context.Params,
 		"header": context.Header,
 	})
+}
+
+func Info(args ...interface{}) {
+	Entry().Info(args)
 }
 
 func CloseLogFile() {
