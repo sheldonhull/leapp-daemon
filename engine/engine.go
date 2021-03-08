@@ -39,7 +39,7 @@ func Engine() *engineWrapper {
 func (engineWrapper *engineWrapper) initialize() {
 	logging.InitializeLogger()
 	engineWrapper.ginEngine.Use(middleware.ErrorHandler.Handle)
-	engineWrapper.ginEngine.Use(gin.Recovery())
+	//engineWrapper.ginEngine.Use(gin.Recovery())
 	initializeRoutes(engineWrapper.ginEngine)
 }
 
