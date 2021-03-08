@@ -1,17 +1,17 @@
-package controllers
+package controller
 
 import (
 	"github.com/gin-gonic/gin"
-	"leapp_daemon/controllers/response_dto"
+	"leapp_daemon/controller/response_dto"
 	"leapp_daemon/logging"
-	"leapp_daemon/services"
+	"leapp_daemon/service"
 	"net/http"
 )
 
 func CreateConfigurationController(context *gin.Context) {
 	logging.SetContext(context)
 
-	err := services.CreateConfiguration()
+	err := service.CreateConfiguration()
 	if err != nil {
 		_ = context.Error(err)
 		return
@@ -24,7 +24,7 @@ func CreateConfigurationController(context *gin.Context) {
 func ReadConfigurationController(context *gin.Context) {
 	logging.SetContext(context)
 
-	configuration, err := services.ReadConfiguration()
+	configuration, err := service.ReadConfiguration()
 	if err != nil {
 		_ = context.Error(err)
 		return

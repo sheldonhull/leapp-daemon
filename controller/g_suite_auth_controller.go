@@ -1,12 +1,12 @@
-package controllers
+package controller
 
 import (
 	"encoding/json"
 	"github.com/gin-gonic/gin"
-	"leapp_daemon/controllers/request_dto/g_suite_auth"
-	"leapp_daemon/controllers/response_dto"
+	"leapp_daemon/controller/request_dto/g_suite_auth"
+	"leapp_daemon/controller/response_dto"
 	"leapp_daemon/logging"
-	"leapp_daemon/services"
+	"leapp_daemon/service"
 	"net/http"
 	"net/url"
 	"strings"
@@ -37,7 +37,7 @@ func GSuiteAuthFirstStepController(context *gin.Context) {
 		return
 	}
 
-	captchaForm, captchaInputId, captchaPictureURL, captchaURL, loginForm, loginURL := services.GSuiteAuthFirstStepService(requestDto.Username, requestDto.Password)
+	captchaForm, captchaInputId, captchaPictureURL, captchaURL, loginForm, loginURL := service.GSuiteAuthFirstStepService(requestDto.Username, requestDto.Password)
 
 	gSuiteAuthFirstStepResponse := GSuiteAuthFirstStepResponse{
 		CaptchaForm:       captchaForm,
@@ -76,7 +76,7 @@ func GSuiteAuthSecondStepController(context *gin.Context) {
 	loginFormString := []byte(requestDto.LoginForm)
 	_ = json.Unmarshal(loginFormString, &loginForm)
 
-	isMfaTokenRequested, responseForm, submitURL := services.GSuiteAuthSecondStepService(requestDto.Captcha, requestDto.CaptchaInputId, requestDto.CaptchaUrl,
+	isMfaTokenRequested, responseForm, submitURL := service.GSuiteAuthSecondStepService(requestDto.Captcha, requestDto.CaptchaInputId, requestDto.CaptchaUrl,
 		captchaForm, requestDto.Password, loginForm, requestDto.LoginUrl)
 
 	gSuiteAuthSecondStepResponse := GSuiteAuthSecondStepResponse{
@@ -110,7 +110,7 @@ func GSuiteAuthThirdStepController(context *gin.Context) {
 	loginFormString := []byte(requestDto.ResponseForm)
 	_ = json.Unmarshal(loginFormString, &responseForm)
 
-	samlAssertion := services.GSuiteAuthThirdStepService(requestDto.IsMfaTokenRequested, responseForm,
+	samlAssertion := service.GSuiteAuthThirdStepService(requestDto.IsMfaTokenRequested, responseForm,
 		requestDto.SubmitURL, requestDto.Token)
 
 	responseDto := response_dto.MessageAndDataResponseDto{Message: "success", Data: samlAssertion}

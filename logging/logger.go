@@ -5,13 +5,13 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"io"
-	"leapp_daemon/controllers/utils"
+	"leapp_daemon/controller/util"
 	"os"
 	"os/user"
 )
 
 var logFile *os.File = nil
-var context utils.Context
+var context util.Context
 
 func InitializeLogger() {
 	err := createLogDir()
@@ -40,7 +40,7 @@ func SetContext(ctx *gin.Context) {
 		logrus.SetOutput(writer)
 	}
 
-	context = utils.NewContext(ctx)
+	context = util.NewContext(ctx)
 }
 
 func CtxEntry() *logrus.Entry {

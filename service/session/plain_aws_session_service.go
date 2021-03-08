@@ -1,16 +1,16 @@
-package sessions
+package session
 
 import (
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"leapp_daemon/custom_errors"
-	"leapp_daemon/services"
-	"leapp_daemon/services/domain"
+	"leapp_daemon/service"
+	"leapp_daemon/service/domain"
 	"strings"
 )
 
 func GetPlainAwsSession(id string) (*domain.PlainAwsAccountSession, error) {
-	configuration, err := services.ReadConfiguration()
+	configuration, err := service.ReadConfiguration()
 	if err != nil {
 		return nil, err
 	}
@@ -26,7 +26,7 @@ func GetPlainAwsSession(id string) (*domain.PlainAwsAccountSession, error) {
 }
 
 func ListPlainAwsSession(query string) ([]domain.PlainAwsAccountSession, error) {
-	configuration, err := services.ReadConfiguration()
+	configuration, err := service.ReadConfiguration()
 	if err != nil {
 		return nil, err
 	}
@@ -54,7 +54,7 @@ func ListPlainAwsSession(query string) ([]domain.PlainAwsAccountSession, error) 
 
 func CreatePlainAwsSession(name string, accountNumber string, region string, user string, mfaDevice string) error {
 
-	configuration, err := services.ReadConfiguration()
+	configuration, err := service.ReadConfiguration()
 	if err != nil {
 		return err
 	}
@@ -90,7 +90,7 @@ func CreatePlainAwsSession(name string, accountNumber string, region string, use
 
 	configuration.PlainAwsAccountSessions = append(configuration.PlainAwsAccountSessions, session)
 
-	err = services.UpdateConfiguration(configuration, false)
+	err = service.UpdateConfiguration(configuration, false)
 	if err != nil {
 		return err
 	}
@@ -100,7 +100,7 @@ func CreatePlainAwsSession(name string, accountNumber string, region string, use
 
 func EditPlainAwsSession(id string, name string, accountNumber string, region string, user string, mfaDevice string) error {
 
-	configuration, err := services.ReadConfiguration()
+	configuration, err := service.ReadConfiguration()
 	if err != nil {
 		return err
 	}
@@ -128,7 +128,7 @@ func EditPlainAwsSession(id string, name string, accountNumber string, region st
 
 	configuration.PlainAwsAccountSessions = sessions
 
-	err = services.UpdateConfiguration(configuration, false)
+	err = service.UpdateConfiguration(configuration, false)
 	if err != nil {
 		return err
 	}
@@ -137,7 +137,7 @@ func EditPlainAwsSession(id string, name string, accountNumber string, region st
 }
 
 func DeletePlainAwsSession(id string) error {
-	configuration, err := services.ReadConfiguration()
+	configuration, err := service.ReadConfiguration()
 	if err != nil {
 		return err
 	}
@@ -159,7 +159,7 @@ func DeletePlainAwsSession(id string) error {
 
 	configuration.PlainAwsAccountSessions = sessions
 
-	err = services.UpdateConfiguration(configuration, false)
+	err = service.UpdateConfiguration(configuration, false)
 	if err != nil {
 		return err
 	}

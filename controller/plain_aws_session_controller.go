@@ -1,11 +1,11 @@
-package controllers
+package controller
 
 import (
 	"github.com/gin-gonic/gin"
-	"leapp_daemon/controllers/request_dto/plain_aws_session"
-	"leapp_daemon/controllers/response_dto"
+	"leapp_daemon/controller/request_dto/plain_aws_session"
+	"leapp_daemon/controller/response_dto"
 	"leapp_daemon/logging"
-	"leapp_daemon/services/sessions"
+	"leapp_daemon/service/session"
 	"net/http"
 )
 
@@ -19,7 +19,7 @@ func GetPlainAwsSessionController(context *gin.Context) {
 		return
 	}
 
-	session, err2 := sessions.GetPlainAwsSession(requestDto.Id)
+	session, err2 := session.GetPlainAwsSession(requestDto.Id)
 	if err2 != nil {
 		_ = context.Error(err2)
 		return
@@ -39,7 +39,7 @@ func CreatePlainAwsSessionController(context *gin.Context) {
 		return
 	}
 
-	err2 := sessions.CreatePlainAwsSession(
+	err2 := session.CreatePlainAwsSession(
 		requestDto.Name,
 		requestDto.AccountNumber,
 		requestDto.Region,
@@ -72,7 +72,7 @@ func EditPlainAwsSessionController(context *gin.Context) {
 		return
 	}
 
-	err2 := sessions.EditPlainAwsSession(
+	err2 := session.EditPlainAwsSession(
 		requestUriDto.Id,
 		requestDto.Name,
 		requestDto.AccountNumber,
@@ -99,7 +99,7 @@ func DeletePlainAwsSessionController(context *gin.Context) {
 		return
 	}
 
-	err2 := sessions.DeletePlainAwsSession(requestDto.Id)
+	err2 := session.DeletePlainAwsSession(requestDto.Id)
 
 	if err2 != nil {
 		_ = context.Error(err2)

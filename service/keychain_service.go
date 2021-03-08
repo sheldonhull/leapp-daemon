@@ -1,9 +1,9 @@
-package services
+package service
 
 import (
 	"log"
 	"github.com/zalando/go-keyring"
-	"leapp_daemon/services/domain"
+	"leapp_daemon/service/domain"
 )
 
 func SaveSecret(secret string, label string) error {

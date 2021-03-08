@@ -1,17 +1,17 @@
-package sessions
+package session
 
 import (
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"leapp_daemon/custom_errors"
-	"leapp_daemon/services"
-	"leapp_daemon/services/domain"
+	"leapp_daemon/service"
+	"leapp_daemon/service/domain"
 	"strings"
 )
 
 
 func GetFederatedAwsSession(id string) (*domain.FederatedAwsAccountSession, error) {
-	configuration, err := services.ReadConfiguration()
+	configuration, err := service.ReadConfiguration()
 	if err != nil {
 		return nil, err
 	}
@@ -27,7 +27,7 @@ func GetFederatedAwsSession(id string) (*domain.FederatedAwsAccountSession, erro
 }
 
 func ListFederatedAwsSession(query string) ([]domain.FederatedAwsAccountSession, error) {
-	configuration, err := services.ReadConfiguration()
+	configuration, err := service.ReadConfiguration()
 	if err != nil {
 		return nil, err
 	}
@@ -55,7 +55,7 @@ func ListFederatedAwsSession(query string) ([]domain.FederatedAwsAccountSession,
 
 func CreateFederatedAwsSession(name string, accountNumber string, roleName string, roleArn string, idpArn string,
 	region string, ssoUrl string) error {
-	configuration, err := services.ReadConfiguration()
+	configuration, err := service.ReadConfiguration()
 	if err != nil {
 		return err
 	}
@@ -98,7 +98,7 @@ func CreateFederatedAwsSession(name string, accountNumber string, roleName strin
 
 	configuration.FederatedAwsAccountSessions = append(configuration.FederatedAwsAccountSessions, session)
 
-	err = services.UpdateConfiguration(configuration, false)
+	err = service.UpdateConfiguration(configuration, false)
 	if err != nil {
 		return err
 	}

@@ -1,10 +1,10 @@
-package services
+package service
 
 import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"leapp_daemon/services/domain"
+	"leapp_daemon/service/domain"
 	"os"
 )
 

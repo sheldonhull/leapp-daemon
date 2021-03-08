@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
-	"leapp_daemon/controllers/utils"
+	"leapp_daemon/controller/util"
 	"leapp_daemon/custom_errors"
 	"leapp_daemon/logging"
 	"net/http"
@@ -31,7 +31,7 @@ func (*errorHandler) Handle(context *gin.Context) {
 		code = http.StatusInternalServerError
 	}
 
-	errorMap := gin.H{ "statusCode": code, "error": err.Error(), "context": utils.NewContext(context) }
+	errorMap := gin.H{ "statusCode": code, "error": err.Error(), "context": util.NewContext(context) }
 
 	logging.CtxEntry().
 		WithFields(logrus.Fields{"statusCode": code}).

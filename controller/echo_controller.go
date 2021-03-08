@@ -1,11 +1,11 @@
-package controllers
+package controller
 
 import (
 	"github.com/gin-gonic/gin"
-	"leapp_daemon/controllers/request_dto"
-	"leapp_daemon/controllers/response_dto"
+	"leapp_daemon/controller/request_dto"
+	"leapp_daemon/controller/response_dto"
 	"leapp_daemon/logging"
-	"leapp_daemon/services"
+	"leapp_daemon/service"
 	"net/http"
 )
 
@@ -19,7 +19,7 @@ func EchoController(context *gin.Context) {
 		return
 	}
 
-	serviceResponse, err2 := services.Echo(requestDto.Text)
+	serviceResponse, err2 := service.Echo(requestDto.Text)
 	if err2 != nil {
 		_ = context.Error(err)
 		return

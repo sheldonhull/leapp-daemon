@@ -1,11 +1,11 @@
-package controllers
+package controller
 
 import (
 	"github.com/gin-gonic/gin"
-	"leapp_daemon/controllers/request_dto"
-	"leapp_daemon/controllers/response_dto"
+	"leapp_daemon/controller/request_dto"
+	"leapp_daemon/controller/response_dto"
 	"leapp_daemon/logging"
-	"leapp_daemon/services/sessions"
+	"leapp_daemon/service/session"
 	"net/http"
 )
 
@@ -22,7 +22,7 @@ func ListSessionController(context *gin.Context) {
 	listType := requestDto.Type
 	query := requestDto.Query
 
-	sessionList, err2 := sessions.ListSessions(query, listType)
+	sessionList, err2 := session.ListSessions(query, listType)
 	if err2 != nil {
 		_ = context.Error(err2)
 		return
