@@ -5,7 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"io"
-	"leapp_daemon/controller/util"
+	"leapp_daemon/util"
 	"os"
 	"os/user"
 )

@@ -5,8 +5,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"leapp_daemon/controller"
-	"leapp_daemon/controller/middleware"
 	"leapp_daemon/logging"
+	"leapp_daemon/middleware"
 )
 
 type engineWrapper struct {
