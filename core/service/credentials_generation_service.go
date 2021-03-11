@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/sts"
 	"gopkg.in/ini.v1"
 	"leapp_daemon/core/model"
+	"leapp_daemon/core/util"
 	"leapp_daemon/shared/constant"
 	"leapp_daemon/shared/custom_error"
 	"os"
@@ -21,17 +22,23 @@ var keychainMutex sync.Mutex
 // The zero value is an unlocked mutex
 var iniFileMutex sync.Mutex
 
-func getStsStaticCredentialsClient(accessKeyId string, secretAccessKey string, region *string) *sts.STS {
-	// TODO: handle regional endpoints
+func getStsStaticCredentialsClient(accessKeyId string, secretAccessKey string, region *string) (*sts.STS, error) {
+
+	endpoint, err := util.GetRegionalEndpoint(region)
+	if err != nil {
+		return nil, err
+	}
+
 	stsConfig := &aws.Config{
 			Credentials: credentials.NewStaticCredentials(accessKeyId, secretAccessKey, ""),
 			Region: region,
+			Endpoint: endpoint,
 	}
 
 	sess, err := session.NewSession(stsConfig)
 	stsClient := sts.New(session.Must(sess, err))
 
-	return stsClient
+	return stsClient, nil
 }
 
 func GenerateSessionToken(sess *model.PlainAwsSession, mfaToken *string) (*sts.Credentials, error) {
@@ -40,7 +47,10 @@ func GenerateSessionToken(sess *model.PlainAwsSession, mfaToken *string) (*sts.C
 		return nil, err
 	}
 
-	stsClient := getStsStaticCredentialsClient(accessKeyId, secretAccessKey, &sess.Account.Region)
+	stsClient, err2 := getStsStaticCredentialsClient(accessKeyId, secretAccessKey, &sess.Account.Region)
+	if err2 != nil {
+		return nil, err2
+	}
 
 	durationSeconds := constant.SessionTokenDurationInSeconds
 	var getSessionTokenInput sts.GetSessionTokenInput
@@ -59,9 +69,9 @@ func GenerateSessionToken(sess *model.PlainAwsSession, mfaToken *string) (*sts.C
 		}
 	}
 
-	getSessionTokenOutput, err := stsClient.GetSessionToken(&getSessionTokenInput)
-	if err != nil {
-		return nil, err
+	getSessionTokenOutput, err3 := stsClient.GetSessionToken(&getSessionTokenInput)
+	if err3 != nil {
+		return nil, err3
 	}
 
 	return getSessionTokenOutput.Credentials, nil

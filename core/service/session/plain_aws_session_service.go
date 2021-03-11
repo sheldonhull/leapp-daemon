@@ -53,7 +53,8 @@ func ListPlainAwsSession(query string) ([]model.PlainAwsSession, error) {
 	}
 }
 
-func CreatePlainAwsSession(name string, accountNumber string, region string, user string, mfaDevice string) error {
+func CreatePlainAwsSession(name string, accountNumber string, region string, user string,
+	                       awsAccessKeyId string, awsSecretAccessKey string, mfaDevice string) error {
 	configuration, err := service.ReadConfiguration()
 	if err != nil {
 		return err
@@ -74,6 +75,8 @@ func CreatePlainAwsSession(name string, accountNumber string, region string, use
 		Name:          name,
 		Region:        region,
 		User:          user,
+		AwsAccessKeyId: awsAccessKeyId,
+		AwsSecretAccessKey: awsSecretAccessKey,
 		MfaDevice:     mfaDevice,
 	}
 
@@ -98,7 +101,9 @@ func CreatePlainAwsSession(name string, accountNumber string, region string, use
 	return nil
 }
 
-func EditPlainAwsSession(id string, name string, accountNumber string, region string, user string, mfaDevice string) error {
+func EditPlainAwsSession(id string, name string, accountNumber string, region string,
+	                     user string, awsAccessKeyId string, awsSecretAccessKey string, mfaDevice string) error {
+
 	configuration, err := service.ReadConfiguration()
 	if err != nil {
 		return err
@@ -114,6 +119,8 @@ func EditPlainAwsSession(id string, name string, accountNumber string, region st
 				Name:          name,
 				Region:        region,
 				User:          user,
+				AwsAccessKeyId: awsAccessKeyId,
+				AwsSecretAccessKey: awsSecretAccessKey,
 				MfaDevice:     mfaDevice,
 			}
 			found = true

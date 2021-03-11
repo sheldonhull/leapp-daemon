@@ -1,6 +1,8 @@
 package main
 
 import (
+	"leapp_daemon/api/controller"
+	"leapp_daemon/api/engine"
 	"leapp_daemon/core/service/session"
 	"leapp_daemon/shared/logging"
 )
@@ -20,8 +22,8 @@ func main() {
 		}
 	}
 
-	//go controller.Hub.Run()
-	/*defer logging.CloseLogFile()
+	go controller.Hub.Run()
+	defer logging.CloseLogFile()
 	eng := engine.Engine()
-	eng.Serve(8080)*/
+	eng.Serve(8080)
 }

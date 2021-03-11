@@ -15,6 +15,8 @@ type EditPlainAwsSessionRequestDto struct {
 	Region string `json:"region" binding:"required"`
 	User string `json:"user" binding:"required"`
 	MfaDevice string `json:"mfaDevice"`
+	AwsAccessKeyId string `json:"awsAccessKeyId" binding:"required"`
+	AwsSecretAccessKey string `json:"awsSecretAccessKey" binding:"required"`
 }
 
 func (requestDto *EditPlainAwsSessionRequestDto) Build(context *gin.Context) error {

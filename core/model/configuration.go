@@ -51,9 +51,11 @@ type FederatedAwsRole struct {
 }
 
 type PlainAwsAccount struct {
-	AccountNumber string
-	Name          string
-	Region        string
-	User          string
-	MfaDevice     string
+	AccountNumber       string
+	Name                string
+	Region              string
+	User                string
+	AwsAccessKeyId      string
+	AwsSecretAccessKey  string
+	MfaDevice           string
 }
