@@ -1,4 +1,4 @@
-package _const
+package constant
 
 const CredentialsFilePath = `.aws/credentials`
 const ConfigurationFilePath = `.Leapp/Leapp-lock.json`

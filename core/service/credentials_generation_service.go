@@ -8,7 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/sts"
 	"gopkg.in/ini.v1"
 	"leapp_daemon/core/model"
-	"leapp_daemon/shared/const"
+	"leapp_daemon/shared/constant"
 	"leapp_daemon/shared/custom_error"
 	"os"
 	"sync"
@@ -29,31 +29,34 @@ func getStsStaticCredentialsClient(accessKeyId string, secretAccessKey string, r
 	}
 
 	sess, err := session.NewSession(stsConfig)
-	validatedSess := session.Must(sess, err)
-	stsClient := sts.New(validatedSess)
+	stsClient := sts.New(session.Must(sess, err))
 
 	return stsClient
 }
 
-func GenerateSessionToken(sess *model.PlainAwsSession) (*sts.Credentials, error) {
-	accessKeyId, secretAccessKey, err := getAccessKeys(sess.Account.Name)
+func GenerateSessionToken(sess *model.PlainAwsSession, mfaToken *string) (*sts.Credentials, error) {
+	accessKeyId, secretAccessKey, err := GetAccessKeys(sess.Account.Name)
 	if err != nil {
 		return nil, err
 	}
 
 	stsClient := getStsStaticCredentialsClient(accessKeyId, secretAccessKey, &sess.Account.Region)
 
-	durationSeconds := _const.SessionTokenDurationInSeconds
+	durationSeconds := constant.SessionTokenDurationInSeconds
 	var getSessionTokenInput sts.GetSessionTokenInput
 
-	if sess.Account.MfaDevice == "" {
+	if *mfaToken == "" {
 		getSessionTokenInput = sts.GetSessionTokenInput{
 			DurationSeconds: &durationSeconds,
 			SerialNumber:    nil,
 			TokenCode:       nil,
 		}
 	} else {
-		// ask for MFA token
+		getSessionTokenInput = sts.GetSessionTokenInput{
+			DurationSeconds: &durationSeconds,
+			SerialNumber:    &sess.Account.MfaDevice,
+			TokenCode:       mfaToken,
+		}
 	}
 
 	getSessionTokenOutput, err := stsClient.GetSessionToken(&getSessionTokenInput)
@@ -125,7 +128,7 @@ func SaveSessionTokenInIniFile(accessKeyId string, secretAccessKey string, sessi
 		return err
 	}
 
-	credentialsFilePath := homeDir + "/" + _const.CredentialsFilePath
+	credentialsFilePath := homeDir + "/" + constant.CredentialsFilePath
 
 	if DoesFileExist(credentialsFilePath) {
 		credentialsFile, err := ini.Load(credentialsFilePath)
@@ -158,7 +161,7 @@ func SaveSessionTokenInIniFile(accessKeyId string, secretAccessKey string, sessi
 				return err
 			}
 
-			err = appendToFile(credentialsFile, credentialsFilePath)
+			err = overwriteFile(credentialsFile, credentialsFilePath)
 			if err != nil {
 				return err
 			}
@@ -199,7 +202,7 @@ func GetSessionToken(accountName string) (string, string, error) {
 	return sessionToken, sessionTokenExpiration, nil
 }
 
-func getAccessKeys(accountName string) (string, string, error) {
+func GetAccessKeys(accountName string) (string, string, error) {
 	accessKeyIdSecretName := accountName + "-plain-aws-session-access-key-id"
 
 	accessKeyId, err := RetrieveSecret(accessKeyIdSecretName)

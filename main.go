@@ -6,9 +6,18 @@ import (
 )
 
 func main() {
-	err := session.StartPlainAwsSession("5eda3711cc724380a9c6f39638dbb9db")
-	if err != nil {
-		logging.Info(err)
+	isMfaTokenRequired, err := session.IsMfaRequiredForPlainAwsSession("5eda3711cc724380a9c6f39638dbb9db")
+
+	if isMfaTokenRequired {
+		err = session.StartPlainAwsSession("5eda3711cc724380a9c6f39638dbb9db", "")
+		if err != nil {
+			logging.Info(err)
+		}
+	} else {
+		err = session.StartPlainAwsSession("5eda3711cc724380a9c6f39638dbb9db", "")
+		if err != nil {
+			logging.Info(err)
+		}
 	}
 
 	//go controller.Hub.Run()

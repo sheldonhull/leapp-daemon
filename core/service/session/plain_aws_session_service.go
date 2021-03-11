@@ -166,7 +166,21 @@ func DeletePlainAwsSession(id string) error {
 	return nil
 }
 
-func StartPlainAwsSession(id string) error {
+func IsMfaRequiredForPlainAwsSession(id string) (bool, error) {
+	configuration, err := service.ReadConfiguration()
+	if err != nil {
+		return false, err
+	}
+
+	sess, err := getPlainAwsSessionById(configuration, id)
+	if err != nil {
+		return false, err
+	}
+
+	return sess.Account.MfaDevice != "", nil
+}
+
+func StartPlainAwsSession(id string, mfaToken string) error {
 	configuration, err := service.ReadConfiguration()
 	if err != nil {
 		return err
@@ -177,6 +191,15 @@ func StartPlainAwsSession(id string) error {
 		return err
 	}
 
+	err = startPlainAwsSession(sess, configuration, &mfaToken)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func startPlainAwsSession(sess *model.PlainAwsSession, configuration *model.Configuration, mfaToken *string) error {
 	doSessionTokenExist, err := service.DoSessionTokenExist(sess.Account.Name)
 	if err != nil {
 		return err
@@ -192,7 +215,7 @@ func StartPlainAwsSession(id string) error {
 			// generate creds
 			logging.Info("session token no more valid")
 
-			credentials, err := service.GenerateSessionToken(sess)
+			credentials, err := service.GenerateSessionToken(sess, mfaToken)
 			if err != nil {
 				return err
 			}
@@ -216,16 +239,21 @@ func StartPlainAwsSession(id string) error {
 		} else {
 			// re-use creds
 			logging.Info("session token still valid")
-			// TODO: get secrets from keychain
-			//sessionToken, sessionTokenExpiration, err := service.GetSessionToken(sess.Account.Name)
-			// TODO: write secrets down in credentials file
-			//err = service.SaveSessionTokenInIniFile(sess, credentials, "default")
-			//if err != nil {
-			//	return err
-			//}
+
+			accessKeyId, secretAccessKey, err := service.GetAccessKeys(sess.Account.Name)
+			if err != nil {
+				return err
+			}
+			sessionToken, _, err := service.GetSessionToken(sess.Account.Name)
+
+			err = service.SaveSessionTokenInIniFile(accessKeyId, secretAccessKey, sessionToken, sess.Account.Region,
+				"default")
+			if err != nil {
+				return err
+			}
 		}
 	} else {
-		credentials, err := service.GenerateSessionToken(sess)
+		credentials, err := service.GenerateSessionToken(sess, mfaToken)
 		if err != nil {
 			return err
 		}

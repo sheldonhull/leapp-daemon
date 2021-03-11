@@ -2,12 +2,12 @@ package service
 
 import (
 	"github.com/zalando/go-keyring"
-	"leapp_daemon/shared/const"
+	"leapp_daemon/shared/constant"
 )
 
 // TODO: do not use log.Fatal, since it will call os.Exit(1)
 func SaveSecret(secret string, label string) error {
-	err := keyring.Set(_const.KeychainService, label, secret)
+	err := keyring.Set(constant.KeychainService, label, secret)
 	if err != nil {
 		//log.Fatal(err)
 		return err
@@ -17,7 +17,7 @@ func SaveSecret(secret string, label string) error {
 
 // TODO: do not use log.Fatal, since it will call os.Exit(1)
 func RetrieveSecret(label string) (string, error) {
-	secret, err := keyring.Get(_const.KeychainService, label)
+	secret, err := keyring.Get(constant.KeychainService, label)
 	if err != nil {
 		//log.Fatal(err)
 		return "", err
@@ -26,7 +26,7 @@ func RetrieveSecret(label string) (string, error) {
 }
 
 func DoesSecretExist(label string) (bool, error) {
-	_, err := keyring.Get(_const.KeychainService, label)
+	_, err := keyring.Get(constant.KeychainService, label)
 	if err != nil {
 		if err.Error() == "secret not found in keyring" {
 			return false, nil

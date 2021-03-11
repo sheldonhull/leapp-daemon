@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"leapp_daemon/core/model"
-	"leapp_daemon/shared/const"
+	"leapp_daemon/shared/constant"
 	"os"
 	"sync"
 )
@@ -39,7 +39,7 @@ func ReadConfiguration() (*model.Configuration, error) {
 	homeDir, err := GetHomeDir()
 	if err != nil { return nil, err }
 
-	configurationFilePath := fmt.Sprintf("%s/%s", homeDir, _const.ConfigurationFilePath)
+	configurationFilePath := fmt.Sprintf("%s/%s", homeDir, constant.ConfigurationFilePath)
 
 	encryptedText, err := ioutil.ReadFile(configurationFilePath)
 	if err != nil { return nil, err }
@@ -57,7 +57,7 @@ func UpdateConfiguration(configuration *model.Configuration, deleteExistingFile 
 	homeDir, err := GetHomeDir()
 	if err != nil { return err }
 
-	configurationFilePath := fmt.Sprintf("%s/%s", homeDir, _const.ConfigurationFilePath)
+	configurationFilePath := fmt.Sprintf("%s/%s", homeDir, constant.ConfigurationFilePath)
 
 	if deleteExistingFile == true {
 		if DoesFileExist(configurationFilePath) {
