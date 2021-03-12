@@ -92,7 +92,7 @@ func CreateFederatedAwsSession(name string, accountNumber string, roleName strin
 		Id:           uuidString,
 		Active:       false,
 		Loading:      false,
-		LastStopDate: "",
+		StartTime: "",
 		Account:      federatedAwsAccount,
 	}
 

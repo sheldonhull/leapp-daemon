@@ -87,7 +87,7 @@ func CreatePlainAwsSession(name string, accountNumber string, region string, use
 		Id:           uuidString,
 		Active:       false,
 		Loading:      false,
-		LastStopDate: "",
+		StartTime: "",
 		Account:      plainAwsAccount,
 	}
 

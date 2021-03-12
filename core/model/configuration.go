@@ -19,7 +19,7 @@ type FederatedAwsSession struct {
 	Id           string
 	Active       bool
 	Loading      bool
-	LastStopDate string
+	StartTime    string
 	Account      FederatedAwsAccount
 }
 
@@ -27,7 +27,7 @@ type PlainAwsSession struct {
 	Id           string
 	Active       bool
 	Loading      bool
-	LastStopDate string
+	StartTime    string
 	Account      PlainAwsAccount
 }
 

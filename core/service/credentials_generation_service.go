@@ -47,9 +47,9 @@ func GenerateSessionToken(sess *model.PlainAwsSession, mfaToken *string) (*sts.C
 		return nil, err
 	}
 
-	stsClient, err2 := getStsStaticCredentialsClient(accessKeyId, secretAccessKey, &sess.Account.Region)
-	if err2 != nil {
-		return nil, err2
+	stsClient, err := getStsStaticCredentialsClient(accessKeyId, secretAccessKey, &sess.Account.Region)
+	if err != nil {
+		return nil, err
 	}
 
 	durationSeconds := constant.SessionTokenDurationInSeconds
@@ -69,9 +69,9 @@ func GenerateSessionToken(sess *model.PlainAwsSession, mfaToken *string) (*sts.C
 		}
 	}
 
-	getSessionTokenOutput, err3 := stsClient.GetSessionToken(&getSessionTokenInput)
-	if err3 != nil {
-		return nil, err3
+	getSessionTokenOutput, err := stsClient.GetSessionToken(&getSessionTokenInput)
+	if err != nil {
+		return nil, err
 	}
 
 	return getSessionTokenOutput.Credentials, nil

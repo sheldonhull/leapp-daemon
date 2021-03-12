@@ -3,6 +3,7 @@ package main
 import (
 	"leapp_daemon/api/controller"
 	"leapp_daemon/api/engine"
+	"leapp_daemon/core/service"
 	"leapp_daemon/core/service/session"
 	"leapp_daemon/shared/logging"
 )
@@ -21,6 +22,10 @@ func main() {
 			logging.Info(err)
 		}
 	}
+
+	defer service.CloseTimer()
+	service.InitiliazeTimer(1, service.CheckAllSessions)
+
 
 	go controller.Hub.Run()
 	defer logging.CloseLogFile()
