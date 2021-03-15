@@ -1,7 +1,6 @@
 package service
 
 import (
-	"fmt"
 	"leapp_daemon/core/model"
 	"leapp_daemon/shared/constant"
 	"time"
@@ -13,19 +12,19 @@ func CheckAllSessions() error {
 		return err
 	}
 
-	federatedAwsSessions := configuration.FederatedAwsSessions
-	plainAwsSessions := configuration.PlainAwsSessions
+	for i, _ := range configuration.PlainAwsSessions {
+		session := configuration.PlainAwsSessions[i]
+		if session.Active {
+			checkTimingPlainAwsSession(&session)
+		}
+		configuration.PlainAwsSessions[i] = session
+	}
 
-	for _, session := range federatedAwsSessions {
+	for i, _ := range configuration.FederatedAwsSessions {
+		session := configuration.FederatedAwsSessions[i]
 		if session.Active {
 			checkTimingForFederatedAwsSession(&session)
 		}
-	}
-
-	for _, session := range plainAwsSessions {
-		// if session.Active {
-			checkTimingPlainAwsSession(&session)
-		// }
 	}
 
 	UpdateConfiguration(configuration, false)
@@ -33,42 +32,29 @@ func CheckAllSessions() error {
 	return nil
 }
 
+func checkTimingPlainAwsSession(session *model.PlainAwsSession) {
+	startTime, _ := time.Parse(time.RFC3339, session.StartTime)
+	secondsPassedFromStart := time.Now().Sub(startTime).Seconds()
+	needRefresh := secondsPassedFromStart > time.Duration(constant.SessionTokenDurationInSeconds).Seconds()
+
+	if needRefresh {
+		refreshAwsPlainCredentials(session)
+	}
+}
+
 func checkTimingForFederatedAwsSession(session *model.FederatedAwsSession) {
 	startTime, _ := time.Parse(time.RFC3339, session.StartTime)
 	secondsPassedFromStart := time.Now().Sub(startTime).Seconds()
-
-	fmt.Println(secondsPassedFromStart)
-
 	needRefresh := secondsPassedFromStart > time.Duration(constant.SessionTokenDurationInSeconds).Seconds()
 	if needRefresh {
-		go refreshAwsFederatedCredentials(session)
+		refreshAwsFederatedCredentials(session)
 	}
-}
-
-func checkTimingPlainAwsSession(session *model.PlainAwsSession) {
-	fmt.Println(session.StartTime)
-
-	startTime, _ := time.Parse(time.RFC3339, session.StartTime)
-
-	fmt.Println(startTime)
-
-	secondsPassedFromStart := time.Now().Sub(startTime).Seconds()
-
-	fmt.Println(secondsPassedFromStart)
-
-	needRefresh := secondsPassedFromStart > time.Duration(constant.SessionTokenDurationInSeconds).Seconds()
-	if needRefresh {
-		go refreshAwsPlainCredentials(session)
-	}
-}
-
-func refreshAwsFederatedCredentials(session *model.FederatedAwsSession) {
-	session.StartTime = time.Now().Format(time.RFC3339)
-	println("Federated session " + session.Account.Name + " started at " + session.StartTime)
-
 }
 
 func refreshAwsPlainCredentials(session *model.PlainAwsSession) {
 	session.StartTime = time.Now().Format(time.RFC3339)
-	println("Plain session " + session.Account.Name + " started at " + session.StartTime)
+}
+
+func refreshAwsFederatedCredentials(session *model.FederatedAwsSession) {
+	session.StartTime = time.Now().Format(time.RFC3339)
 }

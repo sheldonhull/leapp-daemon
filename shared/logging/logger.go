@@ -6,8 +6,8 @@ import (
 	"github.com/sirupsen/logrus"
 	"io"
 	"leapp_daemon/api/util"
-	"leapp_daemon/core/service"
 	"os"
+	"os/user"
 )
 
 var logFile *os.File = nil
@@ -103,7 +103,7 @@ func createLogDir() error {
 }
 
 func getLogFilePath() (string, error) {
-	homeDir, err := service.GetHomeDir()
+	homeDir, err := GetHomeDir()
 	if err != nil {
 		return "", err
 	}
@@ -112,7 +112,7 @@ func getLogFilePath() (string, error) {
 }
 
 func getLogDirPath() (string, error) {
-	homeDir, err := service.GetHomeDir()
+	homeDir, err := GetHomeDir()
 	if err != nil {
 		return "", err
 	}
@@ -121,3 +121,11 @@ func getLogDirPath() (string, error) {
 }
 
 type LogWriter struct{}
+
+func GetHomeDir() (string, error) {
+	usr, err := user.Current()
+	if err != nil {
+		return "", err
+	}
+	return usr.HomeDir, nil
+}
