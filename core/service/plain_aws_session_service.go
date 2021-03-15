@@ -1,17 +1,17 @@
-package session
+package service
 
 import (
+	"encoding/json"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"leapp_daemon/core/model"
-	"leapp_daemon/core/service"
 	errors2 "leapp_daemon/shared/custom_error"
 	"leapp_daemon/shared/logging"
 	"strings"
 )
 
 func GetPlainAwsSession(id string) (*model.PlainAwsSession, error) {
-	configuration, err := service.ReadConfiguration()
+	configuration, err := ReadConfiguration()
 	if err != nil {
 		return nil, err
 	}
@@ -27,7 +27,7 @@ func GetPlainAwsSession(id string) (*model.PlainAwsSession, error) {
 }
 
 func ListPlainAwsSession(query string) ([]model.PlainAwsSession, error) {
-	configuration, err := service.ReadConfiguration()
+	configuration, err := ReadConfiguration()
 	if err != nil {
 		return nil, err
 	}
@@ -55,7 +55,7 @@ func ListPlainAwsSession(query string) ([]model.PlainAwsSession, error) {
 
 func CreatePlainAwsSession(name string, accountNumber string, region string, user string,
 	                       awsAccessKeyId string, awsSecretAccessKey string, mfaDevice string) error {
-	configuration, err := service.ReadConfiguration()
+	configuration, err := ReadConfiguration()
 	if err != nil {
 		return err
 	}
@@ -93,7 +93,7 @@ func CreatePlainAwsSession(name string, accountNumber string, region string, use
 
 	configuration.PlainAwsSessions = append(configuration.PlainAwsSessions, session)
 
-	err = service.UpdateConfiguration(configuration, false)
+	err = UpdateConfiguration(configuration, false)
 	if err != nil {
 		return err
 	}
@@ -104,7 +104,7 @@ func CreatePlainAwsSession(name string, accountNumber string, region string, use
 func EditPlainAwsSession(id string, name string, accountNumber string, region string,
 	                     user string, awsAccessKeyId string, awsSecretAccessKey string, mfaDevice string) error {
 
-	configuration, err := service.ReadConfiguration()
+	configuration, err := ReadConfiguration()
 	if err != nil {
 		return err
 	}
@@ -134,7 +134,7 @@ func EditPlainAwsSession(id string, name string, accountNumber string, region st
 
 	configuration.PlainAwsSessions = sessions
 
-	err = service.UpdateConfiguration(configuration, false)
+	err = UpdateConfiguration(configuration, false)
 	if err != nil {
 		return err
 	}
@@ -143,7 +143,7 @@ func EditPlainAwsSession(id string, name string, accountNumber string, region st
 }
 
 func DeletePlainAwsSession(id string) error {
-	configuration, err := service.ReadConfiguration()
+	configuration, err := ReadConfiguration()
 	if err != nil {
 		return err
 	}
@@ -165,7 +165,7 @@ func DeletePlainAwsSession(id string) error {
 
 	configuration.PlainAwsSessions = sessions
 
-	err = service.UpdateConfiguration(configuration, false)
+	err = UpdateConfiguration(configuration, false)
 	if err != nil {
 		return err
 	}
@@ -174,7 +174,7 @@ func DeletePlainAwsSession(id string) error {
 }
 
 func IsMfaRequiredForPlainAwsSession(id string) (bool, error) {
-	configuration, err := service.ReadConfiguration()
+	configuration, err := ReadConfiguration()
 	if err != nil {
 		return false, err
 	}
@@ -188,7 +188,7 @@ func IsMfaRequiredForPlainAwsSession(id string) (bool, error) {
 }
 
 func StartPlainAwsSession(id string, mfaToken string) error {
-	configuration, err := service.ReadConfiguration()
+	configuration, err := ReadConfiguration()
 	if err != nil {
 		return err
 	}
@@ -207,13 +207,13 @@ func StartPlainAwsSession(id string, mfaToken string) error {
 }
 
 func startPlainAwsSession(sess *model.PlainAwsSession, configuration *model.Configuration, mfaToken *string) error {
-	doSessionTokenExist, err := service.DoSessionTokenExist(sess.Account.Name)
+	doSessionTokenExist, err := DoSessionTokenExist(sess.Account.Name)
 	if err != nil {
 		return err
 	}
 
 	if doSessionTokenExist {
-		isSessionTokenExpired, err := service.IsSessionTokenExpired(sess.Account.Name)
+		isSessionTokenExpired, err := IsSessionTokenExpired(sess.Account.Name)
 		if err != nil {
 			return err
 		}
@@ -222,24 +222,24 @@ func startPlainAwsSession(sess *model.PlainAwsSession, configuration *model.Conf
 			// generate creds
 			logging.Info("session token no more valid")
 
-			credentials, err := service.GenerateSessionToken(sess, mfaToken)
+			credentials, err := GenerateSessionToken(sess, mfaToken)
 			if err != nil {
 				return err
 			}
 
-			err = service.SaveSessionTokenInKeychain(sess.Account.Name, credentials)
+			err = SaveSessionTokenInKeychain(sess.Account.Name, credentials)
 			if err != nil {
 				return err
 			}
 
-			err = service.SaveSessionTokenInIniFile(*credentials.AccessKeyId, *credentials.SecretAccessKey,
+			err = SaveSessionTokenInIniFile(*credentials.AccessKeyId, *credentials.SecretAccessKey,
 				*credentials.SessionToken, sess.Account.Region, "default")
 			if err != nil {
 				return err
 			}
 
 			sess.Active = true
-			err = service.UpdateConfiguration(configuration, false)
+			err = UpdateConfiguration(configuration, false)
 			if err != nil {
 				return err
 			}
@@ -247,37 +247,43 @@ func startPlainAwsSession(sess *model.PlainAwsSession, configuration *model.Conf
 			// re-use creds
 			logging.Info("session token still valid")
 
-			accessKeyId, secretAccessKey, err := service.GetAccessKeys(sess.Account.Name)
 			if err != nil {
 				return err
 			}
-			sessionToken, _, err := service.GetSessionToken(sess.Account.Name)
+			sessionTokenJson, _, err := GetSessionToken(sess.Account.Name)
 
-			err = service.SaveSessionTokenInIniFile(accessKeyId, secretAccessKey, sessionToken, sess.Account.Region,
+			data := struct {
+				AccessKeyId string
+				SecretAccessKey string
+				SessionToken string
+			} {}
+
+			err = json.Unmarshal([]byte(sessionTokenJson), &data)
+			if err != nil { return err }
+
+			err = SaveSessionTokenInIniFile(data.AccessKeyId, data.SecretAccessKey, data.SessionToken, sess.Account.Region,
 				"default")
-			if err != nil {
-				return err
-			}
+			if err != nil { return err }
 		}
 	} else {
-		credentials, err := service.GenerateSessionToken(sess, mfaToken)
+		credentials, err := GenerateSessionToken(sess, mfaToken)
 		if err != nil {
 			return err
 		}
 
-		err = service.SaveSessionTokenInKeychain(sess.Account.Name, credentials)
+		err = SaveSessionTokenInKeychain(sess.Account.Name, credentials)
 		if err != nil {
 			return err
 		}
 
-		err = service.SaveSessionTokenInIniFile(*credentials.AccessKeyId, *credentials.SecretAccessKey,
+		err = SaveSessionTokenInIniFile(*credentials.AccessKeyId, *credentials.SecretAccessKey,
 			*credentials.SessionToken, sess.Account.Region, "default")
 		if err != nil {
 			return err
 		}
 
 		sess.Active = true
-		err = service.UpdateConfiguration(configuration, false)
+		err = UpdateConfiguration(configuration, false)
 		if err != nil {
 			return err
 		}

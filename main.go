@@ -8,6 +8,36 @@ import (
 )
 
 func main() {
+	// Test MFA
+	// testMFA()
+
+	// ======= Deferred functions ========
+	defer logging.CloseLogFile()
+	defer service.CloseTimer()
+
+	// Check and create config file
+	_, err := service.ReadConfiguration()
+	// TODO: check the nature of the error: if is no such file is ok, otherwise it must be panicked
+	if err != nil {
+		err = service.CreateConfiguration()
+		if err != nil {
+			logging.Entry().Error(err)
+			panic(err)
+		}
+	}
+
+	// ========   Global Timer    ========
+	service.InitializeTimer(1, service.CheckAllSessions)
+
+	// ======== WebSocket Channel ========
+	go controller.Hub.Run()
+
+	// ========     Api Server    ========
+	eng := engine.Engine()
+	eng.Serve(8080)
+}
+
+func testMFA() {
 	/*isMfaTokenRequired, err := session.IsMfaRequiredForPlainAwsSession("e2e5541af95c41f495087954d77b2e2d")
 
 	if isMfaTokenRequired {
@@ -21,12 +51,4 @@ func main() {
 			logging.Info(err)
 		}
 	}*/
-
-	defer service.CloseTimer()
-	service.InitializeTimer(1, service.CheckAllSessions)
-
-	go controller.Hub.Run()
-	defer logging.CloseLogFile()
-	eng := engine.Engine()
-	eng.Serve(8080)
 }

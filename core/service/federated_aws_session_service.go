@@ -1,17 +1,16 @@
-package session
+package service
 
 import (
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"leapp_daemon/core/model"
-	"leapp_daemon/core/service"
 	errors2 "leapp_daemon/shared/custom_error"
 	"strings"
 )
 
 
 func GetFederatedAwsSession(id string) (*model.FederatedAwsSession, error) {
-	configuration, err := service.ReadConfiguration()
+	configuration, err := ReadConfiguration()
 	if err != nil {
 		return nil, err
 	}
@@ -27,7 +26,7 @@ func GetFederatedAwsSession(id string) (*model.FederatedAwsSession, error) {
 }
 
 func ListFederatedAwsSession(query string) ([]model.FederatedAwsSession, error) {
-	configuration, err := service.ReadConfiguration()
+	configuration, err := ReadConfiguration()
 	if err != nil {
 		return nil, err
 	}
@@ -55,7 +54,7 @@ func ListFederatedAwsSession(query string) ([]model.FederatedAwsSession, error) 
 
 func CreateFederatedAwsSession(name string, accountNumber string, roleName string, roleArn string, idpArn string,
 	region string, ssoUrl string) error {
-	configuration, err := service.ReadConfiguration()
+	configuration, err := ReadConfiguration()
 	if err != nil {
 		return err
 	}
@@ -98,7 +97,7 @@ func CreateFederatedAwsSession(name string, accountNumber string, roleName strin
 
 	configuration.FederatedAwsSessions = append(configuration.FederatedAwsSessions, session)
 
-	err = service.UpdateConfiguration(configuration, false)
+	err = UpdateConfiguration(configuration, false)
 	if err != nil {
 		return err
 	}

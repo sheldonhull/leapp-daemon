@@ -5,21 +5,17 @@ import (
 	"leapp_daemon/shared/constant"
 )
 
-// TODO: do not use log.Fatal, since it will call os.Exit(1)
 func SaveSecret(secret string, label string) error {
 	err := keyring.Set(constant.KeychainService, label, secret)
 	if err != nil {
-		//log.Fatal(err)
 		return err
 	}
 	return nil
 }
 
-// TODO: do not use log.Fatal, since it will call os.Exit(1)
 func RetrieveSecret(label string) (string, error) {
 	secret, err := keyring.Get(constant.KeychainService, label)
 	if err != nil {
-		//log.Fatal(err)
 		return "", err
 	}
 	return secret, nil

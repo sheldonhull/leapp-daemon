@@ -1,7 +1,7 @@
 package service
 
 import (
-	"fmt"
+	"leapp_daemon/shared/logging"
 	"time"
 )
 
@@ -26,12 +26,12 @@ func InitializeTimer(ticksInSeconds int, scheduledFunction ScheduledFunction) {
 			select {
 			case <-done:
 				return
-			case t := <-ticker.C:
+			case <-ticker.C:
 				err := scheduledFunction()
 				if err != nil {
+					logging.Entry().Error(err)
 					panic(err)
 				}
-				fmt.Println("Tick at", t)
 			}
 		}
 	}()
@@ -40,5 +40,5 @@ func InitializeTimer(ticksInSeconds int, scheduledFunction ScheduledFunction) {
 func CloseTimer() {
 	ticker.Stop()
 	done <- true
-	fmt.Println("Ticker stopped")
+	logging.Info("Ticker stopped")
 }
