@@ -17,7 +17,7 @@ func ListAllSessions(query string, listType string) (*map[string]interface{}, er
 		}
 	}
 	if listType == "" || listType == constant.SessionTypeFederated {
-		federatedList, err = ListFederatedAwsSession(query)
+		federatedList, err = configuration.ListFederatedAwsSession(query)
 		if err != nil { return nil, err
 		}
 	}
@@ -53,7 +53,7 @@ func StartPlainAwsSession(id string, mfaToken *string) error {
 		return err
 	}
 
-	err = sess.Rotate(config, nil)
+	err = sess.Rotate(config, mfaToken)
 	if err != nil {
 		return err
 	}
