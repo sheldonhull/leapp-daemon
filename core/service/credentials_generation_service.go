@@ -55,7 +55,7 @@ func GenerateSessionToken(sess *model.PlainAwsSession, mfaToken *string) (*sts.C
 	durationSeconds := constant.SessionTokenDurationInSeconds
 	var getSessionTokenInput sts.GetSessionTokenInput
 
-	if *mfaToken == "" {
+	if mfaToken == nil {
 		getSessionTokenInput = sts.GetSessionTokenInput{
 			DurationSeconds: &durationSeconds,
 			SerialNumber:    nil,

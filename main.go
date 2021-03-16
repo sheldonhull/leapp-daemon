@@ -9,7 +9,7 @@ import (
 
 func main() {
 	// Test MFA
-	// testMFA()
+	//testMFA()
 
 	// ======= Deferred functions ========
 	defer logging.CloseLogFile()
@@ -26,29 +26,29 @@ func main() {
 		}
 	}
 
-	// ========   Global Timer    ========
-	service.InitializeTimer(1, service.CheckAllSessions)
+	// ======== Sessions Timer ========
+	service.InitializeTimer(1, service.RotateAllSessionsCredentials)
 
-	// ======== WebSocket Channel ========
+	// ======== WebSocket Hub ========
 	go controller.Hub.Run()
 
-	// ========     Api Server    ========
+	// ======== REST API Server ========
 	eng := engine.Engine()
 	eng.Serve(8080)
 }
 
 func testMFA() {
-	/*isMfaTokenRequired, err := session.IsMfaRequiredForPlainAwsSession("e2e5541af95c41f495087954d77b2e2d")
+	isMfaTokenRequired, err := service.IsMfaRequiredForPlainAwsSession("bf0734f41115484aa4152e1039493888")
 
 	if isMfaTokenRequired {
-		err = session.StartPlainAwsSession("e2e5541af95c41f495087954d77b2e2d", "")
+		err = service.StartPlainAwsSession("bf0734f41115484aa4152e1039493888", nil)
 		if err != nil {
 			logging.Info(err)
 		}
 	} else {
-		err = session.StartPlainAwsSession("e2e5541af95c41f495087954d77b2e2d", "")
+		err = service.StartPlainAwsSession("bf0734f41115484aa4152e1039493888", nil)
 		if err != nil {
 			logging.Info(err)
 		}
-	}*/
+	}
 }

@@ -6,8 +6,8 @@ import (
 )
 
 func ListSessions(query string, listType string) (*map[string]interface{}, error) {
-	plainList := make([]model.PlainAwsSession, 0)
-	federatedList := make([]model.FederatedAwsSession, 0)
+	plainList := make([]*model.PlainAwsSession, 0)
+	federatedList := make([]*model.FederatedAwsSession, 0)
 	var err2 error = nil
 
 	// Check and retrieve all sessions filtered by type or by query

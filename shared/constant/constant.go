@@ -8,4 +8,5 @@ const KeychainService = "Leapp"
 const SessionTypePlain = "PLAIN"
 const SessionTypeFederated = "FEDERATED"
 
-const SessionTokenDurationInSeconds int64 = 30 //3600
+const SessionTokenDurationInSeconds int64 = 3600
+const RotationIntervalInSeconds int64 = 15

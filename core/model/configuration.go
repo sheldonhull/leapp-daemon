@@ -2,9 +2,9 @@ package model
 
 type Configuration struct {
 	SsoUrl               string
-	ProxyConfiguration   ProxyConfiguration
-	FederatedAwsSessions []FederatedAwsSession
-	PlainAwsSessions     []PlainAwsSession
+	ProxyConfiguration   *ProxyConfiguration
+	FederatedAwsSessions []*FederatedAwsSession
+	PlainAwsSessions     []*PlainAwsSession
 }
 
 type ProxyConfiguration struct {
@@ -20,7 +20,7 @@ type FederatedAwsSession struct {
 	Active       bool
 	Loading      bool
 	StartTime    string
-	Account      FederatedAwsAccount
+	Account      *FederatedAwsAccount
 }
 
 type PlainAwsSession struct {
@@ -28,13 +28,13 @@ type PlainAwsSession struct {
 	Active       bool
 	Loading      bool
 	StartTime    string
-	Account      PlainAwsAccount
+	Account      *PlainAwsAccount
 }
 
 type FederatedAwsAccount struct {
 	AccountNumber string
 	Name          string
-	Role          FederatedAwsRole
+	Role          *FederatedAwsRole
 	IdpArn        string
 	Region        string
 	SsoUrl        string

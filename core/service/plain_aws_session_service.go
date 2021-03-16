@@ -5,9 +5,10 @@ import (
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"leapp_daemon/core/model"
-	errors2 "leapp_daemon/shared/custom_error"
+	"leapp_daemon/shared/custom_error"
 	"leapp_daemon/shared/logging"
 	"strings"
+	"time"
 )
 
 func GetPlainAwsSession(id string) (*model.PlainAwsSession, error) {
@@ -19,20 +20,20 @@ func GetPlainAwsSession(id string) (*model.PlainAwsSession, error) {
 	sessions := configuration.PlainAwsSessions
 	for index, _ := range sessions {
 		if sessions[index].Id == id {
-			return &sessions[index], nil
+			return sessions[index], nil
 		}
 	}
 
-	return nil, errors2.NewBadRequestError(errors.New("No session found with id:" + id))
+	return nil, custom_error.NewBadRequestError(errors.New("No session found with id:" + id))
 }
 
-func ListPlainAwsSession(query string) ([]model.PlainAwsSession, error) {
+func ListPlainAwsSession(query string) ([]*model.PlainAwsSession, error) {
 	configuration, err := ReadConfiguration()
 	if err != nil {
 		return nil, err
 	}
 
-	filteredList := make([]model.PlainAwsSession, 0)
+	filteredList := make([]*model.PlainAwsSession, 0)
 
 	if query == "" {
 		return append(filteredList, configuration.PlainAwsSessions...), nil
@@ -65,7 +66,7 @@ func CreatePlainAwsSession(name string, accountNumber string, region string, use
 	for _, session := range sessions {
 		account := session.Account
 		if account.AccountNumber == accountNumber && account.User == user {
-			err = errors2.NewBadRequestError(errors.New("an account with the same account number and user is already present"))
+			err = custom_error.NewBadRequestError(errors.New("an account with the same account number and user is already present"))
 			return err
 		}
 	}
@@ -88,10 +89,10 @@ func CreatePlainAwsSession(name string, accountNumber string, region string, use
 		Active:       false,
 		Loading:      false,
 		StartTime: "",
-		Account:      plainAwsAccount,
+		Account:      &plainAwsAccount,
 	}
 
-	configuration.PlainAwsSessions = append(configuration.PlainAwsSessions, session)
+	configuration.PlainAwsSessions = append(configuration.PlainAwsSessions, &session)
 
 	err = UpdateConfiguration(configuration, false)
 	if err != nil {
@@ -114,7 +115,7 @@ func EditPlainAwsSession(id string, name string, accountNumber string, region st
 	found := false
 	for index, _ := range sessions {
 		if sessions[index].Id == id {
-			sessions[index].Account = model.PlainAwsAccount{
+			sessions[index].Account = &model.PlainAwsAccount{
 				AccountNumber: accountNumber,
 				Name:          name,
 				Region:        region,
@@ -128,7 +129,7 @@ func EditPlainAwsSession(id string, name string, accountNumber string, region st
 	}
 
 	if found == false {
-		err = errors2.NewBadRequestError(errors.New("Session not found for Id: " + id))
+		err = custom_error.NewBadRequestError(errors.New("Session not found for Id: " + id))
 		return err
 	}
 
@@ -159,7 +160,7 @@ func DeletePlainAwsSession(id string) error {
 	}
 
 	if found == false {
-		err = errors2.NewBadRequestError(errors.New("Session not found for Id: " + id))
+		err = custom_error.NewBadRequestError(errors.New("Session not found for Id: " + id))
 		return err
 	}
 
@@ -187,7 +188,7 @@ func IsMfaRequiredForPlainAwsSession(id string) (bool, error) {
 	return sess.Account.MfaDevice != "", nil
 }
 
-func StartPlainAwsSession(id string, mfaToken string) error {
+func StartPlainAwsSession(id string, mfaToken *string) error {
 	configuration, err := ReadConfiguration()
 	if err != nil {
 		return err
@@ -198,7 +199,7 @@ func StartPlainAwsSession(id string, mfaToken string) error {
 		return err
 	}
 
-	err = startPlainAwsSession(sess, configuration, &mfaToken)
+	err = RotatePlainAwsSessionCredentials(sess, configuration, mfaToken)
 	if err != nil {
 		return err
 	}
@@ -206,7 +207,7 @@ func StartPlainAwsSession(id string, mfaToken string) error {
 	return nil
 }
 
-func startPlainAwsSession(sess *model.PlainAwsSession, configuration *model.Configuration, mfaToken *string) error {
+func RotatePlainAwsSessionCredentials(sess *model.PlainAwsSession, configuration *model.Configuration, mfaToken *string) error {
 	doSessionTokenExist, err := DoSessionTokenExist(sess.Account.Name)
 	if err != nil {
 		return err
@@ -219,8 +220,7 @@ func startPlainAwsSession(sess *model.PlainAwsSession, configuration *model.Conf
 		}
 
 		if isSessionTokenExpired {
-			// generate creds
-			logging.Info("session token no more valid")
+			logging.Entry().Error("Session token no more valid")
 
 			credentials, err := GenerateSessionToken(sess, mfaToken)
 			if err != nil {
@@ -239,17 +239,15 @@ func startPlainAwsSession(sess *model.PlainAwsSession, configuration *model.Conf
 			}
 
 			sess.Active = true
+			sess.StartTime = time.Now().Format(time.RFC3339)
+
 			err = UpdateConfiguration(configuration, false)
 			if err != nil {
 				return err
 			}
 		} else {
-			// re-use creds
-			logging.Info("session token still valid")
+			logging.Entry().Error("Session token still valid")
 
-			if err != nil {
-				return err
-			}
 			sessionTokenJson, _, err := GetSessionToken(sess.Account.Name)
 
 			data := struct {
@@ -261,9 +259,17 @@ func startPlainAwsSession(sess *model.PlainAwsSession, configuration *model.Conf
 			err = json.Unmarshal([]byte(sessionTokenJson), &data)
 			if err != nil { return err }
 
-			err = SaveSessionTokenInIniFile(data.AccessKeyId, data.SecretAccessKey, data.SessionToken, sess.Account.Region,
-				"default")
+			err = SaveSessionTokenInIniFile(data.AccessKeyId, data.SecretAccessKey, data.SessionToken,
+				sess.Account.Region, "default")
 			if err != nil { return err }
+
+			sess.Active = true
+			sess.StartTime = time.Now().Format(time.RFC3339)
+
+			err = UpdateConfiguration(configuration, false)
+			if err != nil {
+				return err
+			}
 		}
 	} else {
 		credentials, err := GenerateSessionToken(sess, mfaToken)
@@ -283,6 +289,8 @@ func startPlainAwsSession(sess *model.PlainAwsSession, configuration *model.Conf
 		}
 
 		sess.Active = true
+		sess.StartTime = time.Now().Format(time.RFC3339)
+
 		err = UpdateConfiguration(configuration, false)
 		if err != nil {
 			return err
@@ -298,12 +306,12 @@ func getPlainAwsSessionById(configuration *model.Configuration, id string) (*mod
 
 	for index, _ := range sessions {
 		if sessions[index].Id == id {
-			sess = &sessions[index]
+			sess = sessions[index]
 		}
 	}
 
 	if sess == nil {
-		err := errors2.NewBadRequestError(errors.New("Session not found for Id: " + id))
+		err := custom_error.NewBadRequestError(errors.New("Session not found for Id: " + id))
 		return nil, err
 	}
 

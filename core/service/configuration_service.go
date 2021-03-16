@@ -16,15 +16,15 @@ var configurationFileMutex sync.Mutex
 func getInitialConfiguration() model.Configuration {
 	return model.Configuration{
 		SsoUrl: "",
-		ProxyConfiguration: model.ProxyConfiguration{
+		ProxyConfiguration: &model.ProxyConfiguration{
 			ProxyProtocol: "https",
 			ProxyUrl: "",
 			ProxyPort: 8080,
 			Username: "",
 			Password: "",
 		},
-		FederatedAwsSessions: make([]model.FederatedAwsSession, 0),
-		PlainAwsSessions:     make([]model.PlainAwsSession, 0),
+		FederatedAwsSessions: make([]*model.FederatedAwsSession, 0),
+		PlainAwsSessions:     make([]*model.PlainAwsSession, 0),
 	}
 }
 

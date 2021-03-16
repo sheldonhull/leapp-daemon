@@ -18,20 +18,20 @@ func GetFederatedAwsSession(id string) (*model.FederatedAwsSession, error) {
 	sessions := configuration.FederatedAwsSessions
 	for index, _ := range sessions {
 		if sessions[index].Id == id {
-			return &sessions[index], nil
+			return sessions[index], nil
 		}
 	}
 
 	return nil, errors2.NewBadRequestError(errors.New("No session found with id:" + id))
 }
 
-func ListFederatedAwsSession(query string) ([]model.FederatedAwsSession, error) {
+func ListFederatedAwsSession(query string) ([]*model.FederatedAwsSession, error) {
 	configuration, err := ReadConfiguration()
 	if err != nil {
 		return nil, err
 	}
 
-	filteredList := make([]model.FederatedAwsSession, 0)
+	filteredList := make([]*model.FederatedAwsSession, 0)
 
 	if query == "" {
 		return append(filteredList, configuration.FederatedAwsSessions...), nil
@@ -78,7 +78,7 @@ func CreateFederatedAwsSession(name string, accountNumber string, roleName strin
 	federatedAwsAccount := model.FederatedAwsAccount{
 		AccountNumber: accountNumber,
 		Name:          name,
-		Role:          role,
+		Role:          &role,
 		IdpArn:        idpArn,
 		Region:        region,
 		SsoUrl:        ssoUrl,
@@ -92,10 +92,10 @@ func CreateFederatedAwsSession(name string, accountNumber string, roleName strin
 		Active:       false,
 		Loading:      false,
 		StartTime: "",
-		Account:      federatedAwsAccount,
+		Account:      &federatedAwsAccount,
 	}
 
-	configuration.FederatedAwsSessions = append(configuration.FederatedAwsSessions, session)
+	configuration.FederatedAwsSessions = append(configuration.FederatedAwsSessions, &session)
 
 	err = UpdateConfiguration(configuration, false)
 	if err != nil {
