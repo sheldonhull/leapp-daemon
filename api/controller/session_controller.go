@@ -5,7 +5,7 @@ import (
 	"leapp_daemon/api/controller/dto/request_dto"
 	"leapp_daemon/api/controller/dto/response_dto"
 	"leapp_daemon/core/service"
-	"leapp_daemon/shared/logging"
+	"leapp_daemon/logging"
 	"net/http"
 )
 
@@ -22,7 +22,7 @@ func ListSessionController(context *gin.Context) {
 	listType := requestDto.Type
 	query := requestDto.Query
 
-	sessionList, err2 := service.ListSessions(query, listType)
+	sessionList, err2 := service.ListAllSessions(query, listType)
 	if err2 != nil {
 		_ = context.Error(err2)
 		return

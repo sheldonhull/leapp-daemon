@@ -5,7 +5,7 @@ import (
 	"leapp_daemon/api/controller/dto/request_dto/federated_aws_session"
 	"leapp_daemon/api/controller/dto/response_dto"
 	"leapp_daemon/core/service"
-	"leapp_daemon/shared/logging"
+	"leapp_daemon/logging"
 	"net/http"
 )
 

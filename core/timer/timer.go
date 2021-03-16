@@ -1,7 +1,7 @@
 package timer
 
 import (
-	"leapp_daemon/shared/logging"
+	"leapp_daemon/logging"
 	"time"
 )
 

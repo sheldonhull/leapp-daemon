@@ -4,17 +4,19 @@ import (
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"leapp_daemon/core/configuration"
-	"leapp_daemon/shared/custom_error"
+	"leapp_daemon/custom_error"
 	"strings"
 )
 
+// TODO: move into configuration package
+
 func GetFederatedAwsSession(id string) (*configuration.FederatedAwsSession, error) {
-	configuration, err := configuration.ReadConfiguration()
+	config, err := configuration.ReadConfiguration()
 	if err != nil {
 		return nil, err
 	}
 
-	sessions := configuration.FederatedAwsSessions
+	sessions := config.FederatedAwsSessions
 	for index, _ := range sessions {
 		if sessions[index].Id == id {
 			return sessions[index], nil

@@ -2,7 +2,7 @@ package federated_aws_session
 
 import (
 	"github.com/gin-gonic/gin"
-	"leapp_daemon/shared/custom_error"
+	"leapp_daemon/custom_error"
 )
 
 type CreateFederatedAwsSessionRequestDto struct {

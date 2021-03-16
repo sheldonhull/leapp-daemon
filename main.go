@@ -6,7 +6,7 @@ import (
 	"leapp_daemon/core/configuration"
 	"leapp_daemon/core/service"
 	"leapp_daemon/core/timer"
-	"leapp_daemon/shared/logging"
+	"leapp_daemon/logging"
 )
 
 func main() {
@@ -39,7 +39,7 @@ func main() {
 	eng.Serve(8080)
 }
 
-/*func testMFA() {
+func testMFA() {
 	isMfaTokenRequired, err := service.IsMfaRequiredForPlainAwsSession("bf0734f41115484aa4152e1039493888")
 
 	if isMfaTokenRequired {
@@ -53,4 +53,4 @@ func main() {
 			logging.Info(err)
 		}
 	}
-}*/
+}

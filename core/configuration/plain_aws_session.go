@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
+	"leapp_daemon/constant"
 	"leapp_daemon/core/session_token"
-	"leapp_daemon/shared/constant"
-	"leapp_daemon/shared/custom_error"
-	"leapp_daemon/shared/logging"
+	"leapp_daemon/custom_error"
+	"leapp_daemon/logging"
 	"strings"
 	"time"
 )
@@ -38,7 +38,7 @@ func(sess *PlainAwsSession) Rotate(configuration *Configuration, mfaToken *strin
 		}
 
 		if isRotationIntervalExpired {
-			isMfaTokenRequired, err := sess.isMfaRequired()
+			isMfaTokenRequired, err := sess.IsMfaRequired()
 			if err != nil { return nil }
 
 			if isMfaTokenRequired {
@@ -61,7 +61,7 @@ func(sess *PlainAwsSession) IsRotationIntervalExpired() (bool, error) {
 	return int64(secondsPassedFromStart) > constant.RotationIntervalInSeconds, nil
 }
 
-func(sess *PlainAwsSession) isMfaRequired() (bool, error) {
+func(sess *PlainAwsSession) IsMfaRequired() (bool, error) {
 	return sess.Account.MfaDevice != "", nil
 }
 

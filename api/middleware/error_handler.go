@@ -5,8 +5,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"leapp_daemon/api/util"
-	"leapp_daemon/shared/custom_error"
-	"leapp_daemon/shared/logging"
+	"leapp_daemon/custom_error"
+	"leapp_daemon/logging"
 	"net/http"
 )
 

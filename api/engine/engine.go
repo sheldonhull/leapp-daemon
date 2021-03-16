@@ -6,7 +6,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"leapp_daemon/api/controller"
 	"leapp_daemon/api/middleware"
-	"leapp_daemon/shared/logging"
+	"leapp_daemon/logging"
 )
 
 type engineWrapper struct {
@@ -53,8 +53,6 @@ func (engineWrapper *engineWrapper) Serve(port int) {
 func initializeRoutes(ginEngine *gin.Engine) {
 	v1 := ginEngine.Group("/api/v1")
 	{
-		v1.GET("/echo/:text", controller.EchoController)
-
 		v1.POST("/configuration/", controller.CreateConfigurationController)
 		v1.GET("/configuration/read", controller.ReadConfigurationController)
 

@@ -6,7 +6,7 @@ import (
 	"leapp_daemon/api/controller/dto/response_dto"
 	"leapp_daemon/core/configuration"
 	"leapp_daemon/core/service"
-	"leapp_daemon/shared/logging"
+	"leapp_daemon/logging"
 	"net/http"
 )
 

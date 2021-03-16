@@ -2,7 +2,7 @@ package access_keys
 
 import (
 	"leapp_daemon/core/keychain"
-	"leapp_daemon/shared/custom_error"
+	"leapp_daemon/custom_error"
 )
 
 func Get(accountName string) (string, string, error) {

@@ -3,7 +3,7 @@ package controller
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
-	"leapp_daemon/shared/logging"
+	"leapp_daemon/logging"
 	"log"
 	"net/http"
 	"time"

@@ -2,7 +2,7 @@ package g_suite_auth
 
 import (
 	"github.com/gin-gonic/gin"
-	"leapp_daemon/shared/custom_error"
+	"leapp_daemon/custom_error"
 )
 
 type GSuiteAuthThirdStepRequestDto struct {

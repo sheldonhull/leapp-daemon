@@ -2,7 +2,7 @@ package request_dto
 
 import (
 	"github.com/gin-gonic/gin"
-	"leapp_daemon/shared/custom_error"
+	"leapp_daemon/custom_error"
 )
 
 type EchoRequestDto struct {
