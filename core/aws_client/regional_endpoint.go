@@ -1,4 +1,4 @@
-package util
+package aws_client
 
 import "github.com/pkg/errors"
 

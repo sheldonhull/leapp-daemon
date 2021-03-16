@@ -1,4 +1,4 @@
-package service
+package keychain
 
 import (
 	"github.com/zalando/go-keyring"

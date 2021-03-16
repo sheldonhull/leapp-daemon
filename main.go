@@ -3,7 +3,9 @@ package main
 import (
 	"leapp_daemon/api/controller"
 	"leapp_daemon/api/engine"
+	"leapp_daemon/core/configuration"
 	"leapp_daemon/core/service"
+	"leapp_daemon/core/timer"
 	"leapp_daemon/shared/logging"
 )
 
@@ -13,13 +15,13 @@ func main() {
 
 	// ======= Deferred functions ========
 	defer logging.CloseLogFile()
-	defer service.CloseTimer()
+	defer timer.Close()
 
 	// Check and create config file
-	_, err := service.ReadConfiguration()
+	_, err := configuration.ReadConfiguration()
 	// TODO: check the nature of the error: if is no such file is ok, otherwise it must be panicked
 	if err != nil {
-		err = service.CreateConfiguration()
+		err = configuration.CreateConfiguration()
 		if err != nil {
 			logging.Entry().Error(err)
 			panic(err)
@@ -27,7 +29,7 @@ func main() {
 	}
 
 	// ======== Sessions Timer ========
-	service.InitializeTimer(1, service.RotateAllSessionsCredentials)
+	timer.Initialize(1, service.RotateAllSessionsCredentials)
 
 	// ======== WebSocket Hub ========
 	go controller.Hub.Run()
@@ -37,7 +39,7 @@ func main() {
 	eng.Serve(8080)
 }
 
-func testMFA() {
+/*func testMFA() {
 	isMfaTokenRequired, err := service.IsMfaRequiredForPlainAwsSession("bf0734f41115484aa4152e1039493888")
 
 	if isMfaTokenRequired {
@@ -51,4 +53,4 @@ func testMFA() {
 			logging.Info(err)
 		}
 	}
-}
+}*/

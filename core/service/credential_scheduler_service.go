@@ -1,51 +1,31 @@
 package service
 
-import (
-	"leapp_daemon/core/model"
-	"leapp_daemon/shared/constant"
-	"time"
-)
+import "leapp_daemon/core/configuration"
 
 func RotateAllSessionsCredentials() error {
-	configuration, err := ReadConfiguration()
+	config, err := configuration.ReadConfiguration()
 	if err != nil { return err }
 
-	for i := range configuration.PlainAwsSessions {
-		sess := configuration.PlainAwsSessions[i]
+	for i := range config.PlainAwsSessions {
+		sess := config.PlainAwsSessions[i]
 
-		if sess.Active {
-			isRotationIntervalExpired, err := isPlainAwsSessionRotationIntervalExpired(sess)
-			if err != nil {
-				return err
-			}
+		err = sess.Rotate(config, nil)
 
-			if isRotationIntervalExpired {
-				isMfaTokenRequired, err := IsMfaRequiredForPlainAwsSession(sess.Id)
-				if err != nil { return nil }
-
-				if isMfaTokenRequired {
-					// TODO: need to implement a way to ask for token.
-					//  We will probably need WebSocket for this. We will exploit the Hub to wait for client response.
-				} else {
-					println("Rotating session with id", sess.Id)
-					err = RotatePlainAwsSessionCredentials(sess, configuration, nil)
-					if err != nil { return nil }
-				}
-			}
+		if err != nil {
+			return err
 		}
 	}
 
-	/*for i := range configuration.FederatedAwsSessions {
-		sess := configuration.FederatedAwsSessions[i]
+	/*for i := range config.FederatedAwsSessions {
+		sess := config.FederatedAwsSessions[i]
 		if sess.Active {
 		}
 	}*/
 
-	return nil
-}
+	err = configuration.UpdateConfiguration(config, false)
+	if err != nil {
+		return err
+	}
 
-func isPlainAwsSessionRotationIntervalExpired(session *model.PlainAwsSession) (bool, error) {
-	startTime, _ := time.Parse(time.RFC3339, session.StartTime)
-	secondsPassedFromStart := time.Now().Sub(startTime).Seconds()
-	return int64(secondsPassedFromStart) > constant.RotationIntervalInSeconds, nil
+	return nil
 }

@@ -1,4 +1,4 @@
-package service
+package timer
 
 import (
 	"leapp_daemon/shared/logging"
@@ -10,7 +10,7 @@ type ScheduledFunction func() error
 var done = make(chan bool, 1)
 var ticker *time.Ticker
 
-func InitializeTimer(ticksInSeconds int, scheduledFunction ScheduledFunction) {
+func Initialize(ticksInSeconds int, scheduledFunction ScheduledFunction) {
 	timerTick := time.Duration(ticksInSeconds) * time.Second
 
 	if ticker == nil {
@@ -37,7 +37,7 @@ func InitializeTimer(ticksInSeconds int, scheduledFunction ScheduledFunction) {
 	}()
 }
 
-func CloseTimer() {
+func Close() {
 	ticker.Stop()
 	done <- true
 	logging.Info("Ticker stopped")

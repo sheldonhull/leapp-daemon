@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"leapp_daemon/api/controller/dto/request_dto/plain_aws_session"
 	"leapp_daemon/api/controller/dto/response_dto"
+	"leapp_daemon/core/configuration"
 	"leapp_daemon/core/service"
 	"leapp_daemon/shared/logging"
 	"net/http"
@@ -19,13 +20,13 @@ func GetPlainAwsSessionController(context *gin.Context) {
 		return
 	}
 
-	session, err2 := service.GetPlainAwsSession(requestDto.Id)
-	if err2 != nil {
-		_ = context.Error(err2)
+	session, err := service.GetPlainAwsSession(requestDto.Id)
+	if err != nil {
+		_ = context.Error(err)
 		return
 	}
 
-	responseDto := response_dto.MessageAndDataResponseDto{Message: "success", Data: session}
+	responseDto := response_dto.MessageAndDataResponseDto{Message: "success", Data: *session}
 	context.JSON(http.StatusOK, responseDto.ToMap())
 }
 
@@ -39,7 +40,7 @@ func CreatePlainAwsSessionController(context *gin.Context) {
 		return
 	}
 
-	err2 := service.CreatePlainAwsSession(
+	err = configuration.CreatePlainAwsSession(
 		requestDto.Name,
 		requestDto.AccountNumber,
 		requestDto.Region,
@@ -48,8 +49,8 @@ func CreatePlainAwsSessionController(context *gin.Context) {
 		requestDto.AwsSecretAccessKey,
 		requestDto.MfaDevice)
 
-	if err2 != nil {
-		_ = context.Error(err2)
+	if err != nil {
+		_ = context.Error(err)
 		return
 	}
 
@@ -74,7 +75,7 @@ func EditPlainAwsSessionController(context *gin.Context) {
 		return
 	}
 
-	err2 := service.EditPlainAwsSession(
+	err = configuration.UpdatePlainAwsSession(
 		requestUriDto.Id,
 		requestDto.Name,
 		requestDto.AccountNumber,
@@ -84,8 +85,8 @@ func EditPlainAwsSessionController(context *gin.Context) {
 		requestDto.AwsSecretAccessKey,
 		requestDto.MfaDevice)
 
-	if err2 != nil {
-		_ = context.Error(err2)
+	if err != nil {
+		_ = context.Error(err)
 		return
 	}
 
@@ -103,10 +104,10 @@ func DeletePlainAwsSessionController(context *gin.Context) {
 		return
 	}
 
-	err2 := service.DeletePlainAwsSession(requestDto.Id)
+	err = configuration.DeletePlainAwsSession(requestDto.Id)
 
-	if err2 != nil {
-		_ = context.Error(err2)
+	if err != nil {
+		_ = context.Error(err)
 		return
 	}
 

@@ -3,14 +3,13 @@ package service
 import (
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
-	"leapp_daemon/core/model"
-	errors2 "leapp_daemon/shared/custom_error"
+	"leapp_daemon/core/configuration"
+	"leapp_daemon/shared/custom_error"
 	"strings"
 )
 
-
-func GetFederatedAwsSession(id string) (*model.FederatedAwsSession, error) {
-	configuration, err := ReadConfiguration()
+func GetFederatedAwsSession(id string) (*configuration.FederatedAwsSession, error) {
+	configuration, err := configuration.ReadConfiguration()
 	if err != nil {
 		return nil, err
 	}
@@ -22,21 +21,21 @@ func GetFederatedAwsSession(id string) (*model.FederatedAwsSession, error) {
 		}
 	}
 
-	return nil, errors2.NewBadRequestError(errors.New("No session found with id:" + id))
+	return nil, custom_error.NewBadRequestError(errors.New("No session found with id:" + id))
 }
 
-func ListFederatedAwsSession(query string) ([]*model.FederatedAwsSession, error) {
-	configuration, err := ReadConfiguration()
+func ListFederatedAwsSession(query string) ([]*configuration.FederatedAwsSession, error) {
+	config, err := configuration.ReadConfiguration()
 	if err != nil {
 		return nil, err
 	}
 
-	filteredList := make([]*model.FederatedAwsSession, 0)
+	filteredList := make([]*configuration.FederatedAwsSession, 0)
 
 	if query == "" {
-		return append(filteredList, configuration.FederatedAwsSessions...), nil
+		return append(filteredList, config.FederatedAwsSessions...), nil
 	} else {
-		for _, session := range configuration.FederatedAwsSessions {
+		for _, session := range config.FederatedAwsSessions {
 			if  strings.Contains(session.Id, query) ||
 			    strings.Contains(session.Account.Name, query) ||
 				strings.Contains(session.Account.IdpArn, query) ||
@@ -54,28 +53,28 @@ func ListFederatedAwsSession(query string) ([]*model.FederatedAwsSession, error)
 
 func CreateFederatedAwsSession(name string, accountNumber string, roleName string, roleArn string, idpArn string,
 	region string, ssoUrl string) error {
-	configuration, err := ReadConfiguration()
+	config, err := configuration.ReadConfiguration()
 	if err != nil {
 		return err
 	}
 
-	sessions := configuration.FederatedAwsSessions
+	sessions := config.FederatedAwsSessions
 
 	for _, session := range sessions {
 		account := session.Account
 		if account.AccountNumber == accountNumber && account.Role.Name == roleName {
-			err = errors2.NewBadRequestError(errors.New("an account with the same account number and " +
+			err = custom_error.NewBadRequestError(errors.New("an account with the same account number and " +
 				"role name is already present"))
 			return err
 		}
 	}
 
-	role := model.FederatedAwsRole{
+	role := configuration.FederatedAwsRole{
 		Name: roleName,
 		Arn:  roleArn,
 	}
 
-	federatedAwsAccount := model.FederatedAwsAccount{
+	federatedAwsAccount := configuration.FederatedAwsAccount{
 		AccountNumber: accountNumber,
 		Name:          name,
 		Role:          &role,
@@ -87,7 +86,7 @@ func CreateFederatedAwsSession(name string, accountNumber string, roleName strin
 	uuidString := uuid.New().String()
 	uuidString = strings.Replace(uuidString, "-", "", -1)
 
-	session := model.FederatedAwsSession{
+	session := configuration.FederatedAwsSession{
 		Id:           uuidString,
 		Active:       false,
 		Loading:      false,
@@ -95,9 +94,9 @@ func CreateFederatedAwsSession(name string, accountNumber string, roleName strin
 		Account:      &federatedAwsAccount,
 	}
 
-	configuration.FederatedAwsSessions = append(configuration.FederatedAwsSessions, &session)
+	config.FederatedAwsSessions = append(config.FederatedAwsSessions, &session)
 
-	err = UpdateConfiguration(configuration, false)
+	err = configuration.UpdateConfiguration(config, false)
 	if err != nil {
 		return err
 	}
