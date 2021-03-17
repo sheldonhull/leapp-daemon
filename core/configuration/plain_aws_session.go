@@ -221,7 +221,7 @@ func GetById(config *Configuration, id string) (*PlainAwsSession, error) {
 	return nil, err
 }
 
-func List(query string) ([]*PlainAwsSession, error) {
+func ListPlainAwsSession(query string) ([]*PlainAwsSession, error) {
 	config, err := ReadConfiguration()
 	if err != nil {
 		return nil, err

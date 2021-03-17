@@ -12,7 +12,7 @@ func ListAllSessions(query string, listType string) (*map[string]interface{}, er
 
 	// Check and retrieve all sessions filtered by type or by query
 	if listType == "" || listType == constant.SessionTypePlain {
-		plainList, err = configuration.List(query)
+		plainList, err = configuration.ListPlainAwsSession(query)
 		if err != nil { return nil, err
 		}
 	}

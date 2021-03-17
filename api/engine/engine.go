@@ -54,7 +54,7 @@ func initializeRoutes(ginEngine *gin.Engine) {
 	v1 := ginEngine.Group("/api/v1")
 	{
 		v1.POST("/configuration/", controller.CreateConfigurationController)
-		v1.GET("/configuration/read", controller.ReadConfigurationController)
+		v1.GET("/configuration/", controller.ReadConfigurationController)
 
 		v1.GET("/session/list", controller.ListSessionController)
 
@@ -70,6 +70,9 @@ func initializeRoutes(ginEngine *gin.Engine) {
 		v1.POST("/g_suite_auth/first_step", controller.GSuiteAuthFirstStepController)
 		v1.POST("/g_suite_auth/second_step", controller.GSuiteAuthSecondStepController)
 		v1.POST("/g_suite_auth/third_step", controller.GSuiteAuthThirdStepController)
+
+		v1.GET("/region/aws/list", controller.GetAwsRegionListController)
+		v1.PUT("/region/aws/", controller.EditAwsRegionController)
 
 		v1.GET("/ws/:roomId", controller.WsController)
 	}
