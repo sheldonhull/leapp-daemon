@@ -4,9 +4,9 @@ import (
 	"leapp_daemon/api/controller"
 	"leapp_daemon/api/engine"
 	"leapp_daemon/core/configuration"
-	"leapp_daemon/core/service"
 	"leapp_daemon/core/timer"
 	"leapp_daemon/logging"
+	"leapp_daemon/service"
 )
 
 func main() {
