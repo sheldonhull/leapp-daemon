@@ -3,8 +3,10 @@ package configuration
 import (
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
+	"leapp_daemon/constant"
 	"leapp_daemon/custom_error"
 	"strings"
+	"time"
 )
 
 type FederatedAwsSession struct {
@@ -33,6 +35,18 @@ type FederatedAwsRole struct {
 	// Parent string
 	// ParentRole string
 }
+
+func(sess *FederatedAwsSession) Rotate(configuration *Configuration, mfaToken *string) error {
+	// TODO: implement rotate method for federated
+	return nil
+}
+
+func(sess *FederatedAwsSession) IsRotationIntervalExpired() (bool, error) {
+	startTime, _ := time.Parse(time.RFC3339, sess.StartTime)
+	secondsPassedFromStart := time.Now().Sub(startTime).Seconds()
+	return int64(secondsPassedFromStart) > constant.RotationIntervalInSeconds, nil
+}
+
 
 func GetFederatedAwsSession(id string) (*FederatedAwsSession, error) {
 	config, err := ReadConfiguration()
