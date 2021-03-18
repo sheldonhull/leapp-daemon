@@ -43,12 +43,12 @@ func(sess *PlainAwsSession) Rotate(configuration *Configuration, mfaToken *strin
 			isMfaTokenRequired, err := sess.IsMfaRequired()
 			if err != nil { return nil }
 
-			if isMfaTokenRequired {
+			if isMfaTokenRequired && mfaToken == nil {
 				err := sendMfaRequestMessage(sess)
 				if err != nil { return nil }
 			} else {
 				println("Rotating session with id", sess.Id)
-				err = sess.rotatePlainAwsSessionCredentials(configuration, nil)
+				err = sess.rotatePlainAwsSessionCredentials(configuration, mfaToken)
 				if err != nil { return nil }
 			}
 		}
