@@ -6,7 +6,7 @@ import (
 )
 
 type MfaTokenConfirmRequestDto struct {
-	SessionId string `json:"sesionId" binding:"required"`
+	SessionId string `json:"sessionId" binding:"required"`
 	MfaToken string `json:"mfaToken" binding:required`
 }
 

@@ -14,12 +14,19 @@ import (
 	"time"
 )
 
+type SessionStatus int
+
+const (
+	NotActive SessionStatus = iota
+	Pending
+	Active
+)
+
 type PlainAwsSession struct {
-	Id           string
-	Active       bool
-	Loading      bool
-	StartTime    string
-	Account      *PlainAwsAccount
+	Id        string
+	Status    SessionStatus
+	StartTime string
+	Account   *PlainAwsAccount
 }
 
 type PlainAwsAccount struct {
@@ -33,23 +40,17 @@ type PlainAwsAccount struct {
 }
 
 func(sess *PlainAwsSession) Rotate(configuration *Configuration, mfaToken *string) error {
-	if sess.Active {
+	if sess.Status == Active {
 		isRotationIntervalExpired, err := sess.IsRotationIntervalExpired()
 		if err != nil {
 			return err
 		}
 
 		if isRotationIntervalExpired {
-			isMfaTokenRequired, err := sess.IsMfaRequired()
-			if err != nil { return nil }
-
-			if isMfaTokenRequired && mfaToken == nil {
-				err := sendMfaRequestMessage(sess)
-				if err != nil { return nil }
-			} else {
-				println("Rotating session with id", sess.Id)
-				err = sess.rotatePlainAwsSessionCredentials(configuration, mfaToken)
-				if err != nil { return nil }
+			println("Rotating session with id", sess.Id)
+			err = sess.rotatePlainAwsSessionCredentials(configuration, mfaToken)
+			if err != nil {
+				return nil
 			}
 		}
 	} else {
@@ -113,6 +114,22 @@ func(sess *PlainAwsSession) rotatePlainAwsSessionCredentials(config *Configurati
 		if isSessionTokenExpired {
 			logging.Entry().Error("Plain AWS session token no more valid")
 
+			isMfaTokenRequired, err := sess.IsMfaRequired()
+			if err != nil {
+				return nil
+			}
+
+			if isMfaTokenRequired && mfaToken == nil {
+				sess.Status = Pending
+				err = sendMfaRequestMessage(sess)
+
+				if err != nil {
+					return err
+				}
+
+				return nil
+			}
+
 			credentials, err := session_token.Generate(sess.Account.Name, sess.Account.Region, sess.Account.MfaDevice, mfaToken)
 			if err != nil {
 				return err
@@ -129,7 +146,7 @@ func(sess *PlainAwsSession) rotatePlainAwsSessionCredentials(config *Configurati
 				return err
 			}
 
-			sess.Active = true
+			sess.Status = Active
 			sess.StartTime = time.Now().Format(time.RFC3339)
 
 			err = UpdateConfiguration(config, false)
@@ -154,7 +171,7 @@ func(sess *PlainAwsSession) rotatePlainAwsSessionCredentials(config *Configurati
 				sess.Account.Region, "default")
 			if err != nil { return err }
 
-			sess.Active = true
+			sess.Status = Active
 			sess.StartTime = time.Now().Format(time.RFC3339)
 
 			err = UpdateConfiguration(config, false)
@@ -179,7 +196,7 @@ func(sess *PlainAwsSession) rotatePlainAwsSessionCredentials(config *Configurati
 			return err
 		}
 
-		sess.Active = true
+		sess.Status = Active
 		sess.StartTime = time.Now().Format(time.RFC3339)
 
 		err = UpdateConfiguration(config, false)
@@ -222,11 +239,10 @@ func CreatePlainAwsSession(name string, accountNumber string, region string, use
 	uuidString = strings.Replace(uuidString, "-", "", -1)
 
 	session := PlainAwsSession{
-		Id:           uuidString,
-		Active:       false,
-		Loading:      false,
+		Id:        uuidString,
+		Status:    NotActive,
 		StartTime: "",
-		Account:      &plainAwsAccount,
+		Account:   &plainAwsAccount,
 	}
 
 	config.PlainAwsSessions = append(config.PlainAwsSessions, &session)

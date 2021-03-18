@@ -43,7 +43,7 @@ func testMFA() {
 	isMfaTokenRequired, err := service.IsMfaRequiredForPlainAwsSession("dc6b8f6015084ab885c00b5bc0fceb7b")
 
 	if isMfaTokenRequired {
-		var token = "587023"
+		var token = "014729"
 		err = service.StartPlainAwsSession("dc6b8f6015084ab885c00b5bc0fceb7b", &token)
 		if err != nil {
 			logging.Info(err)
