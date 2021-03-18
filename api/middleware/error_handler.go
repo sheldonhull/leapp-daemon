@@ -3,11 +3,11 @@ package middleware
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
 	"leapp_daemon/api/util"
 	"leapp_daemon/custom_error"
 	"leapp_daemon/logging"
 	"net/http"
+	"runtime"
 )
 
 type errorHandler struct{}
@@ -28,12 +28,9 @@ func (*errorHandler) Handle(context *gin.Context) {
 				errString = err.Error()
 			}
 
-			errorMap := gin.H{"statusCode": code, "error": errString, "context": util.NewContext(context)}
+			errorMap := gin.H{"statusCode": code, "error": errString, "stackTrace": getStackTrace(), "context": util.NewContext(context)}
 
-			logging.Entry().
-				WithFields(logrus.Fields{"statusCode": code}).
-				Error(fmt.Sprintf("%s", err))
-
+			logging.Entry().Error(errString)
 			context.JSON(code, errorMap)
 		}
 	}()
@@ -57,3 +54,30 @@ func (*errorHandler) Handle(context *gin.Context) {
 }
 
 var ErrorHandler = &errorHandler{}
+
+type stack []uintptr
+
+func callers() *stack {
+	const depth = 32
+	var pcs [depth]uintptr
+	n := runtime.Callers(3, pcs[:])
+	var st stack = pcs[0:n]
+	return &st
+}
+
+func getStackTrace() []runtime.Frame {
+	clrs := *callers()
+
+	var frames []runtime.Frame
+	callersFrames := runtime.CallersFrames(clrs)
+
+	for {
+		fr, more := callersFrames.Next()
+		frames = append(frames, fr)
+		if !more {
+			break
+		}
+	}
+
+	return frames
+}

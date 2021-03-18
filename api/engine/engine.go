@@ -74,6 +74,6 @@ func initializeRoutes(ginEngine *gin.Engine) {
 		v1.GET("/region/aws/list", controller.GetAwsRegionListController)
 		v1.PUT("/region/aws/", controller.EditAwsRegionController)
 
-		v1.GET("/ws/:roomId", controller.WsController)
+		v1.GET("/ws", controller.WsController)
 	}
 }

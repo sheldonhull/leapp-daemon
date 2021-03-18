@@ -1,10 +1,10 @@
 package main
 
 import (
-	"leapp_daemon/api/controller"
 	"leapp_daemon/api/engine"
 	"leapp_daemon/core/configuration"
 	"leapp_daemon/core/timer"
+	"leapp_daemon/core/websocket"
 	"leapp_daemon/logging"
 	"leapp_daemon/service"
 )
@@ -32,7 +32,7 @@ func main() {
 	timer.Initialize(1, service.RotateAllSessionsCredentials)
 
 	// ======== WebSocket Hub ========
-	go controller.Hub.Run()
+	go websocket.Hub.Run()
 
 	// ======== REST API Server ========
 	eng := engine.Engine()
@@ -40,15 +40,16 @@ func main() {
 }
 
 func testMFA() {
-	isMfaTokenRequired, err := service.IsMfaRequiredForPlainAwsSession("bf0734f41115484aa4152e1039493888")
+	isMfaTokenRequired, err := service.IsMfaRequiredForPlainAwsSession("dc6b8f6015084ab885c00b5bc0fceb7b")
 
 	if isMfaTokenRequired {
-		err = service.StartPlainAwsSession("bf0734f41115484aa4152e1039493888", nil)
+		var token = "587023"
+		err = service.StartPlainAwsSession("dc6b8f6015084ab885c00b5bc0fceb7b", &token)
 		if err != nil {
 			logging.Info(err)
 		}
 	} else {
-		err = service.StartPlainAwsSession("bf0734f41115484aa4152e1039493888", nil)
+		err = service.StartPlainAwsSession("dc6b8f6015084ab885c00b5bc0fceb7b", nil)
 		if err != nil {
 			logging.Info(err)
 		}

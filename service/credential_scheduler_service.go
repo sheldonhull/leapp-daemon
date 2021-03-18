@@ -1,6 +1,8 @@
 package service
 
-import "leapp_daemon/core/configuration"
+import (
+	"leapp_daemon/core/configuration"
+)
 
 func RotateAllSessionsCredentials() error {
 	config, err := configuration.ReadConfiguration()
@@ -10,7 +12,6 @@ func RotateAllSessionsCredentials() error {
 		sess := config.PlainAwsSessions[i]
 
 		err = sess.Rotate(config, nil)
-
 		if err != nil {
 			return err
 		}

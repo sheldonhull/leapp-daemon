@@ -6,8 +6,10 @@ import (
 	"github.com/pkg/errors"
 	"leapp_daemon/core/constant"
 	"leapp_daemon/core/session_token"
+	"leapp_daemon/core/websocket"
 	"leapp_daemon/custom_error"
 	"leapp_daemon/logging"
+	"log"
 	"strings"
 	"time"
 )
@@ -42,15 +44,46 @@ func(sess *PlainAwsSession) Rotate(configuration *Configuration, mfaToken *strin
 			if err != nil { return nil }
 
 			if isMfaTokenRequired {
-				// TODO: need to implement a way to ask for token.
-				//  We will probably need WebSocket for this. We will exploit the Hub to wait for client response.
+				err := sendMfaRequestMessage(sess)
+				if err != nil { return nil }
 			} else {
 				println("Rotating session with id", sess.Id)
 				err = sess.rotatePlainAwsSessionCredentials(configuration, nil)
 				if err != nil { return nil }
 			}
 		}
+	} else {
+		if mfaToken != nil {
+			println("Rotating session with id", sess.Id)
+			err := sess.rotatePlainAwsSessionCredentials(configuration, mfaToken)
+			if err != nil { return nil }
+		}
 	}
+
+	return nil
+}
+
+func sendMfaRequestMessage(sess *PlainAwsSession) error {
+	messageData := websocket.MfaTokenRequestData{
+		SessionId: sess.Id,
+	}
+
+	messageDataJson, err := json.Marshal(messageData)
+	if err != nil {
+		return err
+	}
+
+	msg := websocket.Message{
+		MessageType: websocket.MfaTokenRequest,
+		Data:        string(messageDataJson),
+	}
+
+	err = websocket.SendMessage(msg)
+	if err != nil {
+		return err
+	}
+
+	log.Println("sent message", string(messageDataJson))
 
 	return nil
 }
@@ -302,6 +335,7 @@ func DeletePlainAwsSession(id string) error {
 		if sessions[index].Id == id {
 			sessions = append(sessions[:index], sessions[index+1:]...)
 			found = true
+			break
 		}
 	}
 
