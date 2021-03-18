@@ -1,8 +1,8 @@
 package service
 
 import (
-	"leapp_daemon/constant"
 	"leapp_daemon/core/configuration"
+	"leapp_daemon/core/constant"
 )
 
 func ListAllSessions(query string, listType string) (*map[string]interface{}, error) {

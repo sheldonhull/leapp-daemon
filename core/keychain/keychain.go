@@ -2,7 +2,7 @@ package keychain
 
 import (
 	"github.com/zalando/go-keyring"
-	"leapp_daemon/constant"
+	"leapp_daemon/core/constant"
 )
 
 func SaveSecret(secret string, label string) error {

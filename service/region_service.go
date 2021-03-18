@@ -2,9 +2,9 @@ package service
 
 import (
 	"github.com/pkg/errors"
-	"leapp_daemon/constant"
 	"leapp_daemon/core/aws_client"
 	"leapp_daemon/core/configuration"
+	"leapp_daemon/core/constant"
 )
 
 type SessionAndRegion struct {

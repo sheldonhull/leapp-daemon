@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
-	"leapp_daemon/constant"
+	"leapp_daemon/core/constant"
 	"leapp_daemon/core/session_token"
 	"leapp_daemon/custom_error"
 	"leapp_daemon/logging"

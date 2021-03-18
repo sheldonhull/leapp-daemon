@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"leapp_daemon/constant"
+	"leapp_daemon/core/constant"
 	"leapp_daemon/core/encryption"
 	"leapp_daemon/core/file_system"
 	"os"
