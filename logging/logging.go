@@ -16,12 +16,12 @@ var context util.Context
 func InitializeLogger() {
 	err := createLogDir()
 	if err != nil {
-		logrus.Fatalln("error: %s", err.Error())
+		logrus.Fatalln("error:", err.Error())
 	}
 
 	err = createLogFile()
 	if err != nil {
-		logrus.Fatalln("error: %s", err.Error())
+		logrus.Fatalln("error:", err.Error())
 	}
 
 	logrus.SetLevel(logrus.ErrorLevel)
@@ -65,7 +65,7 @@ func Entry() *logrus.Entry {
 }
 
 func Info(args ...interface{}) {
-	Entry().Info(args)
+	Entry().Info(args...)
 }
 
 func CloseLogFile() {
@@ -80,7 +80,7 @@ func createLogFile() error {
 
 	logFile, err = os.OpenFile(logFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
-		logrus.Fatalln("error: %s", err.Error())
+		logrus.Fatalln("error:", err.Error())
 	}
 
 	return nil
