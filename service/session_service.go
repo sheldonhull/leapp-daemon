@@ -53,10 +53,9 @@ func StartPlainAwsSession(id string, mfaToken *string) error {
 		return err
 	}
 
-	err = sess.Rotate(config, mfaToken)
-	if err != nil {
-		return err
-	}
+	println("Rotating session with id", sess.Id)
+	err = sess.GeneratePlainAwsSessionCredentials(config, mfaToken)
+	if err != nil { return err }
 
 	return nil
 }

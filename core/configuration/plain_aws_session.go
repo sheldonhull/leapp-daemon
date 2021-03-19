@@ -39,6 +39,12 @@ type PlainAwsAccount struct {
 	MfaDevice           string
 }
 
+type AwsSessionToken struct {
+	AccessKeyId     string
+	SecretAccessKey string
+	SessionToken    string
+}
+
 func(sess *PlainAwsSession) Rotate(configuration *Configuration, mfaToken *string) error {
 	if sess.Status == Active {
 		isRotationIntervalExpired, err := sess.IsRotationIntervalExpired()
@@ -48,20 +54,115 @@ func(sess *PlainAwsSession) Rotate(configuration *Configuration, mfaToken *strin
 
 		if isRotationIntervalExpired {
 			println("Rotating session with id", sess.Id)
-			err = sess.rotatePlainAwsSessionCredentials(configuration, mfaToken)
+			err = sess.GeneratePlainAwsSessionCredentials(configuration, mfaToken)
 			if err != nil {
 				return nil
 			}
 		}
+	}
+	return nil
+}
+
+func(sess *PlainAwsSession) IsRotationIntervalExpired() (bool, error) {
+	startTime, _ := time.Parse(time.RFC3339, sess.StartTime)
+	secondsPassedFromStart := time.Now().Sub(startTime).Seconds()
+	return int64(secondsPassedFromStart) > constant.RotationIntervalInSeconds, nil
+}
+
+func(sess *PlainAwsSession) IsMfaRequired() (bool, error) {
+	return sess.Account.MfaDevice != "", nil
+}
+
+func(sess *PlainAwsSession) GeneratePlainAwsSessionCredentials(config *Configuration, mfaToken *string) error {
+	doSessionTokenExist, err := session_token.DoExist(sess.Account.Name)
+	if err != nil { return err }
+
+	if doSessionTokenExist {
+		return sess.generateSessionCredentialsWithOldSessionToken(config, mfaToken)
 	} else {
-		if mfaToken != nil {
-			println("Rotating session with id", sess.Id)
-			err := sess.rotatePlainAwsSessionCredentials(configuration, mfaToken)
-			if err != nil { return nil }
-		}
+		return sess.createAndSaveCredentials(config, mfaToken)
+	}
+}
+
+func (sess *PlainAwsSession) createAndSaveCredentials(config *Configuration, mfaToken *string) error {
+	credentials, err := session_token.Generate(sess.Account.Name, sess.Account.Region, sess.Account.MfaDevice, mfaToken)
+	if err != nil {
+		return err
 	}
 
+	err = session_token.SaveInKeychain(sess.Account.Name, credentials)
+	if err != nil {
+		return err
+	}
+
+	err = session_token.SaveInIniFile(*credentials.AccessKeyId, *credentials.SecretAccessKey,
+		*credentials.SessionToken, sess.Account.Region, "default")
+	if err != nil {
+		return err
+	}
+
+	sess.Status = Active
+	sess.StartTime = time.Now().Format(time.RFC3339)
+
+	err = UpdateConfiguration(config, false)
+	return err
+}
+
+func (sess *PlainAwsSession) generateSessionCredentialsWithOldSessionToken(config *Configuration, mfaToken *string) error {
+	isSessionTokenExpired, err := session_token.IsExpired(sess.Account.Name)
+	if err != nil { return err }
+
+	if isSessionTokenExpired {
+		logging.Entry().Error("Plain AWS session token no more valid")
+
+		isMfaTokenRequired, err := sess.IsMfaRequired()
+		if err != nil { return err }
+
+		if isMfaTokenRequired && mfaToken == nil {
+			sess.Status = Pending
+			err = sendMfaRequestMessage(sess)
+			if err != nil { return err }
+			return nil
+		}
+
+		err = sess.createAndSaveCredentials(config, mfaToken)
+		if err != nil { return err }
+	} else {
+		logging.Entry().Error("Plain AWS session token still valid")
+
+		data, err := sess.unmarshallSessionToken()
+		if err != nil { return err }
+
+		err = session_token.SaveInIniFile(data.AccessKeyId,
+			data.SecretAccessKey,
+			data.SessionToken,
+			sess.Account.Region,
+			"default")
+		if err != nil { return err }
+
+		sess.Status = Active
+		sess.StartTime = time.Now().Format(time.RFC3339)
+
+		err = UpdateConfiguration(config, false)
+		if err != nil {
+			return err
+		}
+	}
 	return nil
+}
+
+
+
+func (sess *PlainAwsSession) unmarshallSessionToken() (AwsSessionToken, error) {
+	sessionTokenJson, _, err := session_token.Get(sess.Account.Name)
+
+	var data AwsSessionToken
+
+	err = json.Unmarshal([]byte(sessionTokenJson), &data)
+	if err != nil {
+		return data, err
+	}
+	return data, nil
 }
 
 func sendMfaRequestMessage(sess *PlainAwsSession) error {
@@ -89,124 +190,7 @@ func sendMfaRequestMessage(sess *PlainAwsSession) error {
 	return nil
 }
 
-func(sess *PlainAwsSession) IsRotationIntervalExpired() (bool, error) {
-	startTime, _ := time.Parse(time.RFC3339, sess.StartTime)
-	secondsPassedFromStart := time.Now().Sub(startTime).Seconds()
-	return int64(secondsPassedFromStart) > constant.RotationIntervalInSeconds, nil
-}
-
-func(sess *PlainAwsSession) IsMfaRequired() (bool, error) {
-	return sess.Account.MfaDevice != "", nil
-}
-
-func(sess *PlainAwsSession) rotatePlainAwsSessionCredentials(config *Configuration, mfaToken *string) error {
-	doSessionTokenExist, err := session_token.DoExist(sess.Account.Name)
-	if err != nil {
-		return err
-	}
-
-	if doSessionTokenExist {
-		isSessionTokenExpired, err := session_token.IsExpired(sess.Account.Name)
-		if err != nil {
-			return err
-		}
-
-		if isSessionTokenExpired {
-			logging.Entry().Error("Plain AWS session token no more valid")
-
-			isMfaTokenRequired, err := sess.IsMfaRequired()
-			if err != nil {
-				return nil
-			}
-
-			if isMfaTokenRequired && mfaToken == nil {
-				sess.Status = Pending
-				err = sendMfaRequestMessage(sess)
-
-				if err != nil {
-					return err
-				}
-
-				return nil
-			}
-
-			credentials, err := session_token.Generate(sess.Account.Name, sess.Account.Region, sess.Account.MfaDevice, mfaToken)
-			if err != nil {
-				return err
-			}
-
-			err = session_token.SaveInKeychain(sess.Account.Name, credentials)
-			if err != nil {
-				return err
-			}
-
-			err = session_token.SaveInIniFile(*credentials.AccessKeyId, *credentials.SecretAccessKey,
-				*credentials.SessionToken, sess.Account.Region, "default")
-			if err != nil {
-				return err
-			}
-
-			sess.Status = Active
-			sess.StartTime = time.Now().Format(time.RFC3339)
-
-			err = UpdateConfiguration(config, false)
-			if err != nil {
-				return err
-			}
-		} else {
-			logging.Entry().Error("Plain AWS session token still valid")
-
-			sessionTokenJson, _, err := session_token.Get(sess.Account.Name)
-
-			data := struct {
-				AccessKeyId string
-				SecretAccessKey string
-				SessionToken string
-			} {}
-
-			err = json.Unmarshal([]byte(sessionTokenJson), &data)
-			if err != nil { return err }
-
-			err = session_token.SaveInIniFile(data.AccessKeyId, data.SecretAccessKey, data.SessionToken,
-				sess.Account.Region, "default")
-			if err != nil { return err }
-
-			sess.Status = Active
-			sess.StartTime = time.Now().Format(time.RFC3339)
-
-			err = UpdateConfiguration(config, false)
-			if err != nil {
-				return err
-			}
-		}
-	} else {
-		credentials, err := session_token.Generate(sess.Account.Name, sess.Account.Region, sess.Account.MfaDevice, mfaToken)
-		if err != nil {
-			return err
-		}
-
-		err = session_token.SaveInKeychain(sess.Account.Name, credentials)
-		if err != nil {
-			return err
-		}
-
-		err = session_token.SaveInIniFile(*credentials.AccessKeyId, *credentials.SecretAccessKey,
-			*credentials.SessionToken, sess.Account.Region, "default")
-		if err != nil {
-			return err
-		}
-
-		sess.Status = Active
-		sess.StartTime = time.Now().Format(time.RFC3339)
-
-		err = UpdateConfiguration(config, false)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
+// ===== CRUD =====
 
 func CreatePlainAwsSession(name string, accountNumber string, region string, user string,
 	awsAccessKeyId string, awsSecretAccessKey string, mfaDevice string) error {
