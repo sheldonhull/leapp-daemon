@@ -63,14 +63,15 @@ func initializeRoutes(ginEngine *gin.Engine) {
 		v1.POST("/session/plain", controller.CreatePlainAwsSessionController)
 		v1.PUT("/session/plain/:id", controller.EditPlainAwsSessionController)
 		v1.DELETE("/session/plain/:id", controller.DeletePlainAwsSessionController)
+		v1.POST("/session/plain/:id/start", controller.StartPlainAwsSessionController)
+		v1.POST("/session/plain/:id/stop", controller.StopPlainAwsSessionController)
 
 		v1.GET("/session/federated/:id", controller.GetFederatedAwsSessionController)
 		v1.POST("/session/federated", controller.CreateFederatedAwsSessionController)
 		v1.PUT("/session/federated/:id", controller.EditFederatedAwsSessionController)
 		v1.DELETE("/session/federated/:id", controller.DeleteFederatedAwsSessionController)
-
-		// v1.POST("/session/plain/:id/start", controllers.StartAwsPlainSessionController)
-		// v1.POST("/session/plain/:id/stop", controllers.StopAwsPlainSessionController)
+		v1.POST("/session/federated/:id/start", controller.StartFederatedAwsSessionController)
+		v1.POST("/session/federated/:id/stop", controller.StopFederatedAwsSessionController)
 
 		v1.POST("/g_suite_auth/first_step", controller.GSuiteAuthFirstStepController)
 		v1.POST("/g_suite_auth/second_step", controller.GSuiteAuthSecondStepController)

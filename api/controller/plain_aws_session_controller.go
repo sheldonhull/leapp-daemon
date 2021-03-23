@@ -112,3 +112,45 @@ func DeletePlainAwsSessionController(context *gin.Context) {
 	responseDto := response_dto.MessageOnlyResponseDto{Message: "success"}
 	context.JSON(http.StatusOK, responseDto.ToMap())
 }
+
+func StartPlainAwsSessionController(context *gin.Context) {
+	logging.SetContext(context)
+
+	requestDto := plain_aws_session_dto.StartPlainAwsSessionRequestDto{}
+	err := (&requestDto).Build(context)
+	if err != nil {
+		_ = context.Error(err)
+		return
+	}
+
+	err = service.StartPlainAwsSession(requestDto.Id)
+
+	if err != nil {
+		_ = context.Error(err)
+		return
+	}
+
+	responseDto := response_dto.MessageOnlyResponseDto{Message: "success"}
+	context.JSON(http.StatusOK, responseDto.ToMap())
+}
+
+func StopPlainAwsSessionController(context *gin.Context) {
+	logging.SetContext(context)
+
+	requestDto := plain_aws_session_dto.StopPlainAwsSessionRequestDto{}
+	err := (&requestDto).Build(context)
+	if err != nil {
+		_ = context.Error(err)
+		return
+	}
+
+	err = service.StopPlainAwsSession(requestDto.Id)
+
+	if err != nil {
+		_ = context.Error(err)
+		return
+	}
+
+	responseDto := response_dto.MessageOnlyResponseDto{Message: "success"}
+	context.JSON(http.StatusOK, responseDto.ToMap())
+}

@@ -106,3 +106,45 @@ func DeleteFederatedAwsSessionController(context *gin.Context) {
 	responseDto := response_dto.MessageOnlyResponseDto{Message: "success"}
 	context.JSON(http.StatusOK, responseDto.ToMap())
 }
+
+func StartFederatedAwsSessionController(context *gin.Context) {
+	logging.SetContext(context)
+
+	requestDto := federated_aws_session_dto.StartFederatedAwsSessionRequestDto{}
+	err := (&requestDto).Build(context)
+	if err != nil {
+		_ = context.Error(err)
+		return
+	}
+
+	err = service.StartFederatedAwsSession(requestDto.Id)
+
+	if err != nil {
+		_ = context.Error(err)
+		return
+	}
+
+	responseDto := response_dto.MessageOnlyResponseDto{Message: "success"}
+	context.JSON(http.StatusOK, responseDto.ToMap())
+}
+
+func StopFederatedAwsSessionController(context *gin.Context) {
+	logging.SetContext(context)
+
+	requestDto := federated_aws_session_dto.StopFederatedAwsSessionRequestDto{}
+	err := (&requestDto).Build(context)
+	if err != nil {
+		_ = context.Error(err)
+		return
+	}
+
+	err = service.StopFederatedAwsSession(requestDto.Id)
+
+	if err != nil {
+		_ = context.Error(err)
+		return
+	}
+
+	responseDto := response_dto.MessageOnlyResponseDto{Message: "success"}
+	context.JSON(http.StatusOK, responseDto.ToMap())
+}
