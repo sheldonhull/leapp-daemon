@@ -7,6 +7,7 @@ import (
 	"leapp_daemon/core/timer"
 	"leapp_daemon/core/websocket"
 	"leapp_daemon/logging"
+	"leapp_daemon/service"
 )
 
 func main3() {
@@ -21,7 +22,7 @@ func main() {
 	defer logging.CloseLogFile()
 	defer timer.Close()
 
-	/*
+
 	// Check and create config file
 	_, err := configuration.ReadConfiguration()
 	// TODO: check the nature of the error: if is no such file is ok, otherwise it must be panicked
@@ -32,10 +33,9 @@ func main() {
 			panic(err)
 		}
 	}
-	 */
 
 	// ======== Sessions Timer ========
-	//timer.Initialize(1, service.RotateAllSessionsCredentials)
+	timer.Initialize(1, service.RotateAllSessionsCredentials)
 
 	// ======== WebSocket Hub ========
 	go websocket.Hub.Run()

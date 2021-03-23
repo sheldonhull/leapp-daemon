@@ -9,6 +9,26 @@ import (
 	"net/http"
 )
 
+func GetFederatedAwsSessionController(context *gin.Context) {
+	logging.SetContext(context)
+
+	requestDto := federated_aws_session_dto.GetFederatedAwsSessionRequestDto{}
+	err := (&requestDto).Build(context)
+	if err != nil {
+		_ = context.Error(err)
+		return
+	}
+
+	sess, err := service.GetFederatedAwsSession(requestDto.Id)
+	if err != nil {
+		_ = context.Error(err)
+		return
+	}
+
+	responseDto := response_dto.MessageAndDataResponseDto{Message: "success", Data: *sess}
+	context.JSON(http.StatusOK, responseDto.ToMap())
+}
+
 func CreateFederatedAwsSessionController(context *gin.Context) {
 	logging.SetContext(context)
 
@@ -21,6 +41,63 @@ func CreateFederatedAwsSessionController(context *gin.Context) {
 
 	err = service.CreateFederatedAwsSession(requestDto.Name, requestDto.AccountNumber, requestDto.RoleName,
 		                                    requestDto.RoleArn, requestDto.IdpArn, requestDto.Region, requestDto.SsoUrl)
+	if err != nil {
+		_ = context.Error(err)
+		return
+	}
+
+	responseDto := response_dto.MessageOnlyResponseDto{Message: "success"}
+	context.JSON(http.StatusOK, responseDto.ToMap())
+}
+
+func EditFederatedAwsSessionController(context *gin.Context) {
+	logging.SetContext(context)
+
+	requestUriDto := federated_aws_session_dto.EditFederatedAwsSessionUriRequestDto{}
+	err := (&requestUriDto).Build(context)
+	if err != nil {
+		_ = context.Error(err)
+		return
+	}
+
+	requestDto := federated_aws_session_dto.EditFederatedAwsSessionRequestDto{}
+	err = (&requestDto).Build(context)
+	if err != nil {
+		_ = context.Error(err)
+		return
+	}
+
+	err = service.UpdateFederatedAwsSession(
+		requestUriDto.Id,
+		requestDto.Name,
+		requestDto.AccountNumber,
+		requestDto.RoleName,
+		requestDto.RoleArn,
+		requestDto.IdpArn,
+		requestDto.Region,
+		requestDto.SsoUrl)
+
+	if err != nil {
+		_ = context.Error(err)
+		return
+	}
+
+	responseDto := response_dto.MessageOnlyResponseDto{Message: "success"}
+	context.JSON(http.StatusOK, responseDto.ToMap())
+}
+
+func DeleteFederatedAwsSessionController(context *gin.Context) {
+	logging.SetContext(context)
+
+	requestDto := federated_aws_session_dto.DeleteFederatedAwsSessionRequestDto{}
+	err := (&requestDto).Build(context)
+	if err != nil {
+		_ = context.Error(err)
+		return
+	}
+
+	err = service.DeleteFederatedAwsSession(requestDto.Id)
+
 	if err != nil {
 		_ = context.Error(err)
 		return
