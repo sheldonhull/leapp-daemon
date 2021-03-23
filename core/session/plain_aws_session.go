@@ -5,7 +5,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"leapp_daemon/core/aws_session_token"
-	"leapp_daemon/core/configuration"
 	"leapp_daemon/core/constant"
 	"leapp_daemon/core/websocket"
 	"leapp_daemon/custom_error"
@@ -225,74 +224,42 @@ func CreatePlainAwsSession(sessionContainer Container, name string, accountNumbe
 	return nil
 }
 
-func DeletePlainAwsSession(id string) error {
-	config, err := configuration.ReadConfiguration()
+func GetPlainAwsSession(sessionContainer Container, id string) (*PlainAwsSession, error) {
+	sess, err := getById(sessionContainer, id)
 	if err != nil {
-		return err
-	}
-
-	sessions := config.PlainAwsSessions
-
-	found := false
-	for index := range sessions {
-		if sessions[index].Id == id {
-			sessions = append(sessions[:index], sessions[index+1:]...)
-			found = true
-			break
-		}
-	}
-
-	if found == false {
-		err = custom_error.NewBadRequestError(errors.New("Plain AWS session not found for Id: " + id))
-		return err
-	}
-
-	config.PlainAwsSessions = sessions
-
-	err = configuration.UpdateConfiguration(config, false)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func GetById(config *configuration.Configuration, id string) (*PlainAwsSession, error) {
-	sessions := config.PlainAwsSessions
-	var sess *PlainAwsSession
-
-	for index := range sessions {
-		if sessions[index].Id == id {
-			sess = sessions[index]
-			return sess, nil
-		}
-	}
-
-	err := custom_error.NewBadRequestError(errors.New("Plain AWS session not found for Id: " + id))
-	return nil, err
-}
-
-func GetPlainAwsSession(id string) (*PlainAwsSession, error) {
-	config, err := configuration.ReadConfiguration()
-	if err != nil {
-		return nil, err
-	}
-
-	sess, err := GetById(config, id)
-	if err != nil {
-		return nil, err
+		return sess, err
 	}
 
 	return sess, nil
 }
 
-func IsMfaRequiredForPlainAwsSession(id string) (bool, error) {
-	config, err := configuration.ReadConfiguration()
-	if err != nil {
-		return false, err
-	}
+func ListPlainAwsSession(sessionContainer Container, query string) ([]*PlainAwsSession, error) {
+	filteredList := make([]*PlainAwsSession, 0)
 
-	sess, err := GetById(config, id)
+	allSessions, err := sessionContainer.GetPlainAwsSessions()
+	if err != nil { return filteredList, nil }
+
+	if query == "" {
+		return append(filteredList, allSessions...), nil
+	} else {
+		for _, sess := range allSessions {
+			if strings.Contains(sess.Id, query) ||
+				strings.Contains(sess.Account.Name, query) ||
+				strings.Contains(sess.Account.MfaDevice, query) ||
+				strings.Contains(sess.Account.User, query) ||
+				strings.Contains(sess.Account.Region, query) ||
+				strings.Contains(sess.Account.AccountNumber, query) {
+
+				filteredList = append(filteredList, sess)
+			}
+		}
+
+		return filteredList, nil
+	}
+}
+
+func IsMfaRequiredForPlainAwsSession(sessionContainer Container, id string) (bool, error) {
+	sess, err := getById(sessionContainer, id)
 	if err != nil {
 		return false, err
 	}
@@ -300,13 +267,8 @@ func IsMfaRequiredForPlainAwsSession(id string) (bool, error) {
 	return sess.IsMfaRequired()
 }
 
-func StartPlainAwsSession(id string, mfaToken *string) error {
-	config, err := configuration.ReadConfiguration()
-	if err != nil {
-		return err
-	}
-
-	sess, err := GetById(config, id)
+func StartPlainAwsSession(sessionContainer Container, id string, mfaToken *string) error {
+	sess, err := getById(sessionContainer, id)
 	if err != nil {
 		return err
 	}
@@ -318,15 +280,11 @@ func StartPlainAwsSession(id string, mfaToken *string) error {
 	return nil
 }
 
-func UpdatePlainAwsSession(id string, name string, accountNumber string, region string,
+func UpdatePlainAwsSession(sessionContainer Container, id string, name string, accountNumber string, region string,
 	user string, awsAccessKeyId string, awsSecretAccessKey string, mfaDevice string) error {
 
-	config, err := configuration.ReadConfiguration()
-	if err != nil {
-		return err
-	}
-
-	sessions := config.PlainAwsSessions
+	sessions, err := sessionContainer.GetPlainAwsSessions()
+	if err != nil { return err }
 
 	found := false
 	for index := range sessions {
@@ -349,9 +307,33 @@ func UpdatePlainAwsSession(id string, name string, accountNumber string, region 
 		return err
 	}
 
-	config.PlainAwsSessions = sessions
+	err = sessionContainer.SetPlainAwsSessions(sessions)
+	if err != nil { return err }
 
-	err = configuration.UpdateConfiguration(config, false)
+	return nil
+}
+
+func DeletePlainAwsSession(sessionContainer Container, id string) error {
+	sessions, err := sessionContainer.GetPlainAwsSessions()
+	if err != nil {
+		return err
+	}
+
+	found := false
+	for index := range sessions {
+		if sessions[index].Id == id {
+			sessions = append(sessions[:index], sessions[index+1:]...)
+			found = true
+			break
+		}
+	}
+
+	if found == false {
+		err = custom_error.NewBadRequestError(errors.New("Plain AWS session not found for Id: " + id))
+		return err
+	}
+
+	err = sessionContainer.SetPlainAwsSessions(sessions)
 	if err != nil {
 		return err
 	}
@@ -382,4 +364,21 @@ func sendMfaRequestMessage(sess *PlainAwsSession) error {
 	log.Println("sent message", string(messageDataJson))
 
 	return nil
+}
+
+func getById(sessionContainer Container, id string) (*PlainAwsSession, error) {
+	var sess *PlainAwsSession
+
+	sessions, err := sessionContainer.GetPlainAwsSessions()
+	if err != nil { return sess, err }
+
+	for index := range sessions {
+		if sessions[index].Id == id {
+			sess = sessions[index]
+			return sess, nil
+		}
+	}
+
+	err = custom_error.NewBadRequestError(errors.New("Plain AWS session not found for Id: " + id))
+	return sess, err
 }

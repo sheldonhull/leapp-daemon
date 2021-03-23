@@ -18,16 +18,16 @@ func RotateAllSessionsCredentials() error {
 		}
 	}
 
-	/*for i := range config.FederatedAwsSessions {
+	for i := range config.FederatedAwsSessions {
 		sess := config.FederatedAwsSessions[i]
 
 		err = sess.RotateCredentials(nil)
 		if err != nil {
 			return err
 		}
-	}*/
+	}
 
-	err = configuration.UpdateConfiguration(config, false)
+	err = config.Update()
 	if err != nil {
 		return err
 	}
@@ -53,24 +53,11 @@ func RotateSessionCredentialsWithMfaToken(sessionId string, mfaToken string) err
 		}
 	}
 
-	/*for i := range config.FederatedAwsSessions {
-		sess := config.FederatedAwsSessions[i]
-
-		if sess.Id == sessionId {
-			err = sess.RotateCredentials(&mfaToken)
-			if err != nil {
-				return err
-			}
-			found = true
-			break
-		}
-	}*/
-
 	if !found {
 		return errors.New("No session found with id " + sessionId)
 	}
 
-	err = configuration.UpdateConfiguration(config, false)
+	err = config.Update()
 	if err != nil {
 		return err
 	}

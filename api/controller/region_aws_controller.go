@@ -27,12 +27,12 @@ func EditAwsRegionController(context *gin.Context) {
 		return
 	}
 
-	sessionAndRegion, err := service.EditAwsSessionRegion(requestDto.SessionId, requestDto.Region)
+	err = service.EditAwsSessionRegion(requestDto.SessionId, requestDto.Region)
 	if err != nil {
 		_ = context.Error(err)
 		return
 	}
 
-	responseDto := response_dto.MessageAndDataResponseDto{Message: "success", Data: *sessionAndRegion}
+	responseDto := response_dto.MessageOnlyResponseDto{Message: "success"}
 	context.JSON(http.StatusOK, responseDto.ToMap())
 }

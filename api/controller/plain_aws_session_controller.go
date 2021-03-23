@@ -19,13 +19,13 @@ func GetPlainAwsSessionController(context *gin.Context) {
 		return
 	}
 
-	session, err := service.GetPlainAwsSession(requestDto.Id)
+	sess, err := service.GetPlainAwsSession(requestDto.Id)
 	if err != nil {
 		_ = context.Error(err)
 		return
 	}
 
-	responseDto := response_dto.MessageAndDataResponseDto{Message: "success", Data: *session}
+	responseDto := response_dto.MessageAndDataResponseDto{Message: "success", Data: *sess}
 	context.JSON(http.StatusOK, responseDto.ToMap())
 }
 

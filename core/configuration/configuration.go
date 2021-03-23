@@ -92,6 +92,15 @@ func (config *Configuration) SetPlainAwsSessions(plainAwsSessions []*session.Pla
 	return nil
 }
 
+func (config *Configuration) GetFederatedAwsSessions() ([]*session.FederatedAwsSession, error) {
+	return config.FederatedAwsSessions, nil
+}
+
+func (config *Configuration) SetFederatedAwsSessions(federatedAwsSessions []*session.FederatedAwsSession) error {
+	config.FederatedAwsSessions = federatedAwsSessions
+	return nil
+}
+
 func (config *Configuration) Update() error {
 	err := UpdateConfiguration(config, false)
 	if err != nil {

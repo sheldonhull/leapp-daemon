@@ -4,26 +4,19 @@ import (
 	"github.com/pkg/errors"
 	"leapp_daemon/core/aws_client"
 	"leapp_daemon/core/configuration"
-	"leapp_daemon/core/constant"
 )
 
-type SessionAndRegion struct {
-	SessionId string
-	SessionType string
-	AwsRegion string
-}
-
-func EditAwsSessionRegion(sessionId string, region string) (*SessionAndRegion, error) {
+func EditAwsSessionRegion(sessionId string, region string) error {
 	// Check if the region is valid: we check it instantly as it is very simple
 	isRegionValid := aws_client.IsRegionValid(region)
 	if !isRegionValid {
-		return nil, errors.New("Region " + region + " not valid")
+		return errors.New("Region " + region + " not valid")
 	}
 
 	// Get configuration
 	config, err := configuration.ReadConfiguration()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	// Find a valid Aws Session
@@ -31,9 +24,9 @@ func EditAwsSessionRegion(sessionId string, region string) (*SessionAndRegion, e
 		if plainSession.Id == sessionId {
 			plainSession.Account.Region = region
 			err = configuration.UpdateConfiguration(config, false)
-			if err != nil { return nil, err }
+			if err != nil { return err }
 
-			return &SessionAndRegion{  SessionId: sessionId, SessionType: constant.SessionTypePlain, AwsRegion: region }, nil
+			return nil
 		}
 	}
 
@@ -41,11 +34,11 @@ func EditAwsSessionRegion(sessionId string, region string) (*SessionAndRegion, e
 		if federatedSession.Id == sessionId {
 			federatedSession.Account.Region = region
 			err = configuration.UpdateConfiguration(config, false)
-			if err != nil { return nil, err }
+			if err != nil { return err }
 
-			return &SessionAndRegion{  SessionId: sessionId, SessionType: constant.SessionTypeFederated, AwsRegion: region }, nil
+			return nil
 		}
 	}
 
-	return nil, errors.New("No valid AWS session found for editing region")
+	return errors.New("No valid AWS session found for editing region")
 }

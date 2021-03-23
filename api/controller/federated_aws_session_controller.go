@@ -4,8 +4,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"leapp_daemon/api/controller/dto/request_dto/federated_aws_session_dto"
 	"leapp_daemon/api/controller/dto/response_dto"
-	"leapp_daemon/core/session"
 	"leapp_daemon/logging"
+	"leapp_daemon/service"
 	"net/http"
 )
 
@@ -19,10 +19,10 @@ func CreateFederatedAwsSessionController(context *gin.Context) {
 		return
 	}
 
-	err2 := session.CreateFederatedAwsSession(requestDto.Name, requestDto.AccountNumber,
-		requestDto.RoleName, requestDto.RoleArn, requestDto.IdpArn, requestDto.Region, requestDto.SsoUrl)
-	if err2 != nil {
-		_ = context.Error(err2)
+	err = service.CreateFederatedAwsSession(requestDto.Name, requestDto.AccountNumber, requestDto.RoleName,
+		                                    requestDto.RoleArn, requestDto.IdpArn, requestDto.Region, requestDto.SsoUrl)
+	if err != nil {
+		_ = context.Error(err)
 		return
 	}
 

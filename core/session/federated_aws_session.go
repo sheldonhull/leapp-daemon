@@ -3,7 +3,6 @@ package session
 import (
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
-	"leapp_daemon/core/configuration"
 	"leapp_daemon/core/constant"
 	"leapp_daemon/custom_error"
 	"strings"
@@ -37,7 +36,7 @@ type FederatedAwsRole struct {
 	// ParentRole string
 }
 
-func(sess *FederatedAwsSession) RotateCredentials(configuration *configuration.Configuration, mfaToken *string) error {
+func(sess *FederatedAwsSession) RotateCredentials(mfaToken *string) error {
 	// TODO: implement rotate method for federated
 	return nil
 }
@@ -48,58 +47,13 @@ func(sess *FederatedAwsSession) IsRotationIntervalExpired() (bool, error) {
 	return int64(secondsPassedFromStart) > constant.RotationIntervalInSeconds, nil
 }
 
-
-func GetFederatedAwsSession(id string) (*FederatedAwsSession, error) {
-	config, err := configuration.ReadConfiguration()
-	if err != nil {
-		return nil, err
-	}
-
-	sessions := config.FederatedAwsSessions
-	for index, _ := range sessions {
-		if sessions[index].Id == id {
-			return sessions[index], nil
-		}
-	}
-
-	return nil, custom_error.NewBadRequestError(errors.New("No session found with id:" + id))
-}
-
-func ListFederatedAwsSession(query string) ([]*FederatedAwsSession, error) {
-	config, err := configuration.ReadConfiguration()
-	if err != nil {
-		return nil, err
-	}
-
-	filteredList := make([]*FederatedAwsSession, 0)
-
-	if query == "" {
-		return append(filteredList, config.FederatedAwsSessions...), nil
-	} else {
-		for _, session := range config.FederatedAwsSessions {
-			if  strings.Contains(session.Id, query) ||
-				strings.Contains(session.Account.Name, query) ||
-				strings.Contains(session.Account.IdpArn, query) ||
-				strings.Contains(session.Account.SsoUrl, query) ||
-				strings.Contains(session.Account.Region, query) ||
-				strings.Contains(session.Account.AccountNumber, query) {
-				// TODO: add also role filters
-				filteredList = append(filteredList, session)
-			}
-		}
-
-		return filteredList, nil
-	}
-}
-
-func CreateFederatedAwsSession(name string, accountNumber string, roleName string, roleArn string, idpArn string,
+func CreateFederatedAwsSession(sessionContainer Container, name string, accountNumber string, roleName string, roleArn string, idpArn string,
 	region string, ssoUrl string) error {
-	config, err := configuration.ReadConfiguration()
+
+	sessions, err := sessionContainer.GetFederatedAwsSessions()
 	if err != nil {
 		return err
 	}
-
-	sessions := config.FederatedAwsSessions
 
 	for _, session := range sessions {
 		account := session.Account
@@ -135,9 +89,114 @@ func CreateFederatedAwsSession(name string, accountNumber string, roleName strin
 		Account:      &federatedAwsAccount,
 	}
 
-	config.FederatedAwsSessions = append(config.FederatedAwsSessions, &session)
+	err = sessionContainer.SetFederatedAwsSessions(append(sessions, &session))
+	if err != nil { return err }
 
-	err = configuration.UpdateConfiguration(config, false)
+	return nil
+}
+
+func GetFederatedAwsSession(sessionContainer Container, id string) (*FederatedAwsSession, error) {
+	sessions, err := sessionContainer.GetFederatedAwsSessions()
+	if err != nil {
+		return nil, err
+	}
+
+	for index, _ := range sessions {
+		if sessions[index].Id == id {
+			return sessions[index], nil
+		}
+	}
+
+	return nil, custom_error.NewBadRequestError(errors.New("No session found with id:" + id))
+}
+
+func ListFederatedAwsSession(sessionContainer Container, query string) ([]*FederatedAwsSession, error) {
+	sessions, err := sessionContainer.GetFederatedAwsSessions()
+	if err != nil {
+		return nil, err
+	}
+
+	filteredList := make([]*FederatedAwsSession, 0)
+
+	if query == "" {
+		return append(filteredList, sessions...), nil
+	} else {
+		for _, session := range sessions {
+			if  strings.Contains(session.Id, query) ||
+				strings.Contains(session.Account.Name, query) ||
+				strings.Contains(session.Account.IdpArn, query) ||
+				strings.Contains(session.Account.SsoUrl, query) ||
+				strings.Contains(session.Account.Region, query) ||
+				strings.Contains(session.Account.AccountNumber, query) ||
+				strings.Contains(session.Account.Role.Name, query) ||
+				strings.Contains(session.Account.Role.Arn, query) {
+
+				filteredList = append(filteredList, session)
+			}
+		}
+
+		return filteredList, nil
+	}
+}
+
+func UpdateFederatedAwsSession(sessionContainer Container, id string, name string, accountNumber string, roleName string, roleArn string, idpArn string,
+	region string, ssoUrl string) error {
+
+	sessions, err := sessionContainer.GetFederatedAwsSessions()
+	if err != nil { return err }
+
+	found := false
+	for index := range sessions {
+		if sessions[index].Id == id {
+			sessions[index].Account = &FederatedAwsAccount{
+				AccountNumber: accountNumber,
+				Name:          name,
+				Region:        region,
+				IdpArn: 	   idpArn,
+				SsoUrl:        ssoUrl,
+			}
+
+			sessions[index].Account.Role = &FederatedAwsRole{
+				Name: roleName,
+				Arn:  roleArn,
+			}
+
+			found = true
+		}
+	}
+
+	if found == false {
+		err = custom_error.NewBadRequestError(errors.New("Federated AWS session not found for Id: " + id))
+		return err
+	}
+
+	err = sessionContainer.SetFederatedAwsSessions(sessions)
+	if err != nil { return err }
+
+	return nil
+}
+
+func DeleteFederatedAwsSession(sessionContainer Container, id string) error {
+	sessions, err := sessionContainer.GetFederatedAwsSessions()
+	if err != nil {
+		return err
+	}
+
+	found := false
+	for index := range sessions {
+		if sessions[index].Id == id {
+			sessions = append(sessions[:index], sessions[index+1:]...)
+			found = true
+			break
+		}
+	}
+
+	if found == false {
+		err = custom_error.NewBadRequestError(errors.New("Federated AWS session not found for Id: " + id))
+		return err
+	}
+
+	err = sessionContainer.SetFederatedAwsSessions(sessions)
 	if err != nil {
 		return err
 	}
