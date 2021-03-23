@@ -11,9 +11,8 @@ import (
 
 type FederatedAwsSession struct {
 	Id           string
-	Active       bool
-	Loading      bool
-	StartTime    string
+	Status    Status
+	StartTime string
 	Account      *FederatedAwsAccount
 }
 
@@ -36,7 +35,7 @@ type FederatedAwsRole struct {
 	// ParentRole string
 }
 
-func(sess *FederatedAwsSession) RotateCredentials(mfaToken *string) error {
+func(sess *FederatedAwsSession) RotateCredentials() error {
 	// TODO: implement rotate method for federated
 	return nil
 }
@@ -83,9 +82,8 @@ func CreateFederatedAwsSession(sessionContainer Container, name string, accountN
 
 	session := FederatedAwsSession{
 		Id:           uuidString,
-		Active:       false,
-		Loading:      false,
-		StartTime: "",
+		Status:       NotActive,
+		StartTime:    "",
 		Account:      &federatedAwsAccount,
 	}
 
@@ -201,5 +199,28 @@ func DeleteFederatedAwsSession(sessionContainer Container, id string) error {
 		return err
 	}
 
+	return nil
+}
+
+func StartFederatedAwsSession(sessionContainer Container, id string) error {
+	sess, err := GetFederatedAwsSession(sessionContainer, id)
+	if err != nil {
+		return err
+	}
+
+	println("Rotating session with id", sess.Id)
+	err = sess.RotateCredentials()
+	if err != nil { return err }
+
+	return nil
+}
+
+func StopFederatedAwsSession(sessionContainer Container, id string) error {
+	sess, err := GetFederatedAwsSession(sessionContainer, id)
+	if err != nil {
+		return err
+	}
+
+	sess.Status = NotActive
 	return nil
 }

@@ -14,13 +14,7 @@ import (
 	"time"
 )
 
-type Status int
 
-const (
-	NotActive Status = iota
-	Pending
-	Active
-)
 
 type PlainAwsSession struct {
 	Id        string
@@ -258,28 +252,6 @@ func ListPlainAwsSession(sessionContainer Container, query string) ([]*PlainAwsS
 	}
 }
 
-func IsMfaRequiredForPlainAwsSession(sessionContainer Container, id string) (bool, error) {
-	sess, err := getById(sessionContainer, id)
-	if err != nil {
-		return false, err
-	}
-
-	return sess.IsMfaRequired()
-}
-
-func StartPlainAwsSession(sessionContainer Container, id string, mfaToken *string) error {
-	sess, err := getById(sessionContainer, id)
-	if err != nil {
-		return err
-	}
-
-	println("Rotating session with id", sess.Id)
-	err = sess.RotatePlainAwsSessionCredentials(mfaToken)
-	if err != nil { return err }
-
-	return nil
-}
-
 func UpdatePlainAwsSession(sessionContainer Container, id string, name string, accountNumber string, region string,
 	user string, awsAccessKeyId string, awsSecretAccessKey string, mfaDevice string) error {
 
@@ -338,6 +310,38 @@ func DeletePlainAwsSession(sessionContainer Container, id string) error {
 		return err
 	}
 
+	return nil
+}
+
+func IsMfaRequiredForPlainAwsSession(sessionContainer Container, id string) (bool, error) {
+	sess, err := getById(sessionContainer, id)
+	if err != nil {
+		return false, err
+	}
+
+	return sess.IsMfaRequired()
+}
+
+func StartPlainAwsSession(sessionContainer Container, id string, mfaToken *string) error {
+	sess, err := getById(sessionContainer, id)
+	if err != nil {
+		return err
+	}
+
+	println("Rotating session with id", sess.Id)
+	err = sess.RotatePlainAwsSessionCredentials(mfaToken)
+	if err != nil { return err }
+
+	return nil
+}
+
+func StopPlainAwsSession(sessionContainer Container, id string) error {
+	sess, err := getById(sessionContainer, id)
+	if err != nil {
+		return err
+	}
+
+	sess.Status = NotActive
 	return nil
 }
 

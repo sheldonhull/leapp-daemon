@@ -191,3 +191,31 @@ func SaveInIniFile(accessKeyId string, secretAccessKey string, sessionToken stri
 
 	return nil
 }
+
+func RemoveFromIniFile(profileName string) error {
+	iniFileMutex.Lock()
+	defer iniFileMutex.Unlock()
+
+	homeDir, err := file_system.GetHomeDir()
+	if err != nil {
+		return err
+	}
+
+	credentialsFilePath := homeDir + "/" + constant.CredentialsFilePath
+
+	if file_system.DoesFileExist(credentialsFilePath) {
+		credentialsFile, err := ini.Load(credentialsFilePath)
+		if err != nil {
+			return err
+		}
+
+		credentialsFile.DeleteSection(profileName)
+
+		err = aws_credentials_ini_file.OverwriteFile(credentialsFile, credentialsFilePath)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
