@@ -72,6 +72,14 @@ func CloseLogFile() {
 	_ = logFile.Close()
 }
 
+func GetHomeDir() (string, error) {
+	usr, err := user.Current()
+	if err != nil {
+		return "", err
+	}
+	return usr.HomeDir, nil
+}
+
 func createLogFile() error {
 	logFilePath, err := getLogFilePath()
 	if err != nil {
@@ -118,14 +126,4 @@ func getLogDirPath() (string, error) {
 	}
 	dirPath := fmt.Sprintf("%s/Library/logs/Leapp/daemon", homeDir)
 	return dirPath, nil
-}
-
-type LogWriter struct{}
-
-func GetHomeDir() (string, error) {
-	usr, err := user.Current()
-	if err != nil {
-		return "", err
-	}
-	return usr.HomeDir, nil
 }

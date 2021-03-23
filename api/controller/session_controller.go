@@ -3,7 +3,7 @@ package controller
 import (
 	"github.com/gin-gonic/gin"
 	"leapp_daemon/api/controller/dto/request_dto"
-	"leapp_daemon/api/controller/dto/request_dto/mfa_token_confirm"
+	"leapp_daemon/api/controller/dto/request_dto/confirm_mfa_token_dto"
 	"leapp_daemon/api/controller/dto/response_dto"
 	"leapp_daemon/logging"
 	"leapp_daemon/service"
@@ -33,17 +33,17 @@ func ListSessionController(context *gin.Context) {
 	context.JSON(http.StatusOK, responseDto.ToMap())
 }
 
-func MfaTokenConfirmController(context *gin.Context) {
+func ConfirmMfaTokenController(context *gin.Context) {
 	logging.SetContext(context)
 
-	requestDto := mfa_token_confirm.MfaTokenConfirmRequestDto{}
+	requestDto := confirm_mfa_token_dto.MfaTokenConfirmRequestDto{}
 	err := (&requestDto).Build(context)
 	if err != nil {
 		_ = context.Error(err)
 		return
 	}
 
-	err = service.ConfirmRotateSessionWithMfaToken(requestDto.SessionId, requestDto.MfaToken)
+	err = service.RotateSessionCredentialsWithMfaToken(requestDto.SessionId, requestDto.MfaToken)
 	if err != nil {
 		_ = context.Error(err)
 		return

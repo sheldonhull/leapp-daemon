@@ -1,4 +1,4 @@
-package federated_aws_session
+package federated_aws_session_dto
 
 import (
 	"github.com/gin-gonic/gin"

@@ -1,4 +1,4 @@
-package mfa_token_confirm
+package confirm_mfa_token_dto
 
 import (
 	"github.com/gin-gonic/gin"

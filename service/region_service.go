@@ -17,7 +17,7 @@ func EditAwsSessionRegion(sessionId string, region string) (*SessionAndRegion, e
 	// Check if the region is valid: we check it instantly as it is very simple
 	isRegionValid := aws_client.IsRegionValid(region)
 	if !isRegionValid {
-		return nil, errors.New("Region " + region + " is not a valid AWS region or is not currently in the supported list")
+		return nil, errors.New("Region " + region + " not valid")
 	}
 
 	// Get configuration

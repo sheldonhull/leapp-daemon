@@ -1,8 +1,9 @@
-package configuration
+package session
 
 import (
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
+	"leapp_daemon/core/configuration"
 	"leapp_daemon/core/constant"
 	"leapp_daemon/custom_error"
 	"strings"
@@ -36,7 +37,7 @@ type FederatedAwsRole struct {
 	// ParentRole string
 }
 
-func(sess *FederatedAwsSession) Rotate(configuration *Configuration, mfaToken *string) error {
+func(sess *FederatedAwsSession) RotateCredentials(configuration *configuration.Configuration, mfaToken *string) error {
 	// TODO: implement rotate method for federated
 	return nil
 }
@@ -49,7 +50,7 @@ func(sess *FederatedAwsSession) IsRotationIntervalExpired() (bool, error) {
 
 
 func GetFederatedAwsSession(id string) (*FederatedAwsSession, error) {
-	config, err := ReadConfiguration()
+	config, err := configuration.ReadConfiguration()
 	if err != nil {
 		return nil, err
 	}
@@ -65,7 +66,7 @@ func GetFederatedAwsSession(id string) (*FederatedAwsSession, error) {
 }
 
 func ListFederatedAwsSession(query string) ([]*FederatedAwsSession, error) {
-	config, err := ReadConfiguration()
+	config, err := configuration.ReadConfiguration()
 	if err != nil {
 		return nil, err
 	}
@@ -93,7 +94,7 @@ func ListFederatedAwsSession(query string) ([]*FederatedAwsSession, error) {
 
 func CreateFederatedAwsSession(name string, accountNumber string, roleName string, roleArn string, idpArn string,
 	region string, ssoUrl string) error {
-	config, err := ReadConfiguration()
+	config, err := configuration.ReadConfiguration()
 	if err != nil {
 		return err
 	}
@@ -136,7 +137,7 @@ func CreateFederatedAwsSession(name string, accountNumber string, roleName strin
 
 	config.FederatedAwsSessions = append(config.FederatedAwsSessions, &session)
 
-	err = UpdateConfiguration(config, false)
+	err = configuration.UpdateConfiguration(config, false)
 	if err != nil {
 		return err
 	}

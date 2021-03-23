@@ -57,7 +57,7 @@ func initializeRoutes(ginEngine *gin.Engine) {
 		v1.GET("/configuration/", controller.ReadConfigurationController)
 
 		v1.GET("/session/list", controller.ListSessionController)
-		v1.POST("/session/mfa/token/confirm", controller.MfaTokenConfirmController)
+		v1.POST("/session/mfa/token/confirm", controller.ConfirmMfaTokenController)
 
 		v1.GET("/session/plain/:id", controller.GetPlainAwsSessionController)
 		v1.POST("/session/plain", controller.CreatePlainAwsSessionController)

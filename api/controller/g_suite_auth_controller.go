@@ -3,7 +3,7 @@ package controller
 import (
 	"encoding/json"
 	"github.com/gin-gonic/gin"
-	"leapp_daemon/api/controller/dto/request_dto/g_suite_auth"
+	"leapp_daemon/api/controller/dto/request_dto/g_suite_auth_dto"
 	"leapp_daemon/api/controller/dto/response_dto"
 	"leapp_daemon/logging"
 	"leapp_daemon/service"
@@ -30,7 +30,7 @@ type GSuiteAuthSecondStepResponse struct {
 func GSuiteAuthFirstStepController(context *gin.Context) {
 	logging.SetContext(context)
 
-	requestDto := g_suite_auth.GSuiteAuthFirstStepRequestDto{}
+	requestDto := g_suite_auth_dto.GSuiteAuthFirstStepRequestDto{}
 	err := (&requestDto).Build(context)
 	if err != nil {
 		_ = context.Error(err)
@@ -61,7 +61,7 @@ func GSuiteAuthFirstStepController(context *gin.Context) {
 func GSuiteAuthSecondStepController(context *gin.Context) {
 	logging.SetContext(context)
 
-	requestDto := g_suite_auth.GSuiteAuthSecondStepRequestDto{}
+	requestDto := g_suite_auth_dto.GSuiteAuthSecondStepRequestDto{}
 	err := (&requestDto).Build(context)
 	if err != nil {
 		_ = context.Error(err)
@@ -99,7 +99,7 @@ func GSuiteAuthSecondStepController(context *gin.Context) {
 func GSuiteAuthThirdStepController(context *gin.Context) {
 	logging.SetContext(context)
 
-	requestDto := g_suite_auth.GSuiteAuthThirdStepRequestDto{}
+	requestDto := g_suite_auth_dto.GSuiteAuthThirdStepRequestDto{}
 	err := (&requestDto).Build(context)
 	if err != nil {
 		_ = context.Error(err)

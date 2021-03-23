@@ -24,12 +24,12 @@ func CreateConfigurationController(context *gin.Context) {
 func ReadConfigurationController(context *gin.Context) {
 	logging.SetContext(context)
 
-	configuration, err := configuration.ReadConfiguration()
+	config, err := configuration.ReadConfiguration()
 	if err != nil {
 		_ = context.Error(err)
 		return
 	}
 
-	responseDto := response_dto.MessageAndDataResponseDto{Message: "success", Data: configuration}
+	responseDto := response_dto.MessageAndDataResponseDto{Message: "success", Data: config}
 	context.JSON(http.StatusOK, responseDto.ToMap())
 }

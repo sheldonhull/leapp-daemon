@@ -2,9 +2,8 @@ package controller
 
 import (
 	"github.com/gin-gonic/gin"
-	"leapp_daemon/api/controller/dto/request_dto/plain_aws_session"
+	"leapp_daemon/api/controller/dto/request_dto/plain_aws_session_dto"
 	"leapp_daemon/api/controller/dto/response_dto"
-	"leapp_daemon/core/configuration"
 	"leapp_daemon/logging"
 	"leapp_daemon/service"
 	"net/http"
@@ -13,7 +12,7 @@ import (
 func GetPlainAwsSessionController(context *gin.Context) {
 	logging.SetContext(context)
 
-	requestDto := plain_aws_session.GetPlainAwsSessionRequestDto{}
+	requestDto := plain_aws_session_dto.GetPlainAwsSessionRequestDto{}
 	err := (&requestDto).Build(context)
 	if err != nil {
 		_ = context.Error(err)
@@ -33,14 +32,14 @@ func GetPlainAwsSessionController(context *gin.Context) {
 func CreatePlainAwsSessionController(context *gin.Context) {
 	logging.SetContext(context)
 
-	requestDto := plain_aws_session.CreatePlainAwsSessionRequestDto{}
+	requestDto := plain_aws_session_dto.CreatePlainAwsSessionRequestDto{}
 	err := (&requestDto).Build(context)
 	if err != nil {
 		_ = context.Error(err)
 		return
 	}
 
-	err = configuration.CreatePlainAwsSession(
+	err = service.CreatePlainAwsSession(
 		requestDto.Name,
 		requestDto.AccountNumber,
 		requestDto.Region,
@@ -48,7 +47,6 @@ func CreatePlainAwsSessionController(context *gin.Context) {
 		requestDto.AwsAccessKeyId,
 		requestDto.AwsSecretAccessKey,
 		requestDto.MfaDevice)
-
 	if err != nil {
 		_ = context.Error(err)
 		return
@@ -61,21 +59,21 @@ func CreatePlainAwsSessionController(context *gin.Context) {
 func EditPlainAwsSessionController(context *gin.Context) {
 	logging.SetContext(context)
 
-	requestUriDto := plain_aws_session.EditPlainAwsSessionUriRequestDto{}
+	requestUriDto := plain_aws_session_dto.EditPlainAwsSessionUriRequestDto{}
 	err := (&requestUriDto).Build(context)
 	if err != nil {
 		_ = context.Error(err)
 		return
 	}
 
-	requestDto := plain_aws_session.EditPlainAwsSessionRequestDto{}
+	requestDto := plain_aws_session_dto.EditPlainAwsSessionRequestDto{}
 	err = (&requestDto).Build(context)
 	if err != nil {
 		_ = context.Error(err)
 		return
 	}
 
-	err = configuration.UpdatePlainAwsSession(
+	err = service.UpdatePlainAwsSession(
 		requestUriDto.Id,
 		requestDto.Name,
 		requestDto.AccountNumber,
@@ -97,14 +95,14 @@ func EditPlainAwsSessionController(context *gin.Context) {
 func DeletePlainAwsSessionController(context *gin.Context) {
 	logging.SetContext(context)
 
-	requestDto := plain_aws_session.DeletePlainAwsSessionRequestDto{}
+	requestDto := plain_aws_session_dto.DeletePlainAwsSessionRequestDto{}
 	err := (&requestDto).Build(context)
 	if err != nil {
 		_ = context.Error(err)
 		return
 	}
 
-	err = configuration.DeletePlainAwsSession(requestDto.Id)
+	err = service.DeletePlainAwsSession(requestDto.Id)
 
 	if err != nil {
 		_ = context.Error(err)

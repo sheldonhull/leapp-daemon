@@ -1,4 +1,4 @@
-package aws_region
+package aws_region_dto
 
 import (
 	"github.com/gin-gonic/gin"

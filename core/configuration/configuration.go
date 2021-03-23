@@ -4,18 +4,20 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"leapp_daemon/core/constant"
 	"leapp_daemon/core/encryption"
 	"leapp_daemon/core/file_system"
+	"leapp_daemon/core/session"
 	"os"
 	"sync"
 )
 
+const configurationFilePath = `.Leapp/Leapp-lock.json`
+
 type Configuration struct {
 	SsoUrl               string
 	ProxyConfiguration   *ProxyConfiguration
-	FederatedAwsSessions []*FederatedAwsSession
-	PlainAwsSessions     []*PlainAwsSession
+	PlainAwsSessions     []*session.PlainAwsSession
+	FederatedAwsSessions []*session.FederatedAwsSession
 }
 
 type ProxyConfiguration struct {
@@ -40,7 +42,7 @@ func ReadConfiguration() (*Configuration, error) {
 	homeDir, err := file_system.GetHomeDir()
 	if err != nil { return nil, err }
 
-	configurationFilePath := fmt.Sprintf("%s/%s", homeDir, constant.ConfigurationFilePath)
+	configurationFilePath := fmt.Sprintf("%s/%s", homeDir, configurationFilePath)
 
 	encryptedText, err := ioutil.ReadFile(configurationFilePath)
 	if err != nil { return nil, err }
@@ -58,7 +60,7 @@ func UpdateConfiguration(configuration *Configuration, deleteExistingFile bool) 
 	homeDir, err := file_system.GetHomeDir()
 	if err != nil { return err }
 
-	configurationFilePath := fmt.Sprintf("%s/%s", homeDir, constant.ConfigurationFilePath)
+	configurationFilePath := fmt.Sprintf("%s/%s", homeDir, configurationFilePath)
 
 	if deleteExistingFile == true {
 		if file_system.DoesFileExist(configurationFilePath) {
@@ -81,6 +83,23 @@ func UpdateConfiguration(configuration *Configuration, deleteExistingFile bool) 
 	return nil
 }
 
+func (config *Configuration) GetPlainAwsSessions() ([]*session.PlainAwsSession, error) {
+	return config.PlainAwsSessions, nil
+}
+
+func (config *Configuration) SetPlainAwsSessions(plainAwsSessions []*session.PlainAwsSession) error {
+	config.PlainAwsSessions = plainAwsSessions
+	return nil
+}
+
+func (config *Configuration) Update() error {
+	err := UpdateConfiguration(config, false)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func getInitialConfiguration() *Configuration {
 	return &Configuration{
 		SsoUrl: "",
@@ -91,8 +110,8 @@ func getInitialConfiguration() *Configuration {
 			Username: "",
 			Password: "",
 		},
-		FederatedAwsSessions: make([]*FederatedAwsSession, 0),
-		PlainAwsSessions:     make([]*PlainAwsSession, 0),
+		FederatedAwsSessions: make([]*session.FederatedAwsSession, 0),
+		PlainAwsSessions:     make([]*session.PlainAwsSession, 0),
 	}
 }
 

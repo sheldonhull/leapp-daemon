@@ -2,7 +2,7 @@ package controller
 
 import (
 	"github.com/gin-gonic/gin"
-	"leapp_daemon/api/controller/dto/request_dto/aws_region"
+	"leapp_daemon/api/controller/dto/request_dto/aws_region_dto"
 	"leapp_daemon/api/controller/dto/response_dto"
 	"leapp_daemon/core/aws_client"
 	"leapp_daemon/logging"
@@ -20,7 +20,7 @@ func GetAwsRegionListController(context *gin.Context) {
 func EditAwsRegionController(context *gin.Context) {
 	logging.SetContext(context)
 
-	requestDto := aws_region.AwsRegionRequestDto{}
+	requestDto := aws_region_dto.AwsRegionRequestDto{}
 	err := (&requestDto).Build(context)
 	if err != nil {
 		_ = context.Error(err)

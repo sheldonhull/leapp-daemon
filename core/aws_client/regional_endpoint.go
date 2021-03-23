@@ -31,11 +31,16 @@ var regionalEndpoints = map[string]string {
 }
 
 func GetRegionalEndpoint(region *string) (*string, error) {
+	isRegionValid := IsRegionValid(*region)
+	if !isRegionValid {
+		return nil, errors.New("Region " + *region + " not valid")
+	}
+
 	i, ok := regionalEndpoints[*region]
 
 	if ok {
 		return &i, nil
 	} else {
-		return &i, errors.New("No such endpoint for requested region: " + *region)
+		return &i, errors.New("No such endpoint for region " + *region)
 	}
 }

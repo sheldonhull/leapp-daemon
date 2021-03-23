@@ -40,5 +40,4 @@ func Initialize(ticksInSeconds int, scheduledFunction ScheduledFunction) {
 func Close() {
 	ticker.Stop()
 	done <- true
-	logging.Info("Ticker stopped")
 }

@@ -1,4 +1,4 @@
-package g_suite_auth
+package g_suite_auth_dto
 
 import (
 	"github.com/gin-gonic/gin"
