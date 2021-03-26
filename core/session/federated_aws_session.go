@@ -166,7 +166,7 @@ func UpdateFederatedAwsSession(sessionContainer Container, id string, name strin
 	}
 
 	if found == false {
-		err = custom_error.NewBadRequestError(errors.New("Federated AWS session not found for Id: " + id))
+		err = custom_error.NewNotFoundError(errors.New("federated AWS session with id " + id + " not found"))
 		return err
 	}
 
@@ -192,7 +192,7 @@ func DeleteFederatedAwsSession(sessionContainer Container, id string) error {
 	}
 
 	if found == false {
-		err = custom_error.NewBadRequestError(errors.New("Federated AWS session not found for Id: " + id))
+		err = custom_error.NewNotFoundError(errors.New("federated AWS session with id " + id + " not found"))
 		return err
 	}
 
