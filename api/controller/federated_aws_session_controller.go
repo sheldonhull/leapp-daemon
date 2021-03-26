@@ -4,8 +4,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"leapp_daemon/api/controller/dto/request_dto/federated_aws_session_dto"
 	"leapp_daemon/api/controller/dto/response_dto"
+	"leapp_daemon/core/service"
 	"leapp_daemon/logging"
-	"leapp_daemon/service"
 	"net/http"
 )
 

@@ -1,7 +1,7 @@
 package service
 
 import (
-	"leapp_daemon/core/aws_session_token"
+	"leapp_daemon/core/aws/aws_session_token"
 	"leapp_daemon/core/configuration"
 	"leapp_daemon/core/session"
 )
@@ -23,6 +23,9 @@ func CreatePlainAwsSession(name string, accountNumber string, region string, use
 		awsAccessKeyId,
 		awsSecretAccessKey,
 		mfaDevice)
+	if err != nil {
+		return err
+	}
 
 	err = config.Update()
 	if err != nil {

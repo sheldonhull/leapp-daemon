@@ -13,6 +13,10 @@ type GSuiteAuthThirdStepRequestDto struct {
 }
 
 func (requestDto *GSuiteAuthThirdStepRequestDto) Build(context *gin.Context) error {
-	err := custom_error.NewBadRequestError(context.ShouldBindJSON(requestDto))
-	return err
+	err := context.ShouldBindJSON(requestDto)
+	if err != nil {
+		return custom_error.NewBadRequestError(err)
+	} else {
+		return nil
+	}
 }

@@ -5,8 +5,8 @@ import (
 	"leapp_daemon/api/controller/dto/request_dto"
 	"leapp_daemon/api/controller/dto/request_dto/confirm_mfa_token_dto"
 	"leapp_daemon/api/controller/dto/response_dto"
+	"leapp_daemon/core/service"
 	"leapp_daemon/logging"
-	"leapp_daemon/service"
 	"net/http"
 )
 

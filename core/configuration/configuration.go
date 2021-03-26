@@ -7,6 +7,7 @@ import (
 	"leapp_daemon/core/encryption"
 	"leapp_daemon/core/file_system"
 	"leapp_daemon/core/session"
+	"leapp_daemon/custom_error"
 	"os"
 	"sync"
 )
@@ -45,10 +46,10 @@ func ReadConfiguration() (*Configuration, error) {
 	configurationFilePath := fmt.Sprintf("%s/%s", homeDir, configurationFilePath)
 
 	encryptedText, err := ioutil.ReadFile(configurationFilePath)
-	if err != nil { return nil, err }
+	if err != nil { return nil, custom_error.NewNotFoundError(err) }
 
 	plainText, err := encryption.Decrypt(string(encryptedText))
-	if err != nil { return nil, err }
+	if err != nil { return nil, custom_error.NewBadRequestError(err) }
 
 	return unmarshalConfiguration(plainText), nil
 }
@@ -58,7 +59,7 @@ func UpdateConfiguration(configuration *Configuration, deleteExistingFile bool) 
 	defer configurationFileMutex.Unlock()
 
 	homeDir, err := file_system.GetHomeDir()
-	if err != nil { return err }
+	if err != nil { return custom_error.NewNotFoundError(err) }
 
 	configurationFilePath := fmt.Sprintf("%s/%s", homeDir, configurationFilePath)
 
@@ -66,19 +67,19 @@ func UpdateConfiguration(configuration *Configuration, deleteExistingFile bool) 
 		if file_system.DoesFileExist(configurationFilePath) {
 			err = os.Remove(configurationFilePath)
 			if err != nil {
-				return err
+				return custom_error.NewBadRequestError(err)
 			}
 		}
 	}
 
 	configurationJson, err := json.Marshal(configuration)
-	if err != nil { return err }
+	if err != nil { return custom_error.NewBadRequestError(err) }
 
 	encryptedConfigurationJson, err := encryption.Encrypt(string(configurationJson))
-	if err != nil { return err }
+	if err != nil { return custom_error.NewBadRequestError(err) }
 
 	err = ioutil.WriteFile(configurationFilePath, []byte(encryptedConfigurationJson), 0644)
-	if err != nil { return err }
+	if err != nil { return custom_error.NewBadRequestError(err) }
 
 	return nil
 }

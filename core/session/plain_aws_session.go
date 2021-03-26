@@ -2,14 +2,13 @@ package session
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/google/uuid"
-	"github.com/pkg/errors"
-	"leapp_daemon/core/aws_session_token"
+	"leapp_daemon/core/aws/aws_session_token"
 	"leapp_daemon/core/constant"
 	"leapp_daemon/core/websocket"
 	"leapp_daemon/custom_error"
 	"leapp_daemon/logging"
-	"log"
 	"strings"
 	"time"
 )
@@ -57,7 +56,6 @@ func(sess *PlainAwsSession) RotateCredentials(mfaToken *string) error {
 		}
 
 		if isRotationIntervalExpired {
-			println("Rotating session with id", sess.Id)
 			err = sess.RotatePlainAwsSessionCredentials(mfaToken)
 			if err != nil {
 				return nil
@@ -174,6 +172,46 @@ func (sess *PlainAwsSession) unmarshallSessionToken() (AwsSessionToken, error) {
 	return data, nil
 }
 
+func getById(sessionContainer Container, id string) (*PlainAwsSession, error) {
+	var sess *PlainAwsSession
+
+	sessions, err := sessionContainer.GetPlainAwsSessions()
+	if err != nil { return sess, err }
+
+	for index := range sessions {
+		if sessions[index].Id == id {
+			sess = sessions[index]
+			return sess, nil
+		}
+	}
+
+	err = custom_error.NewNotFoundError(fmt.Errorf("plain AWS session with id " + id + " not found"))
+	return sess, err
+}
+
+func sendMfaRequestMessage(sess *PlainAwsSession) error {
+	messageData := websocket.MfaTokenRequestData{
+		SessionId: sess.Id,
+	}
+
+	messageDataJson, err := json.Marshal(messageData)
+	if err != nil {
+		return custom_error.NewUnprocessableEntityError(err)
+	}
+
+	msg := websocket.Message{
+		MessageType: websocket.MfaTokenRequest,
+		Data:        string(messageDataJson),
+	}
+
+	err = websocket.SendMessage(msg)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func CreatePlainAwsSession(sessionContainer Container, name string, accountNumber string,
 	region string, user string, awsAccessKeyId string, awsSecretAccessKey string, mfaDevice string) error {
 
@@ -185,7 +223,7 @@ func CreatePlainAwsSession(sessionContainer Container, name string, accountNumbe
 	for _, sess := range sessions {
 		account := sess.Account
 		if account.AccountNumber == accountNumber && account.User == user {
-			err := custom_error.NewBadRequestError(errors.New("a session with the same account number and user is already present"))
+			err := custom_error.NewUnprocessableEntityError(fmt.Errorf("a session with the same account number and user is already present"))
 			return err
 		}
 	}
@@ -275,7 +313,7 @@ func UpdatePlainAwsSession(sessionContainer Container, id string, name string, a
 	}
 
 	if found == false {
-		err = custom_error.NewBadRequestError(errors.New("Plain AWS session not found for Id: " + id))
+		err = custom_error.NewBadRequestError(fmt.Errorf("plain AWS session with id " + id + " not found"))
 		return err
 	}
 
@@ -301,7 +339,7 @@ func DeletePlainAwsSession(sessionContainer Container, id string) error {
 	}
 
 	if found == false {
-		err = custom_error.NewBadRequestError(errors.New("Plain AWS session not found for Id: " + id))
+		err = custom_error.NewBadRequestError(fmt.Errorf("plain AWS session with id " + id + " not found"))
 		return err
 	}
 
@@ -315,6 +353,7 @@ func DeletePlainAwsSession(sessionContainer Container, id string) error {
 
 func IsMfaRequiredForPlainAwsSession(sessionContainer Container, id string) (bool, error) {
 	sess, err := getById(sessionContainer, id)
+
 	if err != nil {
 		return false, err
 	}
@@ -328,7 +367,6 @@ func StartPlainAwsSession(sessionContainer Container, id string, mfaToken *strin
 		return err
 	}
 
-	println("Rotating session with id", sess.Id)
 	err = sess.RotatePlainAwsSessionCredentials(mfaToken)
 	if err != nil { return err }
 
@@ -336,53 +374,11 @@ func StartPlainAwsSession(sessionContainer Container, id string, mfaToken *strin
 }
 
 func StopPlainAwsSession(sessionContainer Container, id string) error {
-	sess, err := getById(sessionContainer, id)
+	sess, err := GetPlainAwsSession(sessionContainer, id)
 	if err != nil {
 		return err
 	}
 
 	sess.Status = NotActive
 	return nil
-}
-
-func sendMfaRequestMessage(sess *PlainAwsSession) error {
-	messageData := websocket.MfaTokenRequestData{
-		SessionId: sess.Id,
-	}
-
-	messageDataJson, err := json.Marshal(messageData)
-	if err != nil {
-		return err
-	}
-
-	msg := websocket.Message{
-		MessageType: websocket.MfaTokenRequest,
-		Data:        string(messageDataJson),
-	}
-
-	err = websocket.SendMessage(msg)
-	if err != nil {
-		return err
-	}
-
-	log.Println("sent message", string(messageDataJson))
-
-	return nil
-}
-
-func getById(sessionContainer Container, id string) (*PlainAwsSession, error) {
-	var sess *PlainAwsSession
-
-	sessions, err := sessionContainer.GetPlainAwsSessions()
-	if err != nil { return sess, err }
-
-	for index := range sessions {
-		if sessions[index].Id == id {
-			sess = sessions[index]
-			return sess, nil
-		}
-	}
-
-	err = custom_error.NewBadRequestError(errors.New("Plain AWS session not found for Id: " + id))
-	return sess, err
 }

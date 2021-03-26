@@ -3,11 +3,11 @@ package main
 import (
 	"leapp_daemon/api/engine"
 	"leapp_daemon/core/configuration"
+	"leapp_daemon/core/service"
 	"leapp_daemon/core/session"
 	"leapp_daemon/core/timer"
 	"leapp_daemon/core/websocket"
 	"leapp_daemon/logging"
-	"leapp_daemon/service"
 )
 
 func main3() {
