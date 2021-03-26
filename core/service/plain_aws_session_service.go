@@ -22,6 +22,9 @@ func CreatePlainAwsSession(name string, accountNumber string, region string, use
 		awsAccessKeyId,
 		awsSecretAccessKey,
 		mfaDevice)
+	if err != nil {
+		return err
+	}
 
 	err = config.Update()
 	if err != nil {

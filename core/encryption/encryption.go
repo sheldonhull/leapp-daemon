@@ -4,8 +4,8 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
+	"fmt"
 	"github.com/denisbrodbeck/machineid"
-	"github.com/pkg/errors"
 	"io"
 )
 
@@ -73,7 +73,7 @@ func Decrypt(encryptedText string) (string, error) {
 	encryptedTextByteSlice := []byte(encryptedText)
 
 	if len(encryptedTextByteSlice) <= nonceSize {
-		return "", errors.New("encrypted file's length is shorter than the expected nonce size")
+		return "", fmt.Errorf("encrypted file's length is shorter than the expected nonce size")
 	}
 
 	nonce, ciphertext := encryptedTextByteSlice[:nonceSize], encryptedTextByteSlice[nonceSize:]

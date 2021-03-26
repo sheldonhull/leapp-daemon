@@ -20,11 +20,19 @@ type EditFederatedAwsSessionRequestDto struct {
 }
 
 func (requestDto *EditFederatedAwsSessionRequestDto) Build(context *gin.Context) error {
-	err := custom_error.NewBadRequestError(context.ShouldBindJSON(requestDto))
-	return err
+	err := context.ShouldBindJSON(requestDto)
+	if err != nil {
+		return custom_error.NewBadRequestError(err)
+	} else {
+		return nil
+	}
 }
 
 func (requestDto *EditFederatedAwsSessionUriRequestDto) Build(context *gin.Context) error {
-	err := custom_error.NewBadRequestError(context.ShouldBindUri(requestDto))
-	return err
+	err := context.ShouldBindUri(requestDto)
+	if err != nil {
+		return custom_error.NewBadRequestError(err)
+	} else {
+		return nil
+	}
 }

@@ -6,7 +6,6 @@ import (
 	"github.com/PuerkitoBio/goquery"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sts"
-	"github.com/pkg/errors"
 	"golang.org/x/net/publicsuffix"
 	"log"
 	"net"
@@ -274,7 +273,7 @@ func GSuiteAuthFirstStepService(username string, password string) (url.Values, s
 		captchaPictureSrc, found := goquery.NewDocumentFromNode(captchaImgDiv.Children().Nodes[0]).Attr("src")
 
 		if !found {
-			log.Println(errors.New("captcha image not found but requested"))
+			log.Println(fmt.Errorf("captcha image not found but requested"))
 		}
 
 		var err error
@@ -715,7 +714,7 @@ func extractInputsByFormID(doc *goquery.Document, formID ...string) (url.Values,
 		}
 		return formData, actionURL, err
 	}
-	return url.Values{}, "", errors.New("could not find any forms matching the provided IDs")
+	return url.Values{}, "", fmt.Errorf("could not find any forms matching the provided IDs")
 }
 
 func extractInputsByFormQuery(doc *goquery.Document, formQuery string) (url.Values, string, error) {
@@ -742,7 +741,7 @@ func extractInputsByFormQuery(doc *goquery.Document, formQuery string) (url.Valu
 
 	actionURL, err := generateFullURLIfRelative(actionAttr, currentURL)
 	if err != nil {
-		return formData, "", errors.Wrap(err, "error getting action URL")
+		return formData, "", err
 	}
 
 	query = fmt.Sprintf("form%s", formQuery)
@@ -767,7 +766,7 @@ func generateFullURLIfRelative(destination, currentPageURL string) (string, erro
 	if string(destination[0]) == "/" {
 		currentURLParsed, err := url.Parse(currentPageURL)
 		if err != nil {
-			return "", errors.Wrap(err, "error generating full URL")
+			return "", err
 		}
 
 		return fmt.Sprintf("%s://%s%s", currentURLParsed.Scheme, currentURLParsed.Host, destination), nil
@@ -807,7 +806,7 @@ func mustFindInputByName(doc *goquery.Document, name string) string {
 	doc.Find(q).Each(func(i int, s *goquery.Selection) {
 		val, ok := s.Attr("value")
 		if !ok {
-			log.Println(errors.New("mustFindInputByName error"))
+			log.Println(fmt.Errorf("mustFindInputByName error"))
 		}
 		fieldValue = val
 	})

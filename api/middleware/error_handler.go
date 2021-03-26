@@ -16,6 +16,7 @@ func (*errorHandler) Handle(context *gin.Context) {
 	var code int
 	var err error
 	var errString string
+	var stackTrace []runtime.Frame
 
 	defer func() {
 		panicErr := recover()
@@ -24,13 +25,21 @@ func (*errorHandler) Handle(context *gin.Context) {
 			if panicErr != nil {
 				code = http.StatusInternalServerError
 				errString = fmt.Sprintf("%s", panicErr)
-			} else if len(context.Errors) > 0 {
+				stackTrace = custom_error.GetStackTrace()
+			} else if err != nil {
 				errString = err.Error()
+
+				switch err.(type) {
+				case custom_error.CustomError:
+					stackTrace = err.(custom_error.CustomError).StackTrace
+				default:
+					stackTrace = make([]runtime.Frame, 0)
+				}
 			}
 
-			errorMap := gin.H{"statusCode": code, "error": errString, "stackTrace": getStackTrace(), "context": util.NewContext(context)}
+			errorMap := gin.H{"statusCode": code, "error": errString, "stackTrace": stackTrace, "context": util.NewContext(context)}
 
-			logging.Entry().Error(errString)
+			logging.Entry().WithField("stackTrace", stackTrace).Error(errString)
 			context.JSON(code, errorMap)
 		}
 	}()
@@ -39,6 +48,7 @@ func (*errorHandler) Handle(context *gin.Context) {
 
 	if len(context.Errors) > 0 {
 		err = context.Errors[0]
+		err = err.(*gin.Error).Err
 	} else {
 		return
 	}
@@ -52,30 +62,3 @@ func (*errorHandler) Handle(context *gin.Context) {
 }
 
 var ErrorHandler = &errorHandler{}
-
-type stack []uintptr
-
-func callers() *stack {
-	const depth = 32
-	var pcs [depth]uintptr
-	n := runtime.Callers(3, pcs[:])
-	var st stack = pcs[0:n]
-	return &st
-}
-
-func getStackTrace() []runtime.Frame {
-	clrs := *callers()
-
-	var frames []runtime.Frame
-	callersFrames := runtime.CallersFrames(clrs)
-
-	for {
-		fr, more := callersFrames.Next()
-		frames = append(frames, fr)
-		if !more {
-			break
-		}
-	}
-
-	return frames
-}

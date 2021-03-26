@@ -2,8 +2,8 @@ package session
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/google/uuid"
-	"github.com/pkg/errors"
 	"leapp_daemon/core/aws/aws_session_token"
 	"leapp_daemon/core/constant"
 	"leapp_daemon/core/websocket"
@@ -191,7 +191,7 @@ func getById(sessionContainer Container, id string) (*PlainAwsSession, error) {
 		}
 	}
 
-	err = custom_error.NewNotFoundError(errors.New("plain AWS session with id " + id + " not found"))
+	err = custom_error.NewNotFoundError(fmt.Errorf("plain AWS session with id " + id + " not found"))
 	return sess, err
 }
 
@@ -229,7 +229,7 @@ func CreatePlainAwsSession(sessionContainer Container, name string, accountNumbe
 	for _, sess := range sessions {
 		account := sess.Account
 		if account.AccountNumber == accountNumber && account.User == user {
-			err := custom_error.NewUnprocessableEntityError(errors.New("a session with the same account number and user is already present"))
+			err := custom_error.NewUnprocessableEntityError(fmt.Errorf("a session with the same account number and user is already present"))
 			return err
 		}
 	}
@@ -319,7 +319,7 @@ func UpdatePlainAwsSession(sessionContainer Container, id string, name string, a
 	}
 
 	if found == false {
-		err = custom_error.NewBadRequestError(errors.New("plain AWS session with id " + id + " not found"))
+		err = custom_error.NewBadRequestError(fmt.Errorf("plain AWS session with id " + id + " not found"))
 		return err
 	}
 
@@ -345,7 +345,7 @@ func DeletePlainAwsSession(sessionContainer Container, id string) error {
 	}
 
 	if found == false {
-		err = custom_error.NewBadRequestError(errors.New("plain AWS session with id " + id + " not found"))
+		err = custom_error.NewBadRequestError(fmt.Errorf("plain AWS session with id " + id + " not found"))
 		return err
 	}
 

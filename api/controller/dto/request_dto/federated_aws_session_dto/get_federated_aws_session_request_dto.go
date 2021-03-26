@@ -10,6 +10,10 @@ type GetFederatedAwsSessionRequestDto struct {
 }
 
 func (requestDto *GetFederatedAwsSessionRequestDto) Build(context *gin.Context) error {
-	err := custom_error.NewBadRequestError(context.ShouldBindUri(requestDto))
-	return err
+	err := context.ShouldBindUri(requestDto)
+	if err != nil {
+		return custom_error.NewBadRequestError(err)
+	} else {
+		return nil
+	}
 }

@@ -26,6 +26,7 @@ func InitializeLogger() {
 
 	// TODO: export error level, which should depend on the environment
 	logrus.SetLevel(logrus.InfoLevel)
+	// TODO: check other formatters
 	logrus.SetFormatter(&logrus.JSONFormatter{ PrettyPrint: true})
 	writer := io.MultiWriter(os.Stderr, logFile)
 	logrus.SetOutput(writer)

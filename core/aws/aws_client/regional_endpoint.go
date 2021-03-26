@@ -1,6 +1,8 @@
 package aws_client
 
-import "github.com/pkg/errors"
+import (
+	"fmt"
+)
 
 var regionalEndpoints = map[string]string {
 	"af-south-1": "https://sts.af-south-1.amazonaws.com",
@@ -33,7 +35,7 @@ var regionalEndpoints = map[string]string {
 func GetRegionalEndpoint(region *string) (*string, error) {
 	isRegionValid := IsRegionValid(*region)
 	if !isRegionValid {
-		return nil, errors.New("Region " + *region + " not valid")
+		return nil, fmt.Errorf("Region " + *region + " not valid")
 	}
 
 	i, ok := regionalEndpoints[*region]
@@ -41,6 +43,6 @@ func GetRegionalEndpoint(region *string) (*string, error) {
 	if ok {
 		return &i, nil
 	} else {
-		return &i, errors.New("No such endpoint for region " + *region)
+		return &i, fmt.Errorf("No such endpoint for region " + *region)
 	}
 }

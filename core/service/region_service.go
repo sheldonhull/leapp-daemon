@@ -1,7 +1,7 @@
 package service
 
 import (
-	"github.com/pkg/errors"
+	"fmt"
 	"leapp_daemon/core/aws/aws_client"
 	"leapp_daemon/core/configuration"
 	"leapp_daemon/custom_error"
@@ -10,7 +10,7 @@ import (
 func EditAwsSessionRegion(sessionId string, region string) error {
 	isRegionValid := aws_client.IsRegionValid(region)
 	if !isRegionValid {
-		return custom_error.NewUnprocessableEntityError(errors.New("Region " + region + " not valid"))
+		return custom_error.NewUnprocessableEntityError(fmt.Errorf("Region " + region + " not valid"))
 	}
 
 	config, err := configuration.ReadConfiguration()
@@ -37,5 +37,5 @@ func EditAwsSessionRegion(sessionId string, region string) error {
 		}
 	}
 
-	return custom_error.NewUnprocessableEntityError(errors.New("No valid AWS session found for editing region"))
+	return custom_error.NewUnprocessableEntityError(fmt.Errorf("no valid AWS session found for editing region"))
 }

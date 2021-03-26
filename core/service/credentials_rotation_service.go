@@ -1,7 +1,7 @@
 package service
 
 import (
-	"github.com/pkg/errors"
+	"fmt"
 	"leapp_daemon/core/configuration"
 )
 
@@ -54,7 +54,7 @@ func RotateSessionCredentialsWithMfaToken(sessionId string, mfaToken string) err
 	}
 
 	if !found {
-		return errors.New("No session found with id " + sessionId)
+		return fmt.Errorf("No session found with id " + sessionId)
 	}
 
 	err = config.Update()
