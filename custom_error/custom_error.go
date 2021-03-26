@@ -5,30 +5,26 @@ import (
 	"net/http"
 )
 
-type BadRequestError struct{
+type CustomError struct{
 	StatusCode int
 	Message    error
 }
 
-func (err BadRequestError) Error() string {
-	return fmt.Sprintf(`%+v`, err.Message)
-}
-
-type UnprocessableEntityError struct{
-	StatusCode int
-	Message    error
-}
-
-func (err UnprocessableEntityError) Error() string {
+func (err CustomError) Error() string {
 	return fmt.Sprintf(`%+v`, err.Message)
 }
 
 func NewBadRequestError(err error) error {
 	if err == nil { return nil }
-	return BadRequestError{ StatusCode: http.StatusBadRequest, Message: err }
+	return CustomError{ StatusCode: http.StatusBadRequest, Message: err }
 }
 
 func NewUnprocessableEntityError(err error) error {
 	if err == nil { return nil }
-	return UnprocessableEntityError{ StatusCode: http.StatusUnprocessableEntity, Message: err }
+	return CustomError{ StatusCode: http.StatusUnprocessableEntity, Message: err }
+}
+
+func NewNotFoundError(err error) error {
+	if err == nil { return nil }
+	return CustomError{ StatusCode: http.StatusNotFound, Message: err }
 }

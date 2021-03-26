@@ -44,10 +44,8 @@ func (*errorHandler) Handle(context *gin.Context) {
 	}
 
 	switch err.(type) {
-	case custom_error.BadRequestError:
-		code = http.StatusBadRequest
-	case custom_error.UnprocessableEntityError:
-		code = http.StatusUnprocessableEntity
+	case custom_error.CustomError:
+		code = err.(custom_error.CustomError).StatusCode
 	default:
 		code = http.StatusInternalServerError
 	}
