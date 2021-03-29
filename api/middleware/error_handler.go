@@ -27,12 +27,12 @@ func (*errorHandler) Handle(context *gin.Context) {
 				errString = fmt.Sprintf("%s", panicErr)
 				stackTrace = custom_error.GetStackTrace()
 			} else if err != nil {
-				errString = err.Error()
-
 				switch err.(type) {
 				case custom_error.CustomError:
+					errString = err.Error()
 					stackTrace = err.(custom_error.CustomError).StackTrace
 				default:
+					errString = fmt.Sprintf("%+v", err)
 					stackTrace = make([]runtime.Frame, 0)
 				}
 			}

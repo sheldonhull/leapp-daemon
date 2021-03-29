@@ -1,16 +1,9 @@
 package custom_error
 
 import (
-	"fmt"
 	"net/http"
 	"runtime"
 )
-
-type CustomError struct{
-	StatusCode int
-	Message    error
-	StackTrace []runtime.Frame
-}
 
 type stack []uintptr
 
@@ -39,18 +32,28 @@ func GetStackTrace() []runtime.Frame {
 	return frames
 }
 
+type CustomError struct{
+	StatusCode int
+	Err        error
+	StackTrace []runtime.Frame
+}
+
 func (err CustomError) Error() string {
-	return fmt.Sprintf(`%+v`, err.Message)
+	return err.Err.Error()
 }
 
 func NewBadRequestError(err error) CustomError {
-	return CustomError{ StatusCode: http.StatusBadRequest, Message: err, StackTrace: GetStackTrace()}
+	return CustomError{ StatusCode: http.StatusBadRequest, Err: err, StackTrace: GetStackTrace() }
 }
 
 func NewUnprocessableEntityError(err error) CustomError {
-	return CustomError{ StatusCode: http.StatusUnprocessableEntity, Message: err, StackTrace: GetStackTrace() }
+	return CustomError{ StatusCode: http.StatusUnprocessableEntity, Err: err, StackTrace: GetStackTrace() }
 }
 
 func NewNotFoundError(err error) CustomError {
-	return CustomError{ StatusCode: http.StatusNotFound, Message: err, StackTrace: GetStackTrace() }
+	return CustomError{ StatusCode: http.StatusNotFound, Err: err, StackTrace: GetStackTrace() }
+}
+
+func NewInternalServerError(err error) CustomError {
+	return CustomError{ StatusCode: http.StatusInternalServerError, Err: err, StackTrace: GetStackTrace() }
 }
