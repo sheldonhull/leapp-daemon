@@ -313,7 +313,7 @@ func UpdatePlainAwsSession(sessionContainer Container, id string, name string, a
 	}
 
 	if found == false {
-		err = custom_error.NewBadRequestError(fmt.Errorf("plain AWS session with id " + id + " not found"))
+		err = custom_error.NewNotFoundError(fmt.Errorf("plain AWS session with id " + id + " not found"))
 		return err
 	}
 
@@ -339,7 +339,7 @@ func DeletePlainAwsSession(sessionContainer Container, id string) error {
 	}
 
 	if found == false {
-		err = custom_error.NewBadRequestError(fmt.Errorf("plain AWS session with id " + id + " not found"))
+		err = custom_error.NewNotFoundError(fmt.Errorf("plain AWS session with id " + id + " not found"))
 		return err
 	}
 

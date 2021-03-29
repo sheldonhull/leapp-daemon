@@ -74,7 +74,7 @@ func Decrypt(encryptedText string) (string, error) {
 	encryptedTextByteSlice := []byte(encryptedText)
 
 	if len(encryptedTextByteSlice) <= nonceSize {
-		return "", custom_error.NewBadRequestError(fmt.Errorf("encrypted file's length is shorter than the expected nonce size"))
+		return "", custom_error.NewInternalServerError(fmt.Errorf("encrypted file's length is shorter than the expected nonce size"))
 	}
 
 	nonce, ciphertext := encryptedTextByteSlice[:nonceSize], encryptedTextByteSlice[nonceSize:]

@@ -57,7 +57,7 @@ func CreateFederatedAwsSession(sessionContainer Container, name string, accountN
 	for _, session := range sessions {
 		account := session.Account
 		if account.AccountNumber == accountNumber && account.Role.Name == roleName {
-			err = custom_error.NewBadRequestError(fmt.Errorf("an account with the same account number and " +
+			err = custom_error.NewUnprocessableEntityError(fmt.Errorf("an account with the same account number and " +
 				"role name is already present"))
 			return err
 		}
@@ -105,7 +105,7 @@ func GetFederatedAwsSession(sessionContainer Container, id string) (*FederatedAw
 		}
 	}
 
-	return nil, custom_error.NewBadRequestError(fmt.Errorf("No session found with id:" + id))
+	return nil, custom_error.NewNotFoundError(fmt.Errorf("No session found with id:" + id))
 }
 
 func ListFederatedAwsSession(sessionContainer Container, query string) ([]*FederatedAwsSession, error) {

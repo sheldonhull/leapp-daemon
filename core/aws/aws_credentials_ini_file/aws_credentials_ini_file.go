@@ -11,28 +11,28 @@ func CreateNamedProfileSection(credentialsFile *ini.File, profileName string, ac
 
 	section, err := credentialsFile.NewSection(profileName)
 	if err != nil {
-		return nil, custom_error.NewBadRequestError(err)
+		return nil, custom_error.NewInternalServerError(err)
 	}
 
 	_, err = section.NewKey("aws_access_key_id", accessKeyId)
 	if err != nil {
-		return nil, custom_error.NewBadRequestError(err)
+		return nil, custom_error.NewInternalServerError(err)
 	}
 
 	_, err = section.NewKey("aws_secret_access_key", secretAccessKey)
 	if err != nil {
-		return nil, custom_error.NewBadRequestError(err)
+		return nil, custom_error.NewInternalServerError(err)
 	}
 
 	_, err = section.NewKey("aws_session_token", sessionToken)
 	if err != nil {
-		return nil, custom_error.NewBadRequestError(err)
+		return nil, custom_error.NewInternalServerError(err)
 	}
 
 	if region != "" {
 		_, err = section.NewKey("region", region)
 		if err != nil {
-			return nil, custom_error.NewBadRequestError(err)
+			return nil, custom_error.NewInternalServerError(err)
 		}
 	}
 
