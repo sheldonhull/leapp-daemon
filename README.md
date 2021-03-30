@@ -19,7 +19,7 @@ for opening issues, coding standards, and notes on development.
 Editor preferences are available in the [editor config](.editorconfig) for easy use in
 common text editors. Read more and download plugins at [editorconfig.org](http://editorconfig.org).
 
-We suggest you to come to our [Slack](https://join.slack.com/t/noovolari/shared_invite/zt-noc0ju05-18_GRX~Zi6Jz8~95j5CySA) and discuss development with us; we will point you in the right direction.
+**We suggest you to come to our [Slack](https://join.slack.com/t/noovolari/shared_invite/zt-noc0ju05-18_GRX~Zi6Jz8~95j5CySA) and discuss development with us; we will point you in the right direction as fast as possible.**
 
 # Developing
 Development on leapp-daemon can be done on Mac, Windows, or Linux as long as you have Go installed. See the [go.mod](https://github.com/Noovolari/leapp-daemon/blob/master/go.mod) file located in the project root for the correct Go version.
