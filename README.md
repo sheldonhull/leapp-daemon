@@ -24,7 +24,7 @@ We suggest you to come to our [Slack](https://join.slack.com/t/noovolari/shared_
 # Developing
 Development on leapp-daemon can be done on Mac, Windows, or Linux as long as you have Go installed. See the [go.mod](https://github.com/Noovolari/leapp-daemon/blob/master/go.mod) file located in the project root for the correct Go version.
 
-Clone the repository, launch ```go go get ./...``` and you're good to go for development.
+Clone the repository, launch ```go get ./...``` and you're good to go for development.
 
 ## Good first issues
 We welcome anyone that want to contribute to the project. You can find the [list of good first issues here](https://github.com/Noovolari/leapp-daemon/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22).
