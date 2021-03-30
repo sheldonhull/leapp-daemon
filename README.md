@@ -27,13 +27,13 @@ Development on leapp-daemon can be done on Mac, Windows, or Linux as long as you
 Clone the repository, launch ```go get ./...``` and you're good to go for development.
 
 ## Good first issues
-We welcome anyone that want to contribute to the project. You can find the [list of good first issues here](https://github.com/Noovolari/leapp-daemon/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22).
+We welcome anyone that want to contribute to the project. Here you can find the [list of good first issues](https://github.com/Noovolari/leapp-daemon/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22).
 
 # Logs
 
 
 ## Documentation
-Here you can find our [documentation](https://github.com/Noovolari/leapp/wiki).
+Here you can find our [documentation](https://github.com/Noovolari/leapp-daemon/wiki).
 
 ## Links
 - [Roadmap](https://github.com/Noovolari/leapp/projects/4): view our next steps and stay up to date
