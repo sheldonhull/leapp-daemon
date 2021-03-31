@@ -8,16 +8,20 @@ Leapp Daemon
 
 ![logo](.github/images/README-1.png)
 
-Leapp Daemon is the core Business logic of the [Leapp project](https://github.com/Noovolari/leapp).
-> The project is *NOT* current in use, please refer to [Leapp](https://github.com/Noovolari/leapp) for the Stable version of the App.
+Leapp-daemon is the core Business logic of the [Leapp project](https://github.com/Noovolari/leapp).
+
+The daemon is the engine designed to manage and secure cloud access in multi-account environments.
+
+> The project is in active development to replace the current core logic of [Leapp](https://github.com/Noovolari/leapp)
+
+> If you wanted to download Leapp click [here to download the stable version](https://github.com/Noovolari/leapp)
 
 # Contributing
 
-Please read through our [contributing guidelines](.github/CONTRIBUTING.md) and [code of conduct](.github/CODE_OF_CONDUCT.md). Included are directions
+Please read through our [contributing guidelines](.github/CONTRIBUTING.md) and [code of conduct](.github/CODE_OF_CONDUCT.md). We included directions
 for opening issues, coding standards, and notes on development.
 
-Editor preferences are available in the [editor config](.editorconfig) for easy use in
-common text editors. Read more and download plugins at [editorconfig.org](http://editorconfig.org).
+Editor preferences are available in the [editor config](.editorconfig) for easy use in common text editors. Read more and download plugins at [editorconfig.org](http://editorconfig.org).
 
 **We suggest you to come to our [Slack](https://join.slack.com/t/noovolari/shared_invite/zt-noc0ju05-18_GRX~Zi6Jz8~95j5CySA) and discuss development with us; we will point you in the right direction as fast as possible.**
 
@@ -26,10 +30,30 @@ Development on leapp-daemon can be done on Mac, Windows, or Linux as long as you
 
 ## Quickstart
 - Clone the repository with ```git clone https://github.com/Noovolari/leapp-daemon```
+- Change directory into the project root
 - Install dependencies with ```go get ./...```
 
+## Basic functionality
+Leapp-daemon is a set of REST APIs wrapped around an http client exposed on port 8080.
+
+### Entry-point
+The entry point is [main.go](https://github.com/Noovolari/leapp-daemon/blob/master/main.go) file located in the project root; the main elements are:
+- The [configuration](https://github.com/Noovolari/leapp-daemon/blob/616470d9e8d668dd067eb63cac2024a2b463f67a/core/configuration/configuration.go) represent the current state of the software
+- The [http-engine](https://github.com/Noovolari/leapp-daemon/blob/616470d9e8d668dd067eb63cac2024a2b463f67a/api/engine/engine.go) to respond to API calls
+- The websocket for enabling full-duplex communication against multiple consumers
+- The [timer](https://github.com/Noovolari/leapp-daemon/blob/616470d9e8d668dd067eb63cac2024a2b463f67a/core/timer/timer.go) to auto-rotate credentials
+
+## Project Structure
+The project main areas are:
+- **api**: interfaces for interacting with core logic
+- **core**: business logic
+- **service**: middleware that serves as communication between api and core
+
+## Testing
+To test business logic you can use any API client like [Insomnia](https://insomnia.rest/) or [Postman](https://www.postman.com/).
+
 ## Good first issues
-We welcome anyone that want to contribute to the project. Here you can find the [list of good first issues](https://github.com/Noovolari/leapp-daemon/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22).
+We welcome anyone that want to contribute to the project. Here's the [list of good first issues](https://github.com/Noovolari/leapp-daemon/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22).
 
 # Logs
 
