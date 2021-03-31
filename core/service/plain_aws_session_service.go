@@ -7,7 +7,7 @@ import (
 )
 
 func CreatePlainAwsSession(name string, accountNumber string, region string, user string,
-	awsAccessKeyId string, awsSecretAccessKey string, mfaDevice string) error {
+	awsAccessKeyId string, awsSecretAccessKey string, mfaDevice string, profile string) error {
 
 	config, err := configuration.ReadConfiguration()
 	if err != nil {
@@ -22,7 +22,8 @@ func CreatePlainAwsSession(name string, accountNumber string, region string, use
 		user,
 		awsAccessKeyId,
 		awsSecretAccessKey,
-		mfaDevice)
+		mfaDevice,
+		profile)
 	if err != nil {
 		return err
 	}
@@ -52,14 +53,14 @@ func GetPlainAwsSession(id string) (*session.PlainAwsSession, error) {
 }
 
 func UpdatePlainAwsSession(sessionId string, name string, accountNumber string, region string, user string,
-	awsAccessKeyId string, awsSecretAccessKey string, mfaDevice string) error {
+	awsAccessKeyId string, awsSecretAccessKey string, mfaDevice string, profile string) error {
 
 	config, err := configuration.ReadConfiguration()
 	if err != nil {
 		return err
 	}
 
-	err = session.UpdatePlainAwsSession(config, sessionId, name, accountNumber, region, user, awsAccessKeyId, awsSecretAccessKey, mfaDevice)
+	err = session.UpdatePlainAwsSession(config, sessionId, name, accountNumber, region, user, awsAccessKeyId, awsSecretAccessKey, mfaDevice, profile)
 	if err != nil {
 		return err
 	}

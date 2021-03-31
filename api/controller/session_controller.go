@@ -52,3 +52,16 @@ func ConfirmMfaTokenController(context *gin.Context) {
 	responseDto := response_dto.MessageAndDataResponseDto{Message: "success", Data: requestDto.SessionId }
 	context.JSON(http.StatusOK, responseDto.ToMap())
 }
+
+func GetAwsNamedProfileListController(context *gin.Context) {
+	logging.SetContext(context)
+
+	namedProfiles, err := service.ListAllSNamedProfiles()
+	if err != nil {
+		_ = context.Error(err)
+		return
+	}
+
+	responseDto := response_dto.MessageAndDataResponseDto{Message: "success", Data: namedProfiles }
+	context.JSON(http.StatusOK, responseDto.ToMap())
+}

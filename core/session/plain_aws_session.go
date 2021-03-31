@@ -16,10 +16,12 @@ import (
 
 
 type PlainAwsSession struct {
-	Id        string
-	Status    Status
-	StartTime string
-	Account   *PlainAwsAccount
+	Id           string
+	Status       Status
+	StartTime    string
+	Account      *PlainAwsAccount
+	Profile string
+
 }
 
 type PlainAwsAccount struct {
@@ -213,7 +215,7 @@ func sendMfaRequestMessage(sess *PlainAwsSession) error {
 }
 
 func CreatePlainAwsSession(sessionContainer Container, name string, accountNumber string,
-	region string, user string, awsAccessKeyId string, awsSecretAccessKey string, mfaDevice string) error {
+	region string, user string, awsAccessKeyId string, awsSecretAccessKey string, mfaDevice string, profile string) error {
 
 	sessions, err := sessionContainer.GetPlainAwsSessions()
 	if err != nil {
@@ -236,16 +238,24 @@ func CreatePlainAwsSession(sessionContainer Container, name string, accountNumbe
 		AwsAccessKeyId: awsAccessKeyId,
 		AwsSecretAccessKey: awsSecretAccessKey,
 		MfaDevice:     mfaDevice,
+
 	}
 
 	uuidString := uuid.New().String()
 	uuidString = strings.Replace(uuidString, "-", "", -1)
+
+	namedProfileId, err := CreateNamedProfile(sessionContainer, profile)
+	if err != nil {
+		return err
+	}
+
 
 	sess := PlainAwsSession{
 		Id:        uuidString,
 		Status:    NotActive,
 		StartTime: "",
 		Account:   &plainAwsAccount,
+		Profile: namedProfileId,
 	}
 
 	err = sessionContainer.SetPlainAwsSessions(append(sessions, &sess))
@@ -275,7 +285,8 @@ func ListPlainAwsSession(sessionContainer Container, query string) ([]*PlainAwsS
 		return append(filteredList, allSessions...), nil
 	} else {
 		for _, sess := range allSessions {
-			if strings.Contains(sess.Id, query) ||
+			if  strings.Contains(sess.Id, query) ||
+				strings.Contains(sess.Profile, query) ||
 				strings.Contains(sess.Account.Name, query) ||
 				strings.Contains(sess.Account.MfaDevice, query) ||
 				strings.Contains(sess.Account.User, query) ||
@@ -291,7 +302,7 @@ func ListPlainAwsSession(sessionContainer Container, query string) ([]*PlainAwsS
 }
 
 func UpdatePlainAwsSession(sessionContainer Container, id string, name string, accountNumber string, region string,
-	user string, awsAccessKeyId string, awsSecretAccessKey string, mfaDevice string) error {
+	user string, awsAccessKeyId string, awsSecretAccessKey string, mfaDevice string, profile string) error {
 
 	sessions, err := sessionContainer.GetPlainAwsSessions()
 	if err != nil { return err }
@@ -299,6 +310,10 @@ func UpdatePlainAwsSession(sessionContainer Container, id string, name string, a
 	found := false
 	for index := range sessions {
 		if sessions[index].Id == id {
+			namedProfileId, err := EditNamedProfile(sessionContainer, sessions[index].Profile, profile)
+			if err != nil { return err }
+
+			sessions[index].Profile = namedProfileId
 			sessions[index].Account = &PlainAwsAccount{
 				AccountNumber: accountNumber,
 				Name:          name,

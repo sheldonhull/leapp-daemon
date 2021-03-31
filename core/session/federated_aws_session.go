@@ -14,6 +14,7 @@ type FederatedAwsSession struct {
 	Status    Status
 	StartTime string
 	Account      *FederatedAwsAccount
+	Profile string
 }
 
 type FederatedAwsAccount struct {
@@ -47,7 +48,7 @@ func(sess *FederatedAwsSession) IsRotationIntervalExpired() (bool, error) {
 }
 
 func CreateFederatedAwsSession(sessionContainer Container, name string, accountNumber string, roleName string, roleArn string, idpArn string,
-	region string, ssoUrl string) error {
+	region string, ssoUrl string, profile string) error {
 
 	sessions, err := sessionContainer.GetFederatedAwsSessions()
 	if err != nil {
@@ -80,11 +81,17 @@ func CreateFederatedAwsSession(sessionContainer Container, name string, accountN
 	uuidString := uuid.New().String()
 	uuidString = strings.Replace(uuidString, "-", "", -1)
 
+	namedProfileId, err := CreateNamedProfile(sessionContainer, profile)
+	if err != nil {
+		return err
+	}
+
 	session := FederatedAwsSession{
 		Id:           uuidString,
 		Status:       NotActive,
 		StartTime:    "",
 		Account:      &federatedAwsAccount,
+		Profile:      namedProfileId,
 	}
 
 	err = sessionContainer.SetFederatedAwsSessions(append(sessions, &session))
@@ -121,6 +128,7 @@ func ListFederatedAwsSession(sessionContainer Container, query string) ([]*Feder
 	} else {
 		for _, session := range sessions {
 			if  strings.Contains(session.Id, query) ||
+				strings.Contains(session.Profile, query) ||
 				strings.Contains(session.Account.Name, query) ||
 				strings.Contains(session.Account.IdpArn, query) ||
 				strings.Contains(session.Account.SsoUrl, query) ||
@@ -138,7 +146,7 @@ func ListFederatedAwsSession(sessionContainer Container, query string) ([]*Feder
 }
 
 func UpdateFederatedAwsSession(sessionContainer Container, id string, name string, accountNumber string, roleName string, roleArn string, idpArn string,
-	region string, ssoUrl string) error {
+	region string, ssoUrl string, profile string) error {
 
 	sessions, err := sessionContainer.GetFederatedAwsSessions()
 	if err != nil { return err }
@@ -146,6 +154,10 @@ func UpdateFederatedAwsSession(sessionContainer Container, id string, name strin
 	found := false
 	for index := range sessions {
 		if sessions[index].Id == id {
+			namedProfileId, err := EditNamedProfile(sessionContainer, sessions[index].Profile, profile)
+			if err != nil { return err }
+
+			sessions[index].Profile = namedProfileId
 			sessions[index].Account = &FederatedAwsAccount{
 				AccountNumber: accountNumber,
 				Name:          name,

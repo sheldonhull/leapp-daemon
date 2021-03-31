@@ -46,7 +46,8 @@ func CreatePlainAwsSessionController(context *gin.Context) {
 		requestDto.User,
 		requestDto.AwsAccessKeyId,
 		requestDto.AwsSecretAccessKey,
-		requestDto.MfaDevice)
+		requestDto.MfaDevice,
+		requestDto.ProfileName)
 	if err != nil {
 		_ = context.Error(err)
 		return
@@ -81,7 +82,8 @@ func EditPlainAwsSessionController(context *gin.Context) {
 		requestDto.User,
 		requestDto.AwsAccessKeyId,
 		requestDto.AwsSecretAccessKey,
-		requestDto.MfaDevice)
+		requestDto.MfaDevice,
+		requestDto.ProfileName)
 
 	if err != nil {
 		_ = context.Error(err)

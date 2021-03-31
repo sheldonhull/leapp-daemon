@@ -7,12 +7,12 @@ import (
 )
 
 func CreateFederatedAwsSession(name string, accountNumber string, roleName string, roleArn string,
-	                           idpArn string, region string, ssoUrl string) error {
+	                           idpArn string, region string, ssoUrl string, profile string) error {
 
 	config, err := configuration.ReadConfiguration()
 	if err != nil { return err }
 
-	err = session.CreateFederatedAwsSession(config, name, accountNumber, roleName, roleArn, idpArn, region, ssoUrl)
+	err = session.CreateFederatedAwsSession(config, name, accountNumber, roleName, roleArn, idpArn, region, ssoUrl, profile)
 	if err != nil { return err }
 
 	err = config.Update()
@@ -39,14 +39,14 @@ func GetFederatedAwsSession(id string) (*session.FederatedAwsSession, error) {
 
 
 func UpdateFederatedAwsSession(sessionId string, name string, accountNumber string, roleName string, roleArn string,
-							   idpArn string, region string, ssoUrl string) error {
+							   idpArn string, region string, ssoUrl string, profile string) error {
 
 	config, err := configuration.ReadConfiguration()
 	if err != nil {
 		return err
 	}
 
-	err = session.UpdateFederatedAwsSession(config, sessionId, name, accountNumber, roleName, roleArn, idpArn, region, ssoUrl)
+	err = session.UpdateFederatedAwsSession(config, sessionId, name, accountNumber, roleName, roleArn, idpArn, region, ssoUrl, profile)
 	if err != nil {
 		return err
 	}

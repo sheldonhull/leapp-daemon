@@ -40,7 +40,7 @@ func CreateFederatedAwsSessionController(context *gin.Context) {
 	}
 
 	err = service.CreateFederatedAwsSession(requestDto.Name, requestDto.AccountNumber, requestDto.RoleName,
-		                                    requestDto.RoleArn, requestDto.IdpArn, requestDto.Region, requestDto.SsoUrl)
+		                                    requestDto.RoleArn, requestDto.IdpArn, requestDto.Region, requestDto.SsoUrl, requestDto.ProfileName)
 	if err != nil {
 		_ = context.Error(err)
 		return
@@ -75,7 +75,8 @@ func EditFederatedAwsSessionController(context *gin.Context) {
 		requestDto.RoleArn,
 		requestDto.IdpArn,
 		requestDto.Region,
-		requestDto.SsoUrl)
+		requestDto.SsoUrl,
+		requestDto.ProfileName)
 
 	if err != nil {
 		_ = context.Error(err)

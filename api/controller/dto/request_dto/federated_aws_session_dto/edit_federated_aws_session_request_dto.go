@@ -17,6 +17,8 @@ type EditFederatedAwsSessionRequestDto struct {
 	IdpArn string `json:"idpArn" binding:"required"`
 	Region string `json:"region" binding:"required"`
 	SsoUrl string `json:"ssoUrl" binding:"required"`
+	ProfileName string `json:"profileName"`
+
 }
 
 func (requestDto *EditFederatedAwsSessionRequestDto) Build(context *gin.Context) error {
