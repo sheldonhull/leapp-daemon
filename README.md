@@ -45,9 +45,9 @@ The entry point is [main.go](https://github.com/Noovolari/leapp-daemon/blob/mast
 
 ## Project Structure
 The project main areas are:
-- **api**: interfaces for interacting with core logic
-- **core**: business logic
-- **service**: middleware that serves as communication between api and core
+- **api**     - interfaces for interacting with core logic
+- **core**    - business logic
+- **service** - middleware that serves as communication between api and core
 
 ## Testing
 To test business logic you can use any API client like [Insomnia](https://insomnia.rest/) or [Postman](https://www.postman.com/).
