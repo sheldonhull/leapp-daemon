@@ -34,6 +34,7 @@ Development on leapp-daemon can be done on Mac, Windows, or Linux as long as you
 - Clone the repository with ```git clone https://github.com/Noovolari/leapp-daemon```
 - Change directory into the project root
 - Install dependencies with ```go get ./...```
+- Run the server with ```go run main.go```
 - Check the [good first issues](https://github.com/Noovolari/leapp-daemon/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22)
 
 ## Basic functionality
