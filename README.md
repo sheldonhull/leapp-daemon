@@ -36,18 +36,23 @@ Development on leapp-daemon can be done on Mac, Windows, or Linux as long as you
 ## Basic functionality
 Leapp-daemon is a set of REST APIs wrapped around an http client exposed on port 8080.
 
-### Entry-point
-The entry point is [main.go](https://github.com/Noovolari/leapp-daemon/blob/master/main.go) file located in the project root; the main elements are:
+<details>
+<summary>Main elements and entry-point</summary>
+  
+- The entry point is [main.go](https://github.com/Noovolari/leapp-daemon/blob/master/main.go) file located in the project root
 - The [configuration](https://github.com/Noovolari/leapp-daemon/blob/616470d9e8d668dd067eb63cac2024a2b463f67a/core/configuration/configuration.go) represent the current state of the software
 - The [http-engine](https://github.com/Noovolari/leapp-daemon/blob/616470d9e8d668dd067eb63cac2024a2b463f67a/api/engine/engine.go) to respond to API calls
 - The websocket for enabling full-duplex communication against multiple consumers
 - The [timer](https://github.com/Noovolari/leapp-daemon/blob/616470d9e8d668dd067eb63cac2024a2b463f67a/core/timer/timer.go) to auto-rotate credentials
+</details>
 
-## Project Structure
-The project main areas are:
+<details>
+<summary>Project Structure</summary>
+
 - **api**     - interfaces for interacting with core logic
 - **core**    - business logic
 - **service** - middleware that serves as communication between api and core
+</details>
 
 ## Testing
 To test business logic you can use any API client like [Insomnia](https://insomnia.rest/) or [Postman](https://www.postman.com/).
