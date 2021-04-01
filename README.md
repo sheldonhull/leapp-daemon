@@ -14,7 +14,7 @@ The daemon is the engine designed to manage and secure cloud access in multi-acc
 
 ### FAQ
 
-> :checkered_flag: The project is in active development to replace the current core logic of [Leapp](https://github.com/Noovolari/leapp)
+> :construction: The project is in active development to replace the current core logic of [Leapp](https://github.com/Noovolari/leapp)
 
 > :call_me_hand: To jumpstart your contribution come to our [Slack](https://join.slack.com/t/noovolari/shared_invite/zt-noc0ju05-18_GRX~Zi6Jz8~95j5CySA) and have a chat with us; we will point you in the right direction.
 
