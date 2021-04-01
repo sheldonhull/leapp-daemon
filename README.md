@@ -12,16 +12,18 @@ Leapp-daemon is the core Business logic of the [Leapp project](https://github.co
 
 The daemon is the engine designed to manage and secure cloud access in multi-account environments.
 
-> The project is in active development to replace the current core logic of [Leapp](https://github.com/Noovolari/leapp)
+### FAQ
 
-> If you wanted to download Leapp click [here to download the stable version](https://github.com/Noovolari/leapp)
+> :checkered_flag: The project is in active development to replace the current core logic of [Leapp](https://github.com/Noovolari/leapp)
+
+> :call_me_hand: To jumpstart your contribution to the project we suggest you to come to our [Slack](https://join.slack.com/t/noovolari/shared_invite/zt-noc0ju05-18_GRX~Zi6Jz8~95j5CySA) and have a chat with us; we will point you in the right direction as fast as possible.
+
+> :arrow_down_small: If you wanted to download Leapp click [here to download the stable version](https://github.com/Noovolari/leapp)
 
 # Contributing
 
 Please read through our [contributing guidelines](.github/CONTRIBUTING.md) and [code of conduct](.github/CODE_OF_CONDUCT.md). We included directions
 for opening issues, coding standards, and notes on development.
-
-> 🤙 To jumpstart your contribution to the project we suggest you to come to our [Slack](https://join.slack.com/t/noovolari/shared_invite/zt-noc0ju05-18_GRX~Zi6Jz8~95j5CySA) and have a chat with us; we will point you in the right direction as fast as possible.
 
 Editor preferences are available in the [editor config](.editorconfig) for easy use in common text editors. Read more and download plugins at [editorconfig.org](http://editorconfig.org).
 
