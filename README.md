@@ -70,3 +70,6 @@ Here you can find our [documentation](https://github.com/Noovolari/leapp-daemon/
 ## Links
 - [Roadmap](https://github.com/Noovolari/leapp/projects/4): view our next steps and stay up to date
 - [Contributing](./.github/CONTRIBUTING.md): follow the guidelines if you'd like to contribute to the project
+
+## License
+[Mozilla Public License v2.0](https://github.com/Noovolari/leapp/blob/master/LICENSE)
