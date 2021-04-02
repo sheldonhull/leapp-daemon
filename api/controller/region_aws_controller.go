@@ -13,7 +13,7 @@ import (
 func GetAwsRegionListController(context *gin.Context) {
 	logging.SetContext(context)
 
-	responseDto := response_dto.MessageAndDataResponseDto{Message: "success", Data: aws_client.GetRegionList() }
+	responseDto := response_dto.MessageAndDataResponseDto{Message: "success", Data: aws_client.GetRegionList()}
 	context.JSON(http.StatusOK, responseDto.ToMap())
 }
 

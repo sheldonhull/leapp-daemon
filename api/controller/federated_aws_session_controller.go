@@ -40,7 +40,8 @@ func CreateFederatedAwsSessionController(context *gin.Context) {
 	}
 
 	err = service.CreateFederatedAwsSession(requestDto.Name, requestDto.AccountNumber, requestDto.RoleName,
-		                                    requestDto.RoleArn, requestDto.IdpArn, requestDto.Region, requestDto.SsoUrl, requestDto.ProfileName)
+		                                    requestDto.RoleArn, requestDto.IdpArn, requestDto.Region, requestDto.SsoUrl,
+		                                    requestDto.ProfileName)
 	if err != nil {
 		_ = context.Error(err)
 		return

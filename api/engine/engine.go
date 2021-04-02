@@ -80,7 +80,7 @@ func initializeRoutes(ginEngine *gin.Engine) {
 		v1.GET("/region/aws/list", controller.GetAwsRegionListController)
 		v1.PUT("/region/aws/", controller.EditAwsRegionController)
 
-		v1.GET("/profile/aws/list", controller.GetAwsNamedProfileListController)
+		v1.GET("/named_profile/aws/list", controller.ListAwsNamedProfileController)
 
 		v1.GET("/ws", controller.WsController)
 	}

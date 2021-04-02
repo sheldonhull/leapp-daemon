@@ -23,13 +23,13 @@ func ListSessionController(context *gin.Context) {
 	listType := requestDto.Type
 	query := requestDto.Query
 
-	sessionList, err2 := service.ListAllSessions(query, listType)
-	if err2 != nil {
-		_ = context.Error(err2)
+	sessionList, err := service.ListAllSessions(query, listType)
+	if err != nil {
+		_ = context.Error(err)
 		return
 	}
 
-	responseDto := response_dto.MessageAndDataResponseDto{Message: "success", Data: sessionList }
+	responseDto := response_dto.MessageAndDataResponseDto{ Message: "success", Data: sessionList }
 	context.JSON(http.StatusOK, responseDto.ToMap())
 }
 
@@ -49,19 +49,19 @@ func ConfirmMfaTokenController(context *gin.Context) {
 		return
 	}
 
-	responseDto := response_dto.MessageAndDataResponseDto{Message: "success", Data: requestDto.SessionId }
+	responseDto := response_dto.MessageAndDataResponseDto{ Message: "success", Data: requestDto.SessionId }
 	context.JSON(http.StatusOK, responseDto.ToMap())
 }
 
-func GetAwsNamedProfileListController(context *gin.Context) {
+func ListAwsNamedProfileController(context *gin.Context) {
 	logging.SetContext(context)
 
-	namedProfiles, err := service.ListAllSNamedProfiles()
+	namedProfiles, err := service.ListAllNamedProfiles()
 	if err != nil {
 		_ = context.Error(err)
 		return
 	}
 
-	responseDto := response_dto.MessageAndDataResponseDto{Message: "success", Data: namedProfiles }
+	responseDto := response_dto.MessageAndDataResponseDto{ Message: "success", Data: namedProfiles }
 	context.JSON(http.StatusOK, responseDto.ToMap())
 }

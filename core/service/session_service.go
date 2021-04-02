@@ -33,7 +33,7 @@ func ListAllSessions(query string, listType string) (*map[string]interface{}, er
 	}, nil
 }
 
-func ListAllSNamedProfiles() ([]*session.NamedProfile, error) {
+func ListAllNamedProfiles() ([]*session.NamedProfile, error) {
 	var namedProfiles []*session.NamedProfile
 
 	config, err := configuration.ReadConfiguration()
