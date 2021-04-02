@@ -1,34 +1,59 @@
 package custom_error
 
 import (
-	"fmt"
 	"net/http"
+	"runtime"
 )
 
-type BadRequestError struct{
+type stack []uintptr
+
+func callers() *stack {
+	const depth = 32
+	var pcs [depth]uintptr
+	n := runtime.Callers(3, pcs[:])
+	var st stack = pcs[0:n]
+	return &st
+}
+
+func GetStackTrace() []runtime.Frame {
+	clrs := *callers()
+
+	var frames []runtime.Frame
+	callersFrames := runtime.CallersFrames(clrs)
+
+	for {
+		fr, more := callersFrames.Next()
+		frames = append(frames, fr)
+		if !more {
+			break
+		}
+	}
+
+	return frames
+}
+
+type CustomError struct{
 	StatusCode int
-	Message    error
+	Err        error
+	StackTrace []runtime.Frame
 }
 
-func (err BadRequestError) Error() string {
-	return fmt.Sprintf(`%+v`, err.Message)
+func (err CustomError) Error() string {
+	return err.Err.Error()
 }
 
-type UnprocessableEntityError struct{
-	StatusCode int
-	Message    error
+func NewBadRequestError(err error) CustomError {
+	return CustomError{ StatusCode: http.StatusBadRequest, Err: err, StackTrace: GetStackTrace() }
 }
 
-func (err UnprocessableEntityError) Error() string {
-	return fmt.Sprintf(`%+v`, err.Message)
+func NewUnprocessableEntityError(err error) CustomError {
+	return CustomError{ StatusCode: http.StatusUnprocessableEntity, Err: err, StackTrace: GetStackTrace() }
 }
 
-func NewBadRequestError(err error) error {
-	if err == nil { return nil }
-	return BadRequestError{ StatusCode: http.StatusBadRequest, Message: err }
+func NewNotFoundError(err error) CustomError {
+	return CustomError{ StatusCode: http.StatusNotFound, Err: err, StackTrace: GetStackTrace() }
 }
 
-func NewUnprocessableEntityError(err error) error {
-	if err == nil { return nil }
-	return UnprocessableEntityError{ StatusCode: http.StatusUnprocessableEntity, Message: err }
+func NewInternalServerError(err error) CustomError {
+	return CustomError{ StatusCode: http.StatusInternalServerError, Err: err, StackTrace: GetStackTrace() }
 }

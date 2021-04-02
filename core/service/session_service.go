@@ -32,3 +32,15 @@ func ListAllSessions(query string, listType string) (*map[string]interface{}, er
 		"FederatedSessions": federatedList,
 	}, nil
 }
+
+func ListAllNamedProfiles() ([]*session.NamedProfile, error) {
+	var namedProfiles []*session.NamedProfile
+
+	config, err := configuration.ReadConfiguration()
+	if err != nil {
+		return namedProfiles, err
+	}
+
+	namedProfiles = config.NamedProfiles
+	return namedProfiles, nil
+}

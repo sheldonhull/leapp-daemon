@@ -6,4 +6,7 @@ type Container interface {
 
 	GetFederatedAwsSessions() ([]*FederatedAwsSession, error)
 	SetFederatedAwsSessions([]*FederatedAwsSession) error
+
+	GetNamedProfiles() ([]*NamedProfile, error)
+	SetNamedProfiles([]*NamedProfile) error
 }

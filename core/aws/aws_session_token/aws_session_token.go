@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"github.com/aws/aws-sdk-go/service/sts"
 	"gopkg.in/ini.v1"
-	"leapp_daemon/core/aws_access_keys"
-	"leapp_daemon/core/aws_client"
-	"leapp_daemon/core/aws_credentials_ini_file"
+	"leapp_daemon/core/aws/aws_access_keys"
+	"leapp_daemon/core/aws/aws_client"
+	"leapp_daemon/core/aws/aws_credentials_ini_file"
 	"leapp_daemon/core/constant"
 	"leapp_daemon/core/file_system"
 	"leapp_daemon/core/keychain"
@@ -182,6 +182,34 @@ func SaveInIniFile(accessKeyId string, secretAccessKey string, sessionToken stri
 		if err != nil {
 			return err
 		}
+
+		err = aws_credentials_ini_file.OverwriteFile(credentialsFile, credentialsFilePath)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func RemoveFromIniFile(profileName string) error {
+	iniFileMutex.Lock()
+	defer iniFileMutex.Unlock()
+
+	homeDir, err := file_system.GetHomeDir()
+	if err != nil {
+		return err
+	}
+
+	credentialsFilePath := homeDir + "/" + constant.CredentialsFilePath
+
+	if file_system.DoesFileExist(credentialsFilePath) {
+		credentialsFile, err := ini.Load(credentialsFilePath)
+		if err != nil {
+			return err
+		}
+
+		credentialsFile.DeleteSection(profileName)
 
 		err = aws_credentials_ini_file.OverwriteFile(credentialsFile, credentialsFilePath)
 		if err != nil {

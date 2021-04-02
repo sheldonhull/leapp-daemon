@@ -2,6 +2,7 @@ package keychain
 
 import (
 	"github.com/zalando/go-keyring"
+	"leapp_daemon/custom_error"
 )
 
 const ServiceName = "Leapp"
@@ -9,7 +10,7 @@ const ServiceName = "Leapp"
 func SetSecret(secret string, label string) error {
 	err := keyring.Set(ServiceName, label, secret)
 	if err != nil {
-		return err
+		return custom_error.NewUnprocessableEntityError(err)
 	}
 	return nil
 }
@@ -17,7 +18,7 @@ func SetSecret(secret string, label string) error {
 func GetSecret(label string) (string, error) {
 	secret, err := keyring.Get(ServiceName, label)
 	if err != nil {
-		return "", err
+		return "", custom_error.NewNotFoundError(err)
 	}
 	return secret, nil
 }
@@ -28,7 +29,7 @@ func DoesSecretExist(label string) (bool, error) {
 		if err.Error() == "secret not found in keyring" {
 			return false, nil
 		}
-		return false, err
+		return false, custom_error.NewUnprocessableEntityError(err)
 	}
 	return true, nil
 }

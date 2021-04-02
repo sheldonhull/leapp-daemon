@@ -5,11 +5,11 @@ import (
 	"leapp_daemon/custom_error"
 )
 
-type DeleteFederatedAwsSessionRequestDto struct {
+type StopFederatedAwsSessionRequestDto struct {
 	Id string `uri:"id" binding:"required"`
 }
 
-func (requestDto *DeleteFederatedAwsSessionRequestDto) Build(context *gin.Context) error {
+func (requestDto *StopFederatedAwsSessionRequestDto) Build(context *gin.Context) error {
 	err := context.ShouldBindUri(requestDto)
 	if err != nil {
 		return custom_error.NewBadRequestError(err)

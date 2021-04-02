@@ -4,16 +4,16 @@ import (
 	"github.com/gin-gonic/gin"
 	"leapp_daemon/api/controller/dto/request_dto/aws_region_dto"
 	"leapp_daemon/api/controller/dto/response_dto"
-	"leapp_daemon/core/aws_client"
+	"leapp_daemon/core/aws/aws_client"
+	"leapp_daemon/core/service"
 	"leapp_daemon/logging"
-	"leapp_daemon/service"
 	"net/http"
 )
 
 func GetAwsRegionListController(context *gin.Context) {
 	logging.SetContext(context)
 
-	responseDto := response_dto.MessageAndDataResponseDto{Message: "success", Data: aws_client.GetRegionList() }
+	responseDto := response_dto.MessageAndDataResponseDto{Message: "success", Data: aws_client.GetRegionList()}
 	context.JSON(http.StatusOK, responseDto.ToMap())
 }
 

@@ -1,8 +1,8 @@
 package session
 
 import (
+	"fmt"
 	"github.com/google/uuid"
-	"github.com/pkg/errors"
 	"leapp_daemon/core/constant"
 	"leapp_daemon/custom_error"
 	"strings"
@@ -11,10 +11,10 @@ import (
 
 type FederatedAwsSession struct {
 	Id           string
-	Active       bool
-	Loading      bool
-	StartTime    string
+	Status    Status
+	StartTime string
 	Account      *FederatedAwsAccount
+	Profile string
 }
 
 type FederatedAwsAccount struct {
@@ -48,7 +48,7 @@ func(sess *FederatedAwsSession) IsRotationIntervalExpired() (bool, error) {
 }
 
 func CreateFederatedAwsSession(sessionContainer Container, name string, accountNumber string, roleName string, roleArn string, idpArn string,
-	region string, ssoUrl string) error {
+	region string, ssoUrl string, profile string) error {
 
 	sessions, err := sessionContainer.GetFederatedAwsSessions()
 	if err != nil {
@@ -58,7 +58,7 @@ func CreateFederatedAwsSession(sessionContainer Container, name string, accountN
 	for _, session := range sessions {
 		account := session.Account
 		if account.AccountNumber == accountNumber && account.Role.Name == roleName {
-			err = custom_error.NewBadRequestError(errors.New("an account with the same account number and " +
+			err = custom_error.NewUnprocessableEntityError(fmt.Errorf("an account with the same account number and " +
 				"role name is already present"))
 			return err
 		}
@@ -81,12 +81,17 @@ func CreateFederatedAwsSession(sessionContainer Container, name string, accountN
 	uuidString := uuid.New().String()
 	uuidString = strings.Replace(uuidString, "-", "", -1)
 
+	namedProfileId, err := CreateNamedProfile(sessionContainer, profile)
+	if err != nil {
+		return err
+	}
+
 	session := FederatedAwsSession{
 		Id:           uuidString,
-		Active:       false,
-		Loading:      false,
-		StartTime: "",
+		Status:       NotActive,
+		StartTime:    "",
 		Account:      &federatedAwsAccount,
+		Profile:      namedProfileId,
 	}
 
 	err = sessionContainer.SetFederatedAwsSessions(append(sessions, &session))
@@ -107,7 +112,7 @@ func GetFederatedAwsSession(sessionContainer Container, id string) (*FederatedAw
 		}
 	}
 
-	return nil, custom_error.NewBadRequestError(errors.New("No session found with id:" + id))
+	return nil, custom_error.NewNotFoundError(fmt.Errorf("No session found with id:" + id))
 }
 
 func ListFederatedAwsSession(sessionContainer Container, query string) ([]*FederatedAwsSession, error) {
@@ -123,6 +128,7 @@ func ListFederatedAwsSession(sessionContainer Container, query string) ([]*Feder
 	} else {
 		for _, session := range sessions {
 			if  strings.Contains(session.Id, query) ||
+				strings.Contains(session.Profile, query) ||
 				strings.Contains(session.Account.Name, query) ||
 				strings.Contains(session.Account.IdpArn, query) ||
 				strings.Contains(session.Account.SsoUrl, query) ||
@@ -140,7 +146,7 @@ func ListFederatedAwsSession(sessionContainer Container, query string) ([]*Feder
 }
 
 func UpdateFederatedAwsSession(sessionContainer Container, id string, name string, accountNumber string, roleName string, roleArn string, idpArn string,
-	region string, ssoUrl string) error {
+	region string, ssoUrl string, profile string) error {
 
 	sessions, err := sessionContainer.GetFederatedAwsSessions()
 	if err != nil { return err }
@@ -148,6 +154,10 @@ func UpdateFederatedAwsSession(sessionContainer Container, id string, name strin
 	found := false
 	for index := range sessions {
 		if sessions[index].Id == id {
+			namedProfileId, err := EditNamedProfile(sessionContainer, sessions[index].Profile, profile)
+			if err != nil { return err }
+
+			sessions[index].Profile = namedProfileId
 			sessions[index].Account = &FederatedAwsAccount{
 				AccountNumber: accountNumber,
 				Name:          name,
@@ -166,7 +176,7 @@ func UpdateFederatedAwsSession(sessionContainer Container, id string, name strin
 	}
 
 	if found == false {
-		err = custom_error.NewBadRequestError(errors.New("Federated AWS session not found for Id: " + id))
+		err = custom_error.NewNotFoundError(fmt.Errorf("federated AWS session with id " + id + " not found"))
 		return err
 	}
 
@@ -192,7 +202,7 @@ func DeleteFederatedAwsSession(sessionContainer Container, id string) error {
 	}
 
 	if found == false {
-		err = custom_error.NewBadRequestError(errors.New("Federated AWS session not found for Id: " + id))
+		err = custom_error.NewNotFoundError(fmt.Errorf("federated AWS session with id " + id + " not found"))
 		return err
 	}
 
@@ -201,5 +211,28 @@ func DeleteFederatedAwsSession(sessionContainer Container, id string) error {
 		return err
 	}
 
+	return nil
+}
+
+func StartFederatedAwsSession(sessionContainer Container, id string) error {
+	sess, err := GetFederatedAwsSession(sessionContainer, id)
+	if err != nil {
+		return err
+	}
+
+	println("Rotating session with id", sess.Id)
+	err = sess.RotateCredentials(nil)
+	if err != nil { return err }
+
+	return nil
+}
+
+func StopFederatedAwsSession(sessionContainer Container, id string) error {
+	sess, err := GetFederatedAwsSession(sessionContainer, id)
+	if err != nil {
+		return err
+	}
+
+	sess.Status = NotActive
 	return nil
 }

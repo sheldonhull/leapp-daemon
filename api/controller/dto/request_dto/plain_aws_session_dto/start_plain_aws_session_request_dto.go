@@ -1,15 +1,15 @@
-package federated_aws_session_dto
+package plain_aws_session_dto
 
 import (
 	"github.com/gin-gonic/gin"
 	"leapp_daemon/custom_error"
 )
 
-type DeleteFederatedAwsSessionRequestDto struct {
+type StartPlainAwsSessionRequestDto struct {
 	Id string `uri:"id" binding:"required"`
 }
 
-func (requestDto *DeleteFederatedAwsSessionRequestDto) Build(context *gin.Context) error {
+func (requestDto *StartPlainAwsSessionRequestDto) Build(context *gin.Context) error {
 	err := context.ShouldBindUri(requestDto)
 	if err != nil {
 		return custom_error.NewBadRequestError(err)

@@ -1,18 +1,15 @@
 package main
 
 import (
+	"fmt"
 	"leapp_daemon/api/engine"
 	"leapp_daemon/core/configuration"
+	"leapp_daemon/core/service"
 	"leapp_daemon/core/session"
 	"leapp_daemon/core/timer"
 	"leapp_daemon/core/websocket"
 	"leapp_daemon/logging"
-	"leapp_daemon/service"
 )
-
-func main3() {
-	configuration.CreateConfiguration()
-}
 
 func main() {
 	// Test MFA
@@ -27,6 +24,7 @@ func main() {
 	_, err := configuration.ReadConfiguration()
 	// TODO: check the nature of the error: if is no such file is ok, otherwise it must be panicked
 	if err != nil {
+		fmt.Printf("%+v", err)
 		err = configuration.CreateConfiguration()
 		if err != nil {
 			logging.Entry().Error(err)

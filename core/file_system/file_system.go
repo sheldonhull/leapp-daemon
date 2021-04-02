@@ -1,6 +1,7 @@
 package file_system
 
 import (
+	"leapp_daemon/custom_error"
 	"os"
 	"os/user"
 )
@@ -14,7 +15,7 @@ func DoesFileExist(path string) bool {
 func GetHomeDir() (string, error) {
 	usr, err := user.Current()
 	if err != nil {
-		return "", err
+		return "", custom_error.NewInternalServerError(err)
 	}
 	return usr.HomeDir, nil
 }

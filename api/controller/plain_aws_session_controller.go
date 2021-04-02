@@ -4,8 +4,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"leapp_daemon/api/controller/dto/request_dto/plain_aws_session_dto"
 	"leapp_daemon/api/controller/dto/response_dto"
+	"leapp_daemon/core/service"
 	"leapp_daemon/logging"
-	"leapp_daemon/service"
 	"net/http"
 )
 
@@ -46,7 +46,8 @@ func CreatePlainAwsSessionController(context *gin.Context) {
 		requestDto.User,
 		requestDto.AwsAccessKeyId,
 		requestDto.AwsSecretAccessKey,
-		requestDto.MfaDevice)
+		requestDto.MfaDevice,
+		requestDto.ProfileName)
 	if err != nil {
 		_ = context.Error(err)
 		return
@@ -81,7 +82,8 @@ func EditPlainAwsSessionController(context *gin.Context) {
 		requestDto.User,
 		requestDto.AwsAccessKeyId,
 		requestDto.AwsSecretAccessKey,
-		requestDto.MfaDevice)
+		requestDto.MfaDevice,
+		requestDto.ProfileName)
 
 	if err != nil {
 		_ = context.Error(err)
@@ -103,6 +105,48 @@ func DeletePlainAwsSessionController(context *gin.Context) {
 	}
 
 	err = service.DeletePlainAwsSession(requestDto.Id)
+
+	if err != nil {
+		_ = context.Error(err)
+		return
+	}
+
+	responseDto := response_dto.MessageOnlyResponseDto{Message: "success"}
+	context.JSON(http.StatusOK, responseDto.ToMap())
+}
+
+func StartPlainAwsSessionController(context *gin.Context) {
+	logging.SetContext(context)
+
+	requestDto := plain_aws_session_dto.StartPlainAwsSessionRequestDto{}
+	err := (&requestDto).Build(context)
+	if err != nil {
+		_ = context.Error(err)
+		return
+	}
+
+	err = service.StartPlainAwsSession(requestDto.Id)
+
+	if err != nil {
+		_ = context.Error(err)
+		return
+	}
+
+	responseDto := response_dto.MessageOnlyResponseDto{Message: "success"}
+	context.JSON(http.StatusOK, responseDto.ToMap())
+}
+
+func StopPlainAwsSessionController(context *gin.Context) {
+	logging.SetContext(context)
+
+	requestDto := plain_aws_session_dto.StopPlainAwsSessionRequestDto{}
+	err := (&requestDto).Build(context)
+	if err != nil {
+		_ = context.Error(err)
+		return
+	}
+
+	err = service.StopPlainAwsSession(requestDto.Id)
 
 	if err != nil {
 		_ = context.Error(err)

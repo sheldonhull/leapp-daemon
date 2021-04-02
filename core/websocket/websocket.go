@@ -121,7 +121,7 @@ func (s Subscription) ReadPump() {
 	})
 
 	for {
-		log.Println("waiting for a Message...")
+		log.Println("waiting for a Err...")
 		_, msgByteArray, err := c.Ws.ReadMessage()
 
 		if err != nil {
@@ -131,7 +131,7 @@ func (s Subscription) ReadPump() {
 			break
 		}
 
-		//m := Message{msg, []byte(DefaultRoom)}
+		//m := Err{msg, []byte(DefaultRoom)}
 		var msg Message
 		err = json.Unmarshal(msgByteArray, &msg)
 		if err != nil {
