@@ -19,6 +19,7 @@ type Configuration struct {
 	ProxyConfiguration   *ProxyConfiguration
 	PlainAwsSessions     []*session.PlainAwsSession
 	FederatedAwsSessions []*session.FederatedAwsSession
+	TrustedAwsSessions   []*session.TrustedAwsSession
 	NamedProfiles        []*session.NamedProfile
 }
 
@@ -103,6 +104,15 @@ func (config *Configuration) GetFederatedAwsSessions() ([]*session.FederatedAwsS
 func (config *Configuration) SetFederatedAwsSessions(federatedAwsSessions []*session.FederatedAwsSession) error {
 	config.FederatedAwsSessions = federatedAwsSessions
 	return nil
+}
+
+func (config *Configuration) GetTrustedAwsSessions() ([]*session.TrustedAwsSession, error) {
+  return config.TrustedAwsSessions, nil
+}
+
+func (config *Configuration) SetTrustedAwsSessions(trustedAwsSessions []*session.TrustedAwsSession) error {
+  config.TrustedAwsSessions = trustedAwsSessions
+  return nil
 }
 
 func (config *Configuration) GetNamedProfiles() ([]*session.NamedProfile, error) {

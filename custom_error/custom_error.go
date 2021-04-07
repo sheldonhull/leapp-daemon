@@ -57,3 +57,7 @@ func NewNotFoundError(err error) CustomError {
 func NewInternalServerError(err error) CustomError {
 	return CustomError{ StatusCode: http.StatusInternalServerError, Err: err, StackTrace: GetStackTrace() }
 }
+
+func NewConflictError(err error) CustomError {
+  return CustomError{ StatusCode: http.StatusConflict, Err: err, StackTrace: GetStackTrace() }
+}

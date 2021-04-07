@@ -13,8 +13,6 @@ import (
 	"time"
 )
 
-
-
 type PlainAwsSession struct {
 	Id           string
 	Status       Status
