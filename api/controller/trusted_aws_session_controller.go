@@ -12,7 +12,7 @@ import (
 /*func GetTrusterAwsSessionController(context *gin.Context) {
 	logging.SetContext(context)
 
-	requestDto := truster_aws_session_dto.GetTrusterAwsSessionRequestDto{}
+	requestDto := truster_aws_session_dto.GetTrustedAwsSessionRequestDto{}
 	err := (&requestDto).Build(context)
 	if err != nil {
 		_ = context.Error(err)
@@ -32,7 +32,7 @@ import (
 func CreateTrustedAwsSessionController(context *gin.Context) {
 	logging.SetContext(context)
 
-	requestDto := trusted_aws_session_dto.CreateTrusterAwsSessionRequestDto{}
+	requestDto := trusted_aws_session_dto.CreateTrustedAwsSessionRequestDto{}
 	err := (&requestDto).Build(context)
 	if err != nil {
 		_ = context.Error(err)

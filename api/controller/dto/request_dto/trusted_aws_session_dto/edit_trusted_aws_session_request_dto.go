@@ -5,11 +5,11 @@ import (
 	"leapp_daemon/custom_error"
 )
 
-type EditTrusterAwsSessionUriRequestDto struct {
+type EditTrustedAwsSessionUriRequestDto struct {
 	Id string `uri:"id" binding:"required"`
 }
 
-type EditTrusterAwsSessionRequestDto struct {
+type EditTrustedAwsSessionRequestDto struct {
 	Name string `json:"name" binding:"required"`
 	AccountNumber string `json:"accountNumber" binding:"required"`
 	RoleName string `json:"roleName" binding:"required"`
@@ -19,12 +19,12 @@ type EditTrusterAwsSessionRequestDto struct {
 	SsoUrl string `json:"ssoUrl" binding:"required"`
 }
 
-func (requestDto *EditTrusterAwsSessionRequestDto) Build(context *gin.Context) error {
+func (requestDto *EditTrustedAwsSessionRequestDto) Build(context *gin.Context) error {
 	err := custom_error.NewBadRequestError(context.ShouldBindJSON(requestDto))
 	return err
 }
 
-func (requestDto *EditTrusterAwsSessionUriRequestDto) Build(context *gin.Context) error {
+func (requestDto *EditTrustedAwsSessionUriRequestDto) Build(context *gin.Context) error {
 	err := custom_error.NewBadRequestError(context.ShouldBindUri(requestDto))
 	return err
 }

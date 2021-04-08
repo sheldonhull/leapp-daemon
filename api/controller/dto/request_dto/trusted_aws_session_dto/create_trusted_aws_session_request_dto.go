@@ -5,7 +5,7 @@ import (
 	"leapp_daemon/custom_error"
 )
 
-type CreateTrusterAwsSessionRequestDto struct {
+type CreateTrustedAwsSessionRequestDto struct {
   ParentId string `json:"parentId" binding:"required"`
 	AccountName string `json:"accountName" binding:"required"`
 	AccountNumber string `json:"accountNumber" binding:"required"`
@@ -13,7 +13,7 @@ type CreateTrusterAwsSessionRequestDto struct {
 	Region string `json:"region"`
 }
 
-func (requestDto *CreateTrusterAwsSessionRequestDto) Build(context *gin.Context) error {
+func (requestDto *CreateTrustedAwsSessionRequestDto) Build(context *gin.Context) error {
 	err := custom_error.NewBadRequestError(context.ShouldBindJSON(requestDto))
 	return err
 }
