@@ -3,29 +3,21 @@ package service
 import (
 	"fmt"
 	"leapp_daemon/core/configuration"
+  "leapp_daemon/core/session"
 )
 
 func RotateAllSessionsCredentials() error {
 	config, err := configuration.ReadConfiguration()
 	if err != nil { return err }
 
-	for i := range config.PlainAwsSessions {
-		sess := config.PlainAwsSessions[i]
+	sessions := config.GetAllSessions()
 
-		err = sess.RotateCredentials(nil)
-		if err != nil {
-			return err
-		}
-	}
-
-	for i := range config.FederatedAwsSessions {
-		sess := config.FederatedAwsSessions[i]
-
-		err = sess.RotateCredentials(nil)
-		if err != nil {
-			return err
-		}
-	}
+	for _, sess := range sessions {
+    err = sess.Rotate(&session.RotateConfiguration{})
+    if err != nil {
+      return err
+    }
+  }
 
 	err = config.Update()
 	if err != nil {
@@ -44,7 +36,7 @@ func RotateSessionCredentialsWithMfaToken(sessionId string, mfaToken string) err
 	for i := range config.PlainAwsSessions {
 		sess := config.PlainAwsSessions[i]
 		if sess.Id == sessionId {
-			err = sess.RotateCredentials(&mfaToken)
+			err = sess.Rotate(&session.RotateConfiguration{MfaToken: mfaToken})
 			if err != nil {
 				return err
 			}

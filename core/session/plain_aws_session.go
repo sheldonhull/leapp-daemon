@@ -1,16 +1,16 @@
 package session
 
 import (
-	"encoding/json"
-	"fmt"
-	"github.com/google/uuid"
-	"leapp_daemon/core/aws/aws_session_token"
-	"leapp_daemon/core/constant"
-	"leapp_daemon/core/websocket"
-	"leapp_daemon/custom_error"
-	"leapp_daemon/logging"
-	"strings"
-	"time"
+  "encoding/json"
+  "fmt"
+  "github.com/google/uuid"
+  "leapp_daemon/core/aws/aws_session_token"
+  "leapp_daemon/core/constant"
+  "leapp_daemon/core/websocket"
+  "leapp_daemon/custom_error"
+  "leapp_daemon/logging"
+  "strings"
+  "time"
 )
 
 type PlainAwsSession struct {
@@ -19,7 +19,6 @@ type PlainAwsSession struct {
 	StartTime    string
 	Account      *PlainAwsAccount
 	Profile string
-
 }
 
 type PlainAwsAccount struct {
@@ -48,7 +47,7 @@ func(sess *PlainAwsSession) IsRotationIntervalExpired() (bool, error) {
 	return int64(secondsPassedFromStart) > constant.RotationIntervalInSeconds, nil
 }
 
-func(sess *PlainAwsSession) RotateCredentials(mfaToken *string) error {
+func(sess *PlainAwsSession) Rotate(rotateConfiguration *RotateConfiguration) error {
 	if sess.Status == Active {
 		isRotationIntervalExpired, err := sess.IsRotationIntervalExpired()
 		if err != nil {
@@ -56,12 +55,14 @@ func(sess *PlainAwsSession) RotateCredentials(mfaToken *string) error {
 		}
 
 		if isRotationIntervalExpired {
-			err = sess.RotatePlainAwsSessionCredentials(mfaToken)
+
+			err = sess.RotatePlainAwsSessionCredentials(&rotateConfiguration.MfaToken)
 			if err != nil {
 				return nil
 			}
 		}
 	}
+
 	return nil
 }
 
@@ -236,7 +237,6 @@ func CreatePlainAwsSession(sessionContainer Container, name string, accountNumbe
 		AwsAccessKeyId: awsAccessKeyId,
 		AwsSecretAccessKey: awsSecretAccessKey,
 		MfaDevice:     mfaDevice,
-
 	}
 
 	uuidString := uuid.New().String()
@@ -246,7 +246,6 @@ func CreatePlainAwsSession(sessionContainer Container, name string, accountNumbe
 	if err != nil {
 		return err
 	}
-
 
 	sess := PlainAwsSession{
 		Id:        uuidString,

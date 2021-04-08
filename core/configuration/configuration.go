@@ -15,7 +15,6 @@ import (
 const configurationFilePath = `.Leapp/Leapp-lock.json`
 
 type Configuration struct {
-	SsoUrl               string
 	ProxyConfiguration   *ProxyConfiguration
 	PlainAwsSessions     []*session.PlainAwsSession
 	FederatedAwsSessions []*session.FederatedAwsSession
@@ -88,6 +87,14 @@ func UpdateConfiguration(configuration *Configuration, deleteExistingFile bool) 
 	return nil
 }
 
+func (config *Configuration) Update() error {
+  err := UpdateConfiguration(config, false)
+  if err != nil {
+    return err
+  }
+  return nil
+}
+
 func (config *Configuration) GetPlainAwsSessions() ([]*session.PlainAwsSession, error) {
 	return config.PlainAwsSessions, nil
 }
@@ -124,17 +131,24 @@ func (config *Configuration) SetNamedProfiles(namedProfiles []*session.NamedProf
 	return nil
 }
 
-func (config *Configuration) Update() error {
-	err := UpdateConfiguration(config, false)
-	if err != nil {
-		return err
-	}
-	return nil
+func (config *Configuration) GetAllSessions() []session.Rotatable {
+  sessions := make([]session.Rotatable, 0)
+
+  for i := range config.PlainAwsSessions {
+    sess := config.PlainAwsSessions[i]
+    sessions = append(sessions, sess)
+  }
+
+  for i := range config.FederatedAwsSessions {
+    sess := config.FederatedAwsSessions[i]
+    sessions = append(sessions, sess)
+  }
+
+  return sessions
 }
 
 func getInitialConfiguration() *Configuration {
 	return &Configuration{
-		SsoUrl: "",
 		ProxyConfiguration: &ProxyConfiguration{
 			ProxyProtocol: "https",
 			ProxyUrl: "",
