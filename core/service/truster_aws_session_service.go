@@ -53,24 +53,25 @@ func CreateTrustedAwsSession(parentId string, accountName string, accountNumber 
   }
 
   trustedAwsAccount := session.TrustedAwsAccount{
-    AccountNumber: accountNumber,
-    Name:          accountName,
-    Role: &session.TrustedAwsRole{
-      Name: roleName,
-      Arn:  fmt.Sprintf("arn:aws:iam::%s:role/%s", accountNumber, roleName),
-    },
-    Region:        region,
+    AccountNumber:  accountNumber,
+    Name:           accountName,
+    Role:           &session.TrustedAwsRole{
+                      Name: roleName,
+                      Arn:  fmt.Sprintf("arn:aws:iam::%s:role/%s", accountNumber, roleName),
+                    },
+    Region:         region,
   }
 
+  // TODO check uuid format
   uuidString := uuid.New().String()
   uuidString = strings.Replace(uuidString, "-", "", -1)
 
   sess := session.TrustedAwsSession{
-    Id:        uuidString,
-    Status:    session.NotActive,
-    StartTime: "",
-    ParentId: parentId,
-    Account:   &trustedAwsAccount,
+    Id:         uuidString,
+    Status:     session.NotActive,
+    StartTime:  "",
+    ParentId:   parentId,
+    Account:    &trustedAwsAccount,
   }
 
   err = config.SetTrustedAwsSessions(append(sessions, &sess))
@@ -83,6 +84,7 @@ func CreateTrustedAwsSession(parentId string, accountName string, accountNumber 
 
 	return nil
 }
+
 /*
 func GetTrusterAwsSession(id string) (*session.TrusterAwsSession, error) {
 	var sess *session.TrusterAwsSession
