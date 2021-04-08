@@ -10,13 +10,12 @@ type EditTrustedAwsSessionUriRequestDto struct {
 }
 
 type EditTrustedAwsSessionRequestDto struct {
-	Name string `json:"name" binding:"required"`
-	AccountNumber string `json:"accountNumber" binding:"required"`
-	RoleName string `json:"roleName" binding:"required"`
-	RoleArn string `json:"roleArn" binding:"required"`
-	IdpArn string `json:"idpArn" binding:"required"`
-	Region string `json:"region" binding:"required"`
-	SsoUrl string `json:"ssoUrl" binding:"required"`
+  Id string `json:"id" binding:"required"`
+  ParentId string `json:"parentId"`
+	AccountName string `json:"accountName"`
+	AccountNumber string `json:"accountNumber"`
+	RoleName string `json:"roleName"`
+	Region string `json:"region"`
 }
 
 func (requestDto *EditTrustedAwsSessionRequestDto) Build(context *gin.Context) error {

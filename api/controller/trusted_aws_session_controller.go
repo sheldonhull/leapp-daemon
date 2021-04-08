@@ -2,32 +2,13 @@ package controller
 
 import (
   "github.com/gin-gonic/gin"
+  "leapp_daemon/api/controller/dto/request_dto/federated_aws_session_dto"
   "leapp_daemon/api/controller/dto/request_dto/trusted_aws_session_dto"
   "leapp_daemon/api/controller/dto/response_dto"
   "leapp_daemon/core/service"
   "leapp_daemon/logging"
   "net/http"
 )
-
-func GetTrustedAwsSessionController(context *gin.Context) {
-	logging.SetContext(context)
-
-	requestDto := trusted_aws_session_dto.GetTrustedAwsSessionRequestDto{}
-	err := (&requestDto).Build(context)
-	if err != nil {
-		_ = context.Error(err)
-		return
-	}
-
-	sess, err := service.GetTrustedAwsSession(requestDto.Id)
-	if err != nil {
-		_ = context.Error(err)
-		return
-	}
-
-	responseDto := response_dto.MessageAndDataResponseDto{Message: "success", Data: *sess}
-	context.JSON(http.StatusOK, responseDto.ToMap())
-}
 
 func CreateTrustedAwsSessionController(context *gin.Context) {
 	logging.SetContext(context)
@@ -47,6 +28,26 @@ func CreateTrustedAwsSessionController(context *gin.Context) {
 
 	responseDto := response_dto.MessageOnlyResponseDto{Message: "success"}
 	context.JSON(http.StatusOK, responseDto.ToMap())
+}
+
+func GetTrustedAwsSessionController(context *gin.Context) {
+  logging.SetContext(context)
+
+  requestDto := trusted_aws_session_dto.GetTrustedAwsSessionRequestDto{}
+  err := (&requestDto).Build(context)
+  if err != nil {
+    _ = context.Error(err)
+    return
+  }
+
+  sess, err := service.GetTrustedAwsSession(requestDto.Id)
+  if err != nil {
+    _ = context.Error(err)
+    return
+  }
+
+  responseDto := response_dto.MessageAndDataResponseDto{Message: "success", Data: *sess}
+  context.JSON(http.StatusOK, responseDto.ToMap())
 }
 
 /*func EditTrusterAwsSessionController(context *gin.Context) {
@@ -83,9 +84,9 @@ func CreateTrustedAwsSessionController(context *gin.Context) {
 
 	responseDto := response_dto.MessageOnlyResponseDto{Message: "success"}
 	context.JSON(http.StatusOK, responseDto.ToMap())
-}
+}*/
 
-func DeleteTrusterAwsSessionController(context *gin.Context) {
+func DeleteTrustedAwsSessionController(context *gin.Context) {
 	logging.SetContext(context)
 
 	requestDto := federated_aws_session_dto.DeleteFederatedAwsSessionRequestDto{}
@@ -95,7 +96,7 @@ func DeleteTrusterAwsSessionController(context *gin.Context) {
 		return
 	}
 
-	err = service.DeleteFederatedAwsSession(requestDto.Id)
+	err = service.DeleteTrustedAwsSession(requestDto.Id)
 
 	if err != nil {
 		_ = context.Error(err)
@@ -105,4 +106,3 @@ func DeleteTrusterAwsSessionController(context *gin.Context) {
 	responseDto := response_dto.MessageOnlyResponseDto{Message: "success"}
 	context.JSON(http.StatusOK, responseDto.ToMap())
 }
-*/

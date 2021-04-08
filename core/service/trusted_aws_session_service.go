@@ -128,18 +128,37 @@ func UpdateTrusterAwsSession(sessionId string, name string, accountNumber string
 	}
 
 	return nil
-}
+}*/
 
-func DeleteTrusterAwsSession(sessionId string) error {
+func DeleteTrustedAwsSession(id string) error {
 	config, err := configuration.ReadConfiguration()
 	if err != nil {
 		return err
 	}
 
-	err = session.DeleteTrusterAwsSession(config, sessionId)
-	if err != nil {
-		return err
-	}
+  sessions, err := config.GetTrustedAwsSessions()
+  if err != nil {
+    return err
+  }
+
+  found := false
+  for index := range sessions {
+    if sessions[index].Id == id {
+      sessions = append(sessions[:index], sessions[index+1:]...)
+      found = true
+      break
+    }
+  }
+
+  if found == false {
+    err = custom_error.NewNotFoundError(fmt.Errorf("trusted aws session with id %s not found", id))
+    return err
+  }
+
+  err = config.SetTrustedAwsSessions(sessions)
+  if err != nil {
+    return err
+  }
 
 	err = config.Update()
 	if err != nil {
@@ -148,4 +167,3 @@ func DeleteTrusterAwsSession(sessionId string) error {
 
 	return nil
 }
-*/
