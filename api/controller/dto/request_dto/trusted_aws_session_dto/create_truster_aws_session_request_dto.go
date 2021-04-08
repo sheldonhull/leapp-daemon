@@ -6,6 +6,7 @@ import (
 )
 
 type CreateTrusterAwsSessionRequestDto struct {
+  ParentId string `json:"parentId" binding:"required"`
 	AccountName string `json:"accountName" binding:"required"`
 	AccountNumber string `json:"accountNumber" binding:"required"`
 	RoleName string `json:"roleName" binding:"required"`

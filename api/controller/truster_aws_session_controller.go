@@ -39,7 +39,7 @@ func CreateTrustedAwsSessionController(context *gin.Context) {
 		return
 	}
 
-	err = service.CreateTrustedAwsSession(requestDto.AccountName, requestDto.AccountNumber, requestDto.RoleName, requestDto.Region)
+	err = service.CreateTrustedAwsSession(requestDto.ParentId, requestDto.AccountName, requestDto.AccountNumber, requestDto.RoleName, requestDto.Region)
 	if err != nil {
 		_ = context.Error(err)
 		return
