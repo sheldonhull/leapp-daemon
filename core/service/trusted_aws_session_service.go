@@ -24,11 +24,11 @@ func CreateTrustedAwsSession(parentId string, accountName string, accountNumber 
     }
   }
 
-  federateds, err := config.GetFederatedAwsSessions()
+  feds, err := config.GetFederatedAwsSessions()
   if err != nil {
     return err
   }
-  for _, sess := range federateds {
+  for _, sess := range feds {
     if sess.Id == parentId {
       foundId = true
     }
@@ -85,24 +85,30 @@ func CreateTrustedAwsSession(parentId string, accountName string, accountNumber 
 	return nil
 }
 
-/*
-func GetTrusterAwsSession(id string) (*session.TrusterAwsSession, error) {
-	var sess *session.TrusterAwsSession
+
+func GetTrustedAwsSession(id string) (*session.TrustedAwsSession, error) {
+	var sess *session.TrustedAwsSession
 
 	config, err := configuration.ReadConfiguration()
 	if err != nil {
 		return sess, err
 	}
 
-	sess, err = session.GetTrusterAwsSession(config, id)
-	if err != nil {
-		return sess, err
-	}
+  sessions, err := config.GetTrustedAwsSessions()
+  if err != nil {
+    return nil, err
+  }
 
-	return sess, nil
+  for index, _ := range sessions {
+    if sessions[index].Id == id {
+      return sessions[index], nil
+    }
+  }
+
+  return nil, custom_error.NewNotFoundError(fmt.Errorf("no session found with id %s", id))
 }
 
-
+/*
 func UpdateTrusterAwsSession(sessionId string, name string, accountNumber string, roleName string, roleArn string,
 							   idpArn string, region string, ssoUrl string) error {
 

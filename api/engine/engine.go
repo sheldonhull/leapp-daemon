@@ -73,9 +73,9 @@ func initializeRoutes(ginEngine *gin.Engine) {
 		v1.POST("/session/federated/:id/start", controller.StartFederatedAwsSessionController)
 		v1.POST("/session/federated/:id/stop", controller.StopFederatedAwsSessionController)
 
-    v1.POST("/session/truster", controller.CreateTrustedAwsSessionController)
-    /*v1.GET("/session/truster/:id", controller.GetTrusterAwsSessionController)
-    v1.POST("/session/truster", controller.CreateTrustedAwsSessionController)
+    v1.POST("/session/trusted", controller.CreateTrustedAwsSessionController)
+    v1.GET("/session/trusted/:id", controller.GetTrustedAwsSessionController)
+    /*v1.POST("/session/truster", controller.CreateTrustedAwsSessionController)
     v1.PUT("/session/truster/:id", controller.EditTrusterAwsSessionController)
     v1.DELETE("/session/truster/:id", controller.DeleteTrusterAwsSessionController)
     v1.POST("/session/truster/:id/start", controller.StartTrusterAwsSessionController)

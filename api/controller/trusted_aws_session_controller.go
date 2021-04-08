@@ -9,17 +9,17 @@ import (
   "net/http"
 )
 
-/*func GetTrusterAwsSessionController(context *gin.Context) {
+func GetTrustedAwsSessionController(context *gin.Context) {
 	logging.SetContext(context)
 
-	requestDto := truster_aws_session_dto.GetTrustedAwsSessionRequestDto{}
+	requestDto := trusted_aws_session_dto.GetTrustedAwsSessionRequestDto{}
 	err := (&requestDto).Build(context)
 	if err != nil {
 		_ = context.Error(err)
 		return
 	}
 
-	sess, err := service.GetTrusterAwsSession(requestDto.Id)
+	sess, err := service.GetTrustedAwsSession(requestDto.Id)
 	if err != nil {
 		_ = context.Error(err)
 		return
@@ -27,7 +27,7 @@ import (
 
 	responseDto := response_dto.MessageAndDataResponseDto{Message: "success", Data: *sess}
 	context.JSON(http.StatusOK, responseDto.ToMap())
-}*/
+}
 
 func CreateTrustedAwsSessionController(context *gin.Context) {
 	logging.SetContext(context)
