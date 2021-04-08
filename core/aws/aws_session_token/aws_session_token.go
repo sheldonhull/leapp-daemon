@@ -2,7 +2,8 @@ package aws_session_token
 
 import (
 	"encoding/json"
-	"github.com/aws/aws-sdk-go/service/sts"
+  "fmt"
+  "github.com/aws/aws-sdk-go/service/sts"
 	"gopkg.in/ini.v1"
 	"leapp_daemon/core/aws/aws_access_keys"
 	"leapp_daemon/core/aws/aws_client"
@@ -145,7 +146,7 @@ func SaveInIniFile(accessKeyId string, secretAccessKey string, sessionToken stri
 		}
 
 		section, err := credentialsFile.GetSection(profileName)
-		if err != nil {
+		if err != nil && err.Error() != fmt.Sprintf("section %q does not exist", profileName){
 			return err
 		}
 

@@ -24,19 +24,14 @@ type FederatedAwsAccount struct {
 	IdpArn        string
 	Region        string
 	SsoUrl        string
-	// Type            string
-	// ParentSessionId string
-	// ParentRole      string
 }
 
 type FederatedAwsRole struct {
 	Name string
 	Arn  string
-	// Parent string
-	// ParentRole string
 }
 
-func(sess *FederatedAwsSession) RotateCredentials(mfaToken *string) error {
+func(sess *FederatedAwsSession) Rotate(rotateConfiguration *RotateConfiguration) error {
 	// TODO: implement rotate method for federated
 	return nil
 }
@@ -221,7 +216,7 @@ func StartFederatedAwsSession(sessionContainer Container, id string) error {
 	}
 
 	println("Rotating session with id", sess.Id)
-	err = sess.RotateCredentials(nil)
+	err = sess.Rotate(nil)
 	if err != nil { return err }
 
 	return nil
