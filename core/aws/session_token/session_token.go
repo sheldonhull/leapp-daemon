@@ -1,13 +1,13 @@
-package aws_session_token
+package session_token
 
 import (
-	"encoding/json"
+  "encoding/json"
   "fmt"
   "github.com/aws/aws-sdk-go/service/sts"
 	"gopkg.in/ini.v1"
-	"leapp_daemon/core/aws/aws_access_keys"
-	"leapp_daemon/core/aws/aws_client"
-	"leapp_daemon/core/aws/aws_credentials_ini_file"
+  "leapp_daemon/core/aws/access_keys"
+  "leapp_daemon/core/aws/sts"
+  "leapp_daemon/core/aws/credentials_ini_file"
 	"leapp_daemon/core/constant"
 	"leapp_daemon/core/file_system"
 	"leapp_daemon/core/keychain"
@@ -51,12 +51,12 @@ func IsExpired(accountName string) (bool, error) {
 }
 
 func Generate(accountName string, region string, mfaDevice string, mfaToken *string) (*sts.Credentials, error) {
-	accessKeyId, secretAccessKey, err := aws_access_keys.Get(accountName)
+	accessKeyId, secretAccessKey, err := access_keys.Get(accountName)
 	if err != nil {
 		return nil, err
 	}
 
-	stsClient, err := aws_client.GetStaticCredentialsClient(accessKeyId, secretAccessKey, &region)
+	stsClient, err := sts.GetStaticCredentialsClient(accessKeyId, secretAccessKey, &region)
 	if err != nil {
 		return nil, err
 	}
@@ -151,26 +151,26 @@ func SaveInIniFile(accessKeyId string, secretAccessKey string, sessionToken stri
 		}
 
 		if section == nil {
-			_, err = aws_credentials_ini_file.CreateNamedProfileSection(credentialsFile, profileName, accessKeyId, secretAccessKey,
+			_, err = credentials_ini_file.CreateNamedProfileSection(credentialsFile, profileName, accessKeyId, secretAccessKey,
 				sessionToken, region)
 			if err != nil {
 				return err
 			}
 
-			err = aws_credentials_ini_file.AppendToFile(credentialsFile, credentialsFilePath)
+			err = credentials_ini_file.AppendToFile(credentialsFile, credentialsFilePath)
 			if err != nil {
 				return err
 			}
 		} else {
 			credentialsFile.DeleteSection(profileName)
 
-			_, err = aws_credentials_ini_file.CreateNamedProfileSection(credentialsFile, profileName, accessKeyId, secretAccessKey,
+			_, err = credentials_ini_file.CreateNamedProfileSection(credentialsFile, profileName, accessKeyId, secretAccessKey,
 				sessionToken, region)
 			if err != nil {
 				return err
 			}
 
-			err = aws_credentials_ini_file.OverwriteFile(credentialsFile, credentialsFilePath)
+			err = credentials_ini_file.OverwriteFile(credentialsFile, credentialsFilePath)
 			if err != nil {
 				return err
 			}
@@ -178,13 +178,13 @@ func SaveInIniFile(accessKeyId string, secretAccessKey string, sessionToken stri
 	} else {
 		credentialsFile := ini.Empty()
 
-		_, err = aws_credentials_ini_file.CreateNamedProfileSection(credentialsFile, profileName, accessKeyId, secretAccessKey,
+		_, err = credentials_ini_file.CreateNamedProfileSection(credentialsFile, profileName, accessKeyId, secretAccessKey,
 			sessionToken, region)
 		if err != nil {
 			return err
 		}
 
-		err = aws_credentials_ini_file.OverwriteFile(credentialsFile, credentialsFilePath)
+		err = credentials_ini_file.OverwriteFile(credentialsFile, credentialsFilePath)
 		if err != nil {
 			return err
 		}
@@ -212,7 +212,7 @@ func RemoveFromIniFile(profileName string) error {
 
 		credentialsFile.DeleteSection(profileName)
 
-		err = aws_credentials_ini_file.OverwriteFile(credentialsFile, credentialsFilePath)
+		err = credentials_ini_file.OverwriteFile(credentialsFile, credentialsFilePath)
 		if err != nil {
 			return err
 		}

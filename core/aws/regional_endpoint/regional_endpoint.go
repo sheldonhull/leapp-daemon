@@ -1,7 +1,8 @@
-package aws_client
+package regional_endpoint
 
 import (
-	"fmt"
+  "fmt"
+	region2 "leapp_daemon/core/aws/region"
 	"leapp_daemon/custom_error"
 )
 
@@ -34,7 +35,7 @@ var regionalEndpoints = map[string]string {
 }
 
 func GetRegionalEndpoint(region *string) (*string, error) {
-	isRegionValid := IsRegionValid(*region)
+	isRegionValid := region2.IsRegionValid(*region)
 	if !isRegionValid {
 		return nil, custom_error.NewUnprocessableEntityError(fmt.Errorf("Region " + *region + " not valid"))
 	}

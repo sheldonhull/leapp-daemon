@@ -2,13 +2,13 @@ package service
 
 import (
 	"fmt"
-	"leapp_daemon/core/aws/aws_client"
+	region2 "leapp_daemon/core/aws/region"
 	"leapp_daemon/core/configuration"
 	"leapp_daemon/custom_error"
 )
 
 func EditAwsSessionRegion(sessionId string, region string) error {
-	isRegionValid := aws_client.IsRegionValid(region)
+	isRegionValid := region2.IsRegionValid(region)
 	if !isRegionValid {
 		return custom_error.NewUnprocessableEntityError(fmt.Errorf("Region " + region + " not valid"))
 	}
