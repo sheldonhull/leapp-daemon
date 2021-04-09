@@ -68,36 +68,6 @@ func CreateTrustedAwsSession(parentId string, accountName string, accountNumber 
 	return nil
 }
 
-func CheckParentExist(parentId string, config *configuration.Configuration) error {
-	foundId := false
-	plains, err := config.GetPlainAwsSessions()
-	if err != nil {
-		return err
-	}
-	for _, sess := range plains {
-		if sess.Id == parentId {
-			foundId = true
-		}
-	}
-
-	feds, err := config.GetFederatedAwsSessions()
-	if err != nil {
-		return err
-	}
-	for _, sess := range feds {
-		if sess.Id == parentId {
-			foundId = true
-		}
-	}
-
-	if !foundId {
-		err := custom_error.NewNotFoundError(fmt.Errorf("no plain or federated session with id %s found", parentId))
-		return err
-	}
-
-	return nil
-}
-
 func GetTrustedAwsSession(id string) (*session.TrustedAwsSession, error) {
 	var sess *session.TrustedAwsSession
 
@@ -144,7 +114,6 @@ func UpdateTrustedAwsSession(id string, parentId string, accountName string, acc
 				s.ParentId = parentId
 			}
 
-			// TODO validate account number - 12 characters only digits
 			if accountNumber != "" {
 				s.Account.AccountNumber = accountNumber
 			}
@@ -211,6 +180,36 @@ func DeleteTrustedAwsSession(id string) error {
 
 	err = config.Update()
 	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func CheckParentExist(parentId string, config *configuration.Configuration) error {
+	foundId := false
+	plains, err := config.GetPlainAwsSessions()
+	if err != nil {
+		return err
+	}
+	for _, sess := range plains {
+		if sess.Id == parentId {
+			foundId = true
+		}
+	}
+
+	feds, err := config.GetFederatedAwsSessions()
+	if err != nil {
+		return err
+	}
+	for _, sess := range feds {
+		if sess.Id == parentId {
+			foundId = true
+		}
+	}
+
+	if !foundId {
+		err := custom_error.NewNotFoundError(fmt.Errorf("no plain or federated session with id %s found", parentId))
 		return err
 	}
 
