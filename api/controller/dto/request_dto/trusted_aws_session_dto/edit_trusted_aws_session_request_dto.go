@@ -12,7 +12,7 @@ type EditTrustedAwsSessionUriRequestDto struct {
 type EditTrustedAwsSessionRequestDto struct {
 	ParentId      string `json:"parentId"`
 	AccountName   string `json:"accountName"`
-	AccountNumber string `json:"accountNumber"`
+	AccountNumber string `json:"accountNumber" binding:"numeric,len=12"`
 	RoleName      string `json:"roleName"`
 	Region        string `json:"region"`
 }

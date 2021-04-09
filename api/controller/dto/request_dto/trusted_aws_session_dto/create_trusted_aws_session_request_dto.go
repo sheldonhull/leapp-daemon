@@ -6,18 +6,18 @@ import (
 )
 
 type CreateTrustedAwsSessionRequestDto struct {
-  ParentId string `json:"parentId" binding:"required"`
-	AccountName string `json:"accountName" binding:"required"`
-	AccountNumber string `json:"accountNumber" binding:"required"`
-	RoleName string `json:"roleName" binding:"required"`
-	Region string `json:"region"`
+	ParentId      string `json:"parentId" binding:"required"`
+	AccountName   string `json:"accountName" binding:"required"`
+	AccountNumber string `json:"accountNumber" binding:"required,numeric,len=12"`
+	RoleName      string `json:"roleName" binding:"required"`
+	Region        string `json:"region"`
 }
 
 func (requestDto *CreateTrustedAwsSessionRequestDto) Build(context *gin.Context) error {
 	err := context.ShouldBindJSON(requestDto)
-  if err != nil {
-    return custom_error.NewBadRequestError(err)
-  } else {
-    return nil
-  }
+	if err != nil {
+		return custom_error.NewBadRequestError(err)
+	} else {
+		return nil
+	}
 }
