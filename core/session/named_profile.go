@@ -11,7 +11,7 @@ type NamedProfile struct {
 	Name string
 }
 
-func CreateNamedProfile(sessionContainer Repository, name string) (string, error) {
+func CreateNamedProfile(sessionContainer Container, name string) (string, error) {
 
 	if name == "" {
 		name = "default"
@@ -44,7 +44,7 @@ func CreateNamedProfile(sessionContainer Repository, name string) (string, error
 	return uuidString, nil
 }
 
-func EditNamedProfile(sessionContainer Repository, namedProfileId string, newName string) (string, error) {
+func EditNamedProfile(sessionContainer Container, namedProfileId string, newName string) (string, error) {
 	if newName == "" {
 		newName = "default"
 	}

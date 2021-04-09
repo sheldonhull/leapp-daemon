@@ -173,7 +173,7 @@ func (sess *PlainAwsSession) unmarshallSessionToken() (AwsSessionToken, error) {
 	return data, nil
 }
 
-func getById(sessionContainer Repository, id string) (*PlainAwsSession, error) {
+func getById(sessionContainer Container, id string) (*PlainAwsSession, error) {
 	var sess *PlainAwsSession
 
 	sessions, err := sessionContainer.GetPlainAwsSessions()
@@ -213,7 +213,7 @@ func sendMfaRequestMessage(sess *PlainAwsSession) error {
 	return nil
 }
 
-func CreatePlainAwsSession(sessionContainer Repository, name string, accountNumber string,
+func CreatePlainAwsSession(sessionContainer Container, name string, accountNumber string,
 	region string, user string, awsAccessKeyId string, awsSecretAccessKey string, mfaDevice string, profile string) error {
 
 	sessions, err := sessionContainer.GetPlainAwsSessions()
@@ -263,7 +263,7 @@ func CreatePlainAwsSession(sessionContainer Repository, name string, accountNumb
 	return nil
 }
 
-func GetPlainAwsSession(sessionContainer Repository, id string) (*PlainAwsSession, error) {
+func GetPlainAwsSession(sessionContainer Container, id string) (*PlainAwsSession, error) {
 	sess, err := getById(sessionContainer, id)
 	if err != nil {
 		return sess, err
@@ -272,7 +272,7 @@ func GetPlainAwsSession(sessionContainer Repository, id string) (*PlainAwsSessio
 	return sess, nil
 }
 
-func ListPlainAwsSession(sessionContainer Repository, query string) ([]*PlainAwsSession, error) {
+func ListPlainAwsSession(sessionContainer Container, query string) ([]*PlainAwsSession, error) {
 	filteredList := make([]*PlainAwsSession, 0)
 
 	allSessions, err := sessionContainer.GetPlainAwsSessions()
@@ -298,7 +298,7 @@ func ListPlainAwsSession(sessionContainer Repository, query string) ([]*PlainAws
 	}
 }
 
-func UpdatePlainAwsSession(sessionContainer Repository, id string, name string, accountNumber string, region string,
+func UpdatePlainAwsSession(sessionContainer Container, id string, name string, accountNumber string, region string,
 	user string, awsAccessKeyId string, awsSecretAccessKey string, mfaDevice string, profile string) error {
 
 	sessions, err := sessionContainer.GetPlainAwsSessions()
@@ -335,7 +335,7 @@ func UpdatePlainAwsSession(sessionContainer Repository, id string, name string, 
 	return nil
 }
 
-func DeletePlainAwsSession(sessionContainer Repository, id string) error {
+func DeletePlainAwsSession(sessionContainer Container, id string) error {
 	sessions, err := sessionContainer.GetPlainAwsSessions()
 	if err != nil {
 		return err
@@ -363,7 +363,7 @@ func DeletePlainAwsSession(sessionContainer Repository, id string) error {
 	return nil
 }
 
-func IsMfaRequiredForPlainAwsSession(sessionContainer Repository, id string) (bool, error) {
+func IsMfaRequiredForPlainAwsSession(sessionContainer Container, id string) (bool, error) {
 	sess, err := getById(sessionContainer, id)
 
 	if err != nil {
@@ -373,7 +373,7 @@ func IsMfaRequiredForPlainAwsSession(sessionContainer Repository, id string) (bo
 	return sess.IsMfaRequired()
 }
 
-func StartPlainAwsSession(sessionContainer Repository, id string, mfaToken *string) error {
+func StartPlainAwsSession(sessionContainer Container, id string, mfaToken *string) error {
 	sess, err := getById(sessionContainer, id)
 	if err != nil {
 		return err
@@ -385,7 +385,7 @@ func StartPlainAwsSession(sessionContainer Repository, id string, mfaToken *stri
 	return nil
 }
 
-func StopPlainAwsSession(sessionContainer Repository, id string) error {
+func StopPlainAwsSession(sessionContainer Container, id string) error {
 	sess, err := GetPlainAwsSession(sessionContainer, id)
 	if err != nil {
 		return err

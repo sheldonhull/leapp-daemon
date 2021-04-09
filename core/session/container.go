@@ -1,6 +1,6 @@
 package session
 
-type Repository interface {
+type Container interface {
 	GetPlainAwsSessions() ([]*PlainAwsSession, error)
 	SetPlainAwsSessions([]*PlainAwsSession) error
 
