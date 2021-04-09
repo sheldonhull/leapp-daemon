@@ -4,7 +4,7 @@ import (
   "encoding/json"
   "fmt"
   "github.com/google/uuid"
-  "leapp_daemon/core/aws/aws_session_token"
+  "leapp_daemon/core/aws/session_token"
   "leapp_daemon/core/constant"
   "leapp_daemon/core/websocket"
   "leapp_daemon/custom_error"
@@ -67,13 +67,13 @@ func(sess *PlainAwsSession) Rotate(rotateConfiguration *RotateConfiguration) err
 }
 
 func(sess *PlainAwsSession) RotatePlainAwsSessionCredentials(mfaToken *string) error {
-	doSessionTokenExist, err := aws_session_token.DoExist(sess.Account.Name)
+	doSessionTokenExist, err := session_token.DoExist(sess.Account.Name)
 	if err != nil {
 		return err
 	}
 
 	if doSessionTokenExist {
-		isSessionTokenExpired, err := aws_session_token.IsExpired(sess.Account.Name)
+		isSessionTokenExpired, err := session_token.IsExpired(sess.Account.Name)
 		if err != nil {
 			return err
 		}
@@ -97,17 +97,17 @@ func(sess *PlainAwsSession) RotatePlainAwsSessionCredentials(mfaToken *string) e
 				return nil
 			}
 
-			credentials, err := aws_session_token.Generate(sess.Account.Name, sess.Account.Region, sess.Account.MfaDevice, mfaToken)
+			credentials, err := session_token.Generate(sess.Account.Name, sess.Account.Region, sess.Account.MfaDevice, mfaToken)
 			if err != nil {
 				return err
 			}
 
-			err = aws_session_token.SaveInKeychain(sess.Account.Name, credentials)
+			err = session_token.SaveInKeychain(sess.Account.Name, credentials)
 			if err != nil {
 				return err
 			}
 
-			err = aws_session_token.SaveInIniFile(*credentials.AccessKeyId, *credentials.SecretAccessKey,
+			err = session_token.SaveInIniFile(*credentials.AccessKeyId, *credentials.SecretAccessKey,
 				*credentials.SessionToken, sess.Account.Region, "default")
 			if err != nil {
 				return err
@@ -123,7 +123,7 @@ func(sess *PlainAwsSession) RotatePlainAwsSessionCredentials(mfaToken *string) e
 				return err
 			}
 
-			err = aws_session_token.SaveInIniFile(data.AccessKeyId,
+			err = session_token.SaveInIniFile(data.AccessKeyId,
 				data.SecretAccessKey,
 				data.SessionToken,
 				sess.Account.Region,
@@ -138,17 +138,17 @@ func(sess *PlainAwsSession) RotatePlainAwsSessionCredentials(mfaToken *string) e
 
 		return nil
 	} else {
-		credentials, err := aws_session_token.Generate(sess.Account.Name, sess.Account.Region, sess.Account.MfaDevice, mfaToken)
+		credentials, err := session_token.Generate(sess.Account.Name, sess.Account.Region, sess.Account.MfaDevice, mfaToken)
 		if err != nil {
 			return err
 		}
 
-		err = aws_session_token.SaveInKeychain(sess.Account.Name, credentials)
+		err = session_token.SaveInKeychain(sess.Account.Name, credentials)
 		if err != nil {
 			return err
 		}
 
-		err = aws_session_token.SaveInIniFile(*credentials.AccessKeyId, *credentials.SecretAccessKey,
+		err = session_token.SaveInIniFile(*credentials.AccessKeyId, *credentials.SecretAccessKey,
 			*credentials.SessionToken, sess.Account.Region, "default")
 		if err != nil {
 			return err
@@ -162,7 +162,7 @@ func(sess *PlainAwsSession) RotatePlainAwsSessionCredentials(mfaToken *string) e
 }
 
 func (sess *PlainAwsSession) unmarshallSessionToken() (AwsSessionToken, error) {
-	sessionTokenJson, _, err := aws_session_token.Get(sess.Account.Name)
+	sessionTokenJson, _, err := session_token.Get(sess.Account.Name)
 
 	var data AwsSessionToken
 

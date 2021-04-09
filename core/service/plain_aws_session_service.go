@@ -1,9 +1,9 @@
 package service
 
 import (
-	"leapp_daemon/core/aws/aws_session_token"
-	"leapp_daemon/core/configuration"
-	"leapp_daemon/core/session"
+  "leapp_daemon/core/aws/session_token"
+  "leapp_daemon/core/configuration"
+  "leapp_daemon/core/session"
 )
 
 func CreatePlainAwsSession(name string, accountNumber string, region string, user string,
@@ -131,7 +131,7 @@ func StopPlainAwsSession(sessionId string) error {
 
 	// TODO: we need profileName branch here to change the profile
 	// sess, err := session.GetPlainAwsSession(config, sessionId)
-	err = aws_session_token.RemoveFromIniFile("default")
+	err = session_token.RemoveFromIniFile("default")
 	if err != nil {
 		return err
 	}

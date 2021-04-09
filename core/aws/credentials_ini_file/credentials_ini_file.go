@@ -1,4 +1,4 @@
-package aws_credentials_ini_file
+package credentials_ini_file
 
 import (
 	"gopkg.in/ini.v1"

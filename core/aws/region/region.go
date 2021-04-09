@@ -1,4 +1,4 @@
-package aws_client
+package region
 
 func GetRegionList() []string {
 	return []string {

@@ -1,4 +1,4 @@
-package aws_access_keys
+package access_keys
 
 import (
 	"leapp_daemon/core/keychain"
