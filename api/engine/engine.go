@@ -73,13 +73,12 @@ func initializeRoutes(ginEngine *gin.Engine) {
 		v1.POST("/session/federated/:id/start", controller.StartFederatedAwsSessionController)
 		v1.POST("/session/federated/:id/stop", controller.StopFederatedAwsSessionController)
 
-    v1.GET("/session/trusted/:id", controller.GetTrustedAwsSessionController)
+		v1.GET("/session/trusted/:id", controller.GetTrustedAwsSessionController)
 		v1.POST("/session/trusted", controller.CreateTrustedAwsSessionController)
+		v1.PUT("/session/trusted/:id", controller.EditTrustedAwsSessionController)
 		v1.DELETE("/session/trusted/:id", controller.DeleteTrustedAwsSessionController)
-		/*v1.PUT("/session/trusted/:id", controller.EditTrustedAwsSessionController)
-
-    v1.POST("/session/trusted/:id/start", controller.StartTrustedAwsSessionController)
-    v1.POST("/session/trusted/:id/stop", controller.StopTrustedAwsSessionController)*/
+		/*v1.POST("/session/trusted/:id/start", controller.StartTrustedAwsSessionController)
+		  v1.POST("/session/trusted/:id/stop", controller.StopTrustedAwsSessionController)*/
 
 		v1.POST("/g_suite_auth/first_step", controller.GSuiteAuthFirstStepController)
 		v1.POST("/g_suite_auth/second_step", controller.GSuiteAuthSecondStepController)

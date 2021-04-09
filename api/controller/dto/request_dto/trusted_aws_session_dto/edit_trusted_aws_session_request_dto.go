@@ -10,20 +10,27 @@ type EditTrustedAwsSessionUriRequestDto struct {
 }
 
 type EditTrustedAwsSessionRequestDto struct {
-  Id string `json:"id" binding:"required"`
-  ParentId string `json:"parentId"`
-	AccountName string `json:"accountName"`
+	ParentId      string `json:"parentId"`
+	AccountName   string `json:"accountName"`
 	AccountNumber string `json:"accountNumber"`
-	RoleName string `json:"roleName"`
-	Region string `json:"region"`
+	RoleName      string `json:"roleName"`
+	Region        string `json:"region"`
 }
 
 func (requestDto *EditTrustedAwsSessionRequestDto) Build(context *gin.Context) error {
-	err := custom_error.NewBadRequestError(context.ShouldBindJSON(requestDto))
-	return err
+	err := context.ShouldBindJSON(requestDto)
+	if err != nil {
+		return custom_error.NewBadRequestError(err)
+	} else {
+		return nil
+	}
 }
 
 func (requestDto *EditTrustedAwsSessionUriRequestDto) Build(context *gin.Context) error {
-	err := custom_error.NewBadRequestError(context.ShouldBindUri(requestDto))
-	return err
+	err := context.ShouldBindUri(requestDto)
+	if err != nil {
+		return custom_error.NewBadRequestError(err)
+	} else {
+		return nil
+	}
 }
