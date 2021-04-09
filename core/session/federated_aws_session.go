@@ -42,7 +42,7 @@ func(sess *FederatedAwsSession) IsRotationIntervalExpired() (bool, error) {
 	return int64(secondsPassedFromStart) > constant.RotationIntervalInSeconds, nil
 }
 
-func CreateFederatedAwsSession(sessionContainer Container, name string, accountNumber string, roleName string, roleArn string, idpArn string,
+func CreateFederatedAwsSession(sessionContainer Repository, name string, accountNumber string, roleName string, roleArn string, idpArn string,
 	region string, ssoUrl string, profile string) error {
 
 	sessions, err := sessionContainer.GetFederatedAwsSessions()
@@ -95,7 +95,7 @@ func CreateFederatedAwsSession(sessionContainer Container, name string, accountN
 	return nil
 }
 
-func GetFederatedAwsSession(sessionContainer Container, id string) (*FederatedAwsSession, error) {
+func GetFederatedAwsSession(sessionContainer Repository, id string) (*FederatedAwsSession, error) {
 	sessions, err := sessionContainer.GetFederatedAwsSessions()
 	if err != nil {
 		return nil, err
@@ -110,7 +110,7 @@ func GetFederatedAwsSession(sessionContainer Container, id string) (*FederatedAw
 	return nil, custom_error.NewNotFoundError(fmt.Errorf("No session found with id:" + id))
 }
 
-func ListFederatedAwsSession(sessionContainer Container, query string) ([]*FederatedAwsSession, error) {
+func ListFederatedAwsSession(sessionContainer Repository, query string) ([]*FederatedAwsSession, error) {
 	sessions, err := sessionContainer.GetFederatedAwsSessions()
 	if err != nil {
 		return nil, err
@@ -140,7 +140,7 @@ func ListFederatedAwsSession(sessionContainer Container, query string) ([]*Feder
 	}
 }
 
-func UpdateFederatedAwsSession(sessionContainer Container, id string, name string, accountNumber string, roleName string, roleArn string, idpArn string,
+func UpdateFederatedAwsSession(sessionContainer Repository, id string, name string, accountNumber string, roleName string, roleArn string, idpArn string,
 	region string, ssoUrl string, profile string) error {
 
 	sessions, err := sessionContainer.GetFederatedAwsSessions()
@@ -181,7 +181,7 @@ func UpdateFederatedAwsSession(sessionContainer Container, id string, name strin
 	return nil
 }
 
-func DeleteFederatedAwsSession(sessionContainer Container, id string) error {
+func DeleteFederatedAwsSession(sessionContainer Repository, id string) error {
 	sessions, err := sessionContainer.GetFederatedAwsSessions()
 	if err != nil {
 		return err
@@ -209,7 +209,7 @@ func DeleteFederatedAwsSession(sessionContainer Container, id string) error {
 	return nil
 }
 
-func StartFederatedAwsSession(sessionContainer Container, id string) error {
+func StartFederatedAwsSession(sessionContainer Repository, id string) error {
 	sess, err := GetFederatedAwsSession(sessionContainer, id)
 	if err != nil {
 		return err
@@ -222,7 +222,7 @@ func StartFederatedAwsSession(sessionContainer Container, id string) error {
 	return nil
 }
 
-func StopFederatedAwsSession(sessionContainer Container, id string) error {
+func StopFederatedAwsSession(sessionContainer Repository, id string) error {
 	sess, err := GetFederatedAwsSession(sessionContainer, id)
 	if err != nil {
 		return err

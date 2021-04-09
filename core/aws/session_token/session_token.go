@@ -4,16 +4,16 @@ import (
   "encoding/json"
   "fmt"
   "github.com/aws/aws-sdk-go/service/sts"
-	"gopkg.in/ini.v1"
+  "gopkg.in/ini.v1"
   "leapp_daemon/core/aws/access_keys"
-  "leapp_daemon/core/aws/sts"
   "leapp_daemon/core/aws/credentials_ini_file"
-	"leapp_daemon/core/constant"
-	"leapp_daemon/core/file_system"
-	"leapp_daemon/core/keychain"
-	"leapp_daemon/custom_error"
-	"sync"
-	"time"
+  "leapp_daemon/core/aws/sts_client"
+  "leapp_daemon/core/constant"
+  "leapp_daemon/core/file_system"
+  "leapp_daemon/core/keychain"
+  "leapp_daemon/custom_error"
+  "sync"
+  "time"
 )
 
 // The zero value is an unlocked mutex
@@ -56,7 +56,8 @@ func Generate(accountName string, region string, mfaDevice string, mfaToken *str
 		return nil, err
 	}
 
-	stsClient, err := sts.GetStaticCredentialsClient(accessKeyId, secretAccessKey, &region)
+
+	stsClient, err := sts_client.GetStaticCredentialsClient(accessKeyId, secretAccessKey, &region)
 	if err != nil {
 		return nil, err
 	}
