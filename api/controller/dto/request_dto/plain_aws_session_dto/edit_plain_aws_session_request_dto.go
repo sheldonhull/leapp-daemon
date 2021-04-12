@@ -11,7 +11,7 @@ type EditPlainAwsSessionUriRequestDto struct {
 
 type EditPlainAwsSessionRequestDto struct {
 	Name               string `json:"name" binding:"required"`
-	AccountNumber      string `json:"accountNumber" binding:"required"`
+	AccountNumber      string `json:"accountNumber" binding:"required,numeric,len=12"`
 	Region             string `json:"region" binding:"required,awsregion"`
 	User               string `json:"user" binding:"required"`
 	MfaDevice          string `json:"mfaDevice"`

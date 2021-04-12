@@ -2,19 +2,19 @@ package session
 
 import (
 	"fmt"
-	"github.com/google/uuid"
 	"leapp_daemon/core/constant"
+	"leapp_daemon/core/uuid"
 	"leapp_daemon/custom_error"
 	"strings"
 	"time"
 )
 
 type FederatedAwsSession struct {
-	Id           string
+	Id        string
 	Status    Status
 	StartTime string
-	Account      *FederatedAwsAccount
-	Profile string
+	Account   *FederatedAwsAccount
+	Profile   string
 }
 
 type FederatedAwsAccount struct {
@@ -31,12 +31,12 @@ type FederatedAwsRole struct {
 	Arn  string
 }
 
-func(sess *FederatedAwsSession) Rotate(rotateConfiguration *RotateConfiguration) error {
+func (sess *FederatedAwsSession) Rotate(rotateConfiguration *RotateConfiguration) error {
 	// TODO: implement rotate method for federated
 	return nil
 }
 
-func(sess *FederatedAwsSession) IsRotationIntervalExpired() (bool, error) {
+func (sess *FederatedAwsSession) IsRotationIntervalExpired() (bool, error) {
 	startTime, _ := time.Parse(time.RFC3339, sess.StartTime)
 	secondsPassedFromStart := time.Now().Sub(startTime).Seconds()
 	return int64(secondsPassedFromStart) > constant.RotationIntervalInSeconds, nil
@@ -73,8 +73,7 @@ func CreateFederatedAwsSession(sessionContainer Container, name string, accountN
 		SsoUrl:        ssoUrl,
 	}
 
-	uuidString := uuid.New().String()
-	uuidString = strings.Replace(uuidString, "-", "", -1)
+	uuidString := uuid.New()
 
 	namedProfileId, err := CreateNamedProfile(sessionContainer, profile)
 	if err != nil {
@@ -82,15 +81,17 @@ func CreateFederatedAwsSession(sessionContainer Container, name string, accountN
 	}
 
 	session := FederatedAwsSession{
-		Id:           uuidString,
-		Status:       NotActive,
-		StartTime:    "",
-		Account:      &federatedAwsAccount,
-		Profile:      namedProfileId,
+		Id:        uuidString,
+		Status:    NotActive,
+		StartTime: "",
+		Account:   &federatedAwsAccount,
+		Profile:   namedProfileId,
 	}
 
 	err = sessionContainer.SetFederatedAwsSessions(append(sessions, &session))
-	if err != nil { return err }
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -122,7 +123,7 @@ func ListFederatedAwsSession(sessionContainer Container, query string) ([]*Feder
 		return append(filteredList, sessions...), nil
 	} else {
 		for _, session := range sessions {
-			if  strings.Contains(session.Id, query) ||
+			if strings.Contains(session.Id, query) ||
 				strings.Contains(session.Profile, query) ||
 				strings.Contains(session.Account.Name, query) ||
 				strings.Contains(session.Account.IdpArn, query) ||
@@ -144,20 +145,24 @@ func UpdateFederatedAwsSession(sessionContainer Container, id string, name strin
 	region string, ssoUrl string, profile string) error {
 
 	sessions, err := sessionContainer.GetFederatedAwsSessions()
-	if err != nil { return err }
+	if err != nil {
+		return err
+	}
 
 	found := false
 	for index := range sessions {
 		if sessions[index].Id == id {
 			namedProfileId, err := EditNamedProfile(sessionContainer, sessions[index].Profile, profile)
-			if err != nil { return err }
+			if err != nil {
+				return err
+			}
 
 			sessions[index].Profile = namedProfileId
 			sessions[index].Account = &FederatedAwsAccount{
 				AccountNumber: accountNumber,
 				Name:          name,
 				Region:        region,
-				IdpArn: 	   idpArn,
+				IdpArn:        idpArn,
 				SsoUrl:        ssoUrl,
 			}
 
@@ -176,7 +181,9 @@ func UpdateFederatedAwsSession(sessionContainer Container, id string, name strin
 	}
 
 	err = sessionContainer.SetFederatedAwsSessions(sessions)
-	if err != nil { return err }
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -217,7 +224,9 @@ func StartFederatedAwsSession(sessionContainer Container, id string) error {
 
 	println("Rotating session with id", sess.Id)
 	err = sess.Rotate(nil)
-	if err != nil { return err }
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

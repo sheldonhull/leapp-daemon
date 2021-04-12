@@ -2,11 +2,10 @@ package service
 
 import (
 	"fmt"
-	"github.com/google/uuid"
 	"leapp_daemon/core/configuration"
 	"leapp_daemon/core/session"
+	"leapp_daemon/core/uuid"
 	"leapp_daemon/custom_error"
-	"strings"
 )
 
 func CreateTrustedAwsSession(parentId string, accountName string, accountNumber string, roleName string, region string) error {
@@ -44,8 +43,7 @@ func CreateTrustedAwsSession(parentId string, accountName string, accountNumber 
 	}
 
 	// TODO check uuid format
-	uuidString := uuid.New().String()
-	uuidString = strings.Replace(uuidString, "-", "", -1)
+	uuidString := uuid.New()
 
 	sess := session.TrustedAwsSession{
 		Id:        uuidString,

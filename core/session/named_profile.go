@@ -1,13 +1,12 @@
 package session
 
 import (
-	"github.com/google/uuid"
 	"github.com/pkg/errors"
-	"strings"
+	"leapp_daemon/core/uuid"
 )
 
 type NamedProfile struct {
-	Id string
+	Id   string
 	Name string
 }
 
@@ -28,11 +27,10 @@ func CreateNamedProfile(sessionContainer Container, name string) (string, error)
 		}
 	}
 
-	uuidString := uuid.New().String()
-	uuidString = strings.Replace(uuidString, "-", "", -1)
+	uuidString := uuid.New()
 
 	newNamedProfile := NamedProfile{
-		Id: uuidString,
+		Id:   uuidString,
 		Name: name,
 	}
 
@@ -61,6 +59,5 @@ func EditNamedProfile(sessionContainer Container, namedProfileId string, newName
 		}
 	}
 
-	return "", errors.New("No named profile exists with Id: " +namedProfileId + ". Unable to edit profile's name")
+	return "", errors.New("No named profile exists with Id: " + namedProfileId + ". Unable to edit profile's name")
 }
-
