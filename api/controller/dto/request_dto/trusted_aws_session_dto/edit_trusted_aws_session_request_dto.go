@@ -14,7 +14,7 @@ type EditTrustedAwsSessionRequestDto struct {
 	AccountName   string `json:"accountName"`
 	AccountNumber string `json:"accountNumber" binding:"numeric,len=12"`
 	RoleName      string `json:"roleName"`
-	Region        string `json:"region"`
+	Region        string `json:"region" binding:"awsregion"`
 }
 
 func (requestDto *EditTrustedAwsSessionRequestDto) Build(context *gin.Context) error {

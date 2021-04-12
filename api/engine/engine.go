@@ -3,8 +3,11 @@ package engine
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
+	"github.com/go-playground/validator/v10"
 	"github.com/sirupsen/logrus"
 	"leapp_daemon/api/controller"
+	"leapp_daemon/api/controller/custom_validator"
 	"leapp_daemon/api/middleware"
 	"leapp_daemon/logging"
 )
@@ -41,6 +44,7 @@ func (engineWrapper *engineWrapper) initialize() {
 	engineWrapper.ginEngine.Use(middleware.ErrorHandler.Handle)
 	//engineWrapper.ginEngine.Use(gin.Recovery())
 	initializeRoutes(engineWrapper.ginEngine)
+	initializeValidators()
 }
 
 func (engineWrapper *engineWrapper) Serve(port int) {
@@ -90,5 +94,11 @@ func initializeRoutes(ginEngine *gin.Engine) {
 		v1.GET("/named_profile/aws/list", controller.ListAwsNamedProfileController)
 
 		v1.GET("/ws", controller.WsController)
+	}
+}
+
+func initializeValidators() {
+	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		v.RegisterValidation("awsregion", custom_validator.AwsRegionValidator)
 	}
 }

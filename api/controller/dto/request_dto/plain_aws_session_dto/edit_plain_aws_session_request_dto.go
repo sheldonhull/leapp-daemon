@@ -10,14 +10,14 @@ type EditPlainAwsSessionUriRequestDto struct {
 }
 
 type EditPlainAwsSessionRequestDto struct {
-	Name string `json:"name" binding:"required"`
-	AccountNumber string `json:"accountNumber" binding:"required"`
-	Region string `json:"region" binding:"required"`
-	User string `json:"user" binding:"required"`
-	MfaDevice string `json:"mfaDevice"`
-	AwsAccessKeyId string `json:"awsAccessKeyId" binding:"required"`
+	Name               string `json:"name" binding:"required"`
+	AccountNumber      string `json:"accountNumber" binding:"required"`
+	Region             string `json:"region" binding:"required,awsregion"`
+	User               string `json:"user" binding:"required"`
+	MfaDevice          string `json:"mfaDevice"`
+	AwsAccessKeyId     string `json:"awsAccessKeyId" binding:"required"`
 	AwsSecretAccessKey string `json:"awsSecretAccessKey" binding:"required"`
-	ProfileName string `json:"profileName"`
+	ProfileName        string `json:"profileName"`
 }
 
 func (requestDto *EditPlainAwsSessionRequestDto) Build(context *gin.Context) error {

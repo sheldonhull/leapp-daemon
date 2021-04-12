@@ -10,7 +10,7 @@ type CreateTrustedAwsSessionRequestDto struct {
 	AccountName   string `json:"accountName" binding:"required"`
 	AccountNumber string `json:"accountNumber" binding:"required,numeric,len=12"`
 	RoleName      string `json:"roleName" binding:"required"`
-	Region        string `json:"region"`
+	Region        string `json:"region" binding:"awsregion"`
 }
 
 func (requestDto *CreateTrustedAwsSessionRequestDto) Build(context *gin.Context) error {
