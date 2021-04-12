@@ -1,0 +1,51 @@
+basePath: /api/v1
+consumes:
+- application/json
+definitions:
+  TrustedAwsAccount:
+    properties:
+      AccountNumber:
+        type: string
+      Name:
+        type: string
+      Region:
+        type: string
+      Role:
+        $ref: '#/definitions/TrustedAwsRole'
+    type: object
+    x-go-package: leapp_daemon/core/session
+  TrustedAwsRole:
+    properties:
+      Arn:
+        type: string
+      Name:
+        type: string
+    type: object
+    x-go-package: leapp_daemon/core/session
+host: localhost
+info:
+  description: Documentation for Trusted AWS Accounts API
+  title: of Trusted AWS Accounts API
+paths:
+  /session/trusted:
+    post:
+      description: Region is optional
+      operationId: createTrustedAwsSession
+      responses:
+        "200":
+          $ref: '#/responses/createTrustedAwsSessionResponse'
+      summary: Create a new AWS Trusted session
+produces:
+- application/json
+responses:
+  createTrustedAwsSessionResponse:
+    description: ""
+    headers:
+      Data: {}
+      Message:
+        type: string
+    schema:
+      $ref: '#/definitions/TrustedAwsAccount'
+schemes:
+- http
+swagger: "2.0"

@@ -1,3 +1,17 @@
+// Package classification of Trusted AWS Accounts API
+//
+// Documentation for Trusted AWS Accounts API
+//
+//  Schemes: http
+//  Host: localhost
+//  BasePath: /api/v1
+//
+//  Consumes:
+//   - application/json
+//
+//  Produces:
+//   - application/json
+// swagger:meta
 package controller
 
 import (
@@ -6,11 +20,29 @@ import (
 	"leapp_daemon/api/controller/dto/request_dto/trusted_aws_session_dto"
 	"leapp_daemon/api/controller/dto/response_dto"
 	"leapp_daemon/core/service"
+	"leapp_daemon/core/session"
 	"leapp_daemon/logging"
 	"net/http"
 )
 
+// swagger:response createTrustedAwsSessionResponse
+type createTrustedAwsSessionResponse struct {
+	Message string
+	Data    session.TrustedAwsAccount
+}
+
+// CreateTrustedAwsSessionController returns a new AWS Trusted session
 func CreateTrustedAwsSessionController(context *gin.Context) {
+
+	// swagger:route POST /session/trusted createTrustedAwsSession
+	//
+	// Create a new AWS Trusted session
+	//
+	// Region is optional
+	//
+	//  Responses:
+	//    200: createTrustedAwsSessionResponse
+
 	logging.SetContext(context)
 
 	requestDto := trusted_aws_session_dto.CreateTrustedAwsSessionRequestDto{}
