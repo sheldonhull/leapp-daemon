@@ -64,7 +64,6 @@ func(service *ConfigurationService) Read() (*configuration.Configuration, error)
 func(service *ConfigurationService) Update(configuration *configuration.Configuration, deleteExistingFile bool) error {
   configurationFileMutex.Lock()
   defer configurationFileMutex.Unlock()
-  return http_error.NewInternalServerError(fmt.Errorf("fake error"))
 
   homeDir, err := service.FileSystem.GetHomeDir()
   if err != nil {
