@@ -9,8 +9,6 @@ import (
   "net/http"
 )
 
-// TODO: should pass DTOs to controllers, not *gin.Context
-
 func GetFederatedAwsSessionController(context *gin.Context) {
 	logging.SetContext(context)
 

@@ -124,7 +124,6 @@ func StopFederatedAwsSession(sessionId string) error {
 		return err
 	}
 
-	// TODO: we need profileName branch here to change the profile
 	// sess, err := session.GetPlainAwsSession(config, sessionId)
 	err = session_token.RemoveFromIniFile("default")
 	if err != nil {
