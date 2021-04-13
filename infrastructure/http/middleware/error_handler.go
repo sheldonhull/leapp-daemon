@@ -10,9 +10,9 @@ import (
   "runtime"
 )
 
-type httpErrorHandler struct{}
+type errorHandler struct{}
 
-func (*httpErrorHandler) Handle(ctx *gin.Context) {
+func (*errorHandler) Handle(ctx *gin.Context) {
 	var code int
 	var err error
 	var errString string
@@ -25,7 +25,7 @@ func (*httpErrorHandler) Handle(ctx *gin.Context) {
 			if panicErr != nil {
 				code = http.StatusInternalServerError
 				errString = fmt.Sprintf("%s", panicErr)
-				stackTrace = http_error.GetStackTrace()
+				stackTrace = http_error.GetStackTrace(http_error.BaseNumberOfStackFramesToSkip)
 			} else if err != nil {
 				switch err.(type) {
 				case http_error.CustomError:
@@ -61,4 +61,4 @@ func (*httpErrorHandler) Handle(ctx *gin.Context) {
 	}
 }
 
-var ErrorHandler = &httpErrorHandler{}
+var ErrorHandler = &errorHandler{}

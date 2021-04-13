@@ -1,4 +1,4 @@
-package usecase
+package use_case
 
 import (
   session2 "leapp_daemon/domain/session"

@@ -3,10 +3,10 @@ package controller
 import (
   "github.com/gin-gonic/gin"
   logging2 "leapp_daemon/infrastructure/logging"
-  request_dto2 "leapp_daemon/interfaces/http/controller/dto/request_dto"
-  confirm_mfa_token_dto2 "leapp_daemon/interfaces/http/controller/dto/request_dto/confirm_mfa_token_dto"
-  response_dto2 "leapp_daemon/interfaces/http/controller/dto/response_dto"
-  service2 "leapp_daemon/use_cases/service"
+  request_dto2 "leapp_daemon/interface/http/controller/dto/request_dto"
+  confirm_mfa_token_dto2 "leapp_daemon/interface/http/controller/dto/request_dto/confirm_mfa_token_dto"
+  response_dto2 "leapp_daemon/interface/http/controller/dto/response_dto"
+  "leapp_daemon/use_case"
   "net/http"
 )
 
@@ -23,7 +23,7 @@ func ListSessionController(context *gin.Context) {
 	listType := requestDto.Type
 	query := requestDto.Query
 
-	sessionList, err := service2.ListAllSessions(query, listType)
+	sessionList, err := use_case.ListAllSessions(query, listType)
 	if err != nil {
 		_ = context.Error(err)
 		return
@@ -43,7 +43,7 @@ func ConfirmMfaTokenController(context *gin.Context) {
 		return
 	}
 
-	err = service2.RotateSessionCredentialsWithMfaToken(requestDto.SessionId, requestDto.MfaToken)
+	err = use_case.RotateSessionCredentialsWithMfaToken(requestDto.SessionId, requestDto.MfaToken)
 	if err != nil {
 		_ = context.Error(err)
 		return
@@ -56,7 +56,7 @@ func ConfirmMfaTokenController(context *gin.Context) {
 func ListAwsNamedProfileController(context *gin.Context) {
 	logging2.SetContext(context)
 
-	namedProfiles, err := service2.ListAllNamedProfiles()
+	namedProfiles, err := use_case.ListAllNamedProfiles()
 	if err != nil {
 		_ = context.Error(err)
 		return

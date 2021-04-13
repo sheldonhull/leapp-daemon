@@ -1,9 +1,9 @@
-package regional_endpoint
+package sts_client
 
 import (
   "fmt"
-  "leapp_daemon/core/aws/region"
-  http_error2 "leapp_daemon/infrastructure/http/http_error"
+  "leapp_daemon/domain/region"
+  "leapp_daemon/infrastructure/http/http_error"
 )
 
 var regionalEndpoints = map[string]string {
@@ -37,13 +37,13 @@ var regionalEndpoints = map[string]string {
 func GetRegionalEndpoint(regionName *string) (*string, error) {
 	isRegionValid := region.IsRegionValid(*regionName)
 	if !isRegionValid {
-		return nil, http_error2.NewUnprocessableEntityError(fmt.Errorf("Region " + *regionName + " not valid"))
+		return nil, http_error.NewUnprocessableEntityError(fmt.Errorf("Region " + *regionName + " not valid"))
 	}
 
 	i, ok := regionalEndpoints[*regionName]
 	if ok {
 		return &i, nil
 	} else {
-		return &i, http_error2.NewNotFoundError(fmt.Errorf("No such endpoint for regionName " + *regionName))
+		return &i, http_error.NewNotFoundError(fmt.Errorf("No such endpoint for regionName " + *regionName))
 	}
 }

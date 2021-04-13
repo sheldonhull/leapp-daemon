@@ -4,9 +4,9 @@ import (
   "encoding/json"
   "github.com/gin-gonic/gin"
   logging2 "leapp_daemon/infrastructure/logging"
-  g_suite_auth_dto2 "leapp_daemon/interfaces/http/controller/dto/request_dto/g_suite_auth_dto"
-  response_dto2 "leapp_daemon/interfaces/http/controller/dto/response_dto"
-  service2 "leapp_daemon/use_cases/service"
+  g_suite_auth_dto2 "leapp_daemon/interface/http/controller/dto/request_dto/g_suite_auth_dto"
+  response_dto2 "leapp_daemon/interface/http/controller/dto/response_dto"
+  "leapp_daemon/use_case"
   "net/http"
   "net/url"
   "strings"
@@ -37,7 +37,7 @@ func GSuiteAuthFirstStepController(context *gin.Context) {
 		return
 	}
 
-	captchaForm, captchaInputId, captchaPictureURL, captchaURL, loginForm, loginURL := service2.GSuiteAuthFirstStepService(requestDto.Username, requestDto.Password)
+	captchaForm, captchaInputId, captchaPictureURL, captchaURL, loginForm, loginURL := use_case.GSuiteAuthFirstStepService(requestDto.Username, requestDto.Password)
 
 	gSuiteAuthFirstStepResponse := GSuiteAuthFirstStepResponse{
 		CaptchaForm:       captchaForm,
@@ -76,7 +76,7 @@ func GSuiteAuthSecondStepController(context *gin.Context) {
 	loginFormString := []byte(requestDto.LoginForm)
 	_ = json.Unmarshal(loginFormString, &loginForm)
 
-	isMfaTokenRequested, responseForm, submitURL := service2.GSuiteAuthSecondStepService(requestDto.Captcha, requestDto.CaptchaInputId, requestDto.CaptchaUrl,
+	isMfaTokenRequested, responseForm, submitURL := use_case.GSuiteAuthSecondStepService(requestDto.Captcha, requestDto.CaptchaInputId, requestDto.CaptchaUrl,
 		captchaForm, requestDto.Password, loginForm, requestDto.LoginUrl)
 
 	gSuiteAuthSecondStepResponse := GSuiteAuthSecondStepResponse{
@@ -110,7 +110,7 @@ func GSuiteAuthThirdStepController(context *gin.Context) {
 	loginFormString := []byte(requestDto.ResponseForm)
 	_ = json.Unmarshal(loginFormString, &responseForm)
 
-	samlAssertion := service2.GSuiteAuthThirdStepService(requestDto.IsMfaTokenRequested, responseForm,
+	samlAssertion := use_case.GSuiteAuthThirdStepService(requestDto.IsMfaTokenRequested, responseForm,
 		requestDto.SubmitURL, requestDto.Token)
 
 	responseDto := response_dto2.MessageAndDataResponseDto{Message: "success", Data: samlAssertion}

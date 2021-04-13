@@ -3,18 +3,18 @@ package session
 import (
   "fmt"
   "github.com/google/uuid"
-  "leapp_daemon/domain"
+  "leapp_daemon/domain/constant"
   http_error2 "leapp_daemon/infrastructure/http/http_error"
   "strings"
   "time"
 )
 
 type FederatedAwsSession struct {
-	Id           string
+	Id        string
 	Status    Status
 	StartTime string
-	Account      *FederatedAwsAccount
-	Profile string
+	Account   *FederatedAwsAccount
+	Profile   string
 }
 
 type FederatedAwsAccount struct {
@@ -39,7 +39,7 @@ func(sess *FederatedAwsSession) Rotate(rotateConfiguration *RotateConfiguration)
 func(sess *FederatedAwsSession) IsRotationIntervalExpired() (bool, error) {
 	startTime, _ := time.Parse(time.RFC3339, sess.StartTime)
 	secondsPassedFromStart := time.Now().Sub(startTime).Seconds()
-	return int64(secondsPassedFromStart) > domain.RotationIntervalInSeconds, nil
+	return int64(secondsPassedFromStart) > constant.RotationIntervalInSeconds, nil
 }
 
 func CreateFederatedAwsSession(sessionContainer Container, name string, accountNumber string, roleName string, roleArn string, idpArn string,
@@ -82,11 +82,11 @@ func CreateFederatedAwsSession(sessionContainer Container, name string, accountN
 	}
 
 	session := FederatedAwsSession{
-		Id:           uuidString,
-		Status:       NotActive,
-		StartTime:    "",
-		Account:      &federatedAwsAccount,
-		Profile:      namedProfileId,
+		Id:        uuidString,
+		Status:    NotActive,
+		StartTime: "",
+		Account:   &federatedAwsAccount,
+		Profile:   namedProfileId,
 	}
 
 	err = sessionContainer.SetFederatedAwsSessions(append(sessions, &session))

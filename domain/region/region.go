@@ -1,4 +1,4 @@
-package domain
+package region
 
 func GetRegionList() []string {
 	return []string {

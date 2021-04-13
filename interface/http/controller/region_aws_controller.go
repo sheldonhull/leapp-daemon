@@ -4,9 +4,9 @@ import (
   "github.com/gin-gonic/gin"
   "leapp_daemon/domain/region"
   logging2 "leapp_daemon/infrastructure/logging"
-  aws_region_dto2 "leapp_daemon/interfaces/http/controller/dto/request_dto/aws_region_dto"
-  response_dto2 "leapp_daemon/interfaces/http/controller/dto/response_dto"
-  service2 "leapp_daemon/use_cases/service"
+  aws_region_dto2 "leapp_daemon/interface/http/controller/dto/request_dto/aws_region_dto"
+  response_dto2 "leapp_daemon/interface/http/controller/dto/response_dto"
+  "leapp_daemon/use_case"
   "net/http"
 )
 
@@ -27,7 +27,7 @@ func EditAwsRegionController(context *gin.Context) {
 		return
 	}
 
-	err = service2.EditAwsSessionRegion(requestDto.SessionId, requestDto.Region)
+	err = use_case.EditAwsSessionRegion(requestDto.SessionId, requestDto.Region)
 	if err != nil {
 		_ = context.Error(err)
 		return

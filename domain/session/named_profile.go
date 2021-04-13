@@ -1,9 +1,9 @@
 package session
 
 import (
-	"github.com/google/uuid"
-	"github.com/pkg/errors"
-	"strings"
+  "fmt"
+  "github.com/google/uuid"
+  "strings"
 )
 
 type NamedProfile struct {
@@ -61,6 +61,6 @@ func EditNamedProfile(sessionContainer Container, namedProfileId string, newName
 		}
 	}
 
-	return "", errors.New("No named profile exists with Id: " +namedProfileId + ". Unable to edit profile's name")
+	return "", fmt.Errorf("No named profile exists with Id: " + namedProfileId + ". Unable to edit profile's name")
 }
 

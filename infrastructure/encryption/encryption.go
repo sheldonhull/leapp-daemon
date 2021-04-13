@@ -10,26 +10,9 @@ import (
   "leapp_daemon/infrastructure/http/http_error"
 )
 
-func getMachineId() (string, error) {
-	id, err := machineid.ID()
-	if err != nil { return "", err }
-	return id, nil
-}
+type Encryption struct {}
 
-// TODO: move encryption key to domain layer
-// TODO: read random-generated key from keychain
-func getAesKey() ([]byte, error) {
-	machineId, err := getMachineId()
-	if err != nil { return nil, err }
-	machineIdRuneSlice := []rune(machineId)
-	machineIdRuneSlice = append(machineIdRuneSlice[0:8], machineIdRuneSlice[8+1:]...)
-	machineIdRuneSlice = append(machineIdRuneSlice[0:12], machineIdRuneSlice[12+1:]...)
-	machineIdRuneSlice = append(machineIdRuneSlice[0:16], machineIdRuneSlice[16+1:]...)
-	machineIdRuneSlice = append(machineIdRuneSlice[0:20], machineIdRuneSlice[20+1:]...)
-	return []byte(string(machineIdRuneSlice)), nil
-}
-
-func Encrypt(plainText string) (string, error) {
+func(encryption *Encryption) Encrypt(plainText string) (string, error) {
 	key, err := getAesKey()
 	if err != nil {
 		return "", err
@@ -55,7 +38,7 @@ func Encrypt(plainText string) (string, error) {
 	return string(encryptedText), nil
 }
 
-func Decrypt(encryptedText string) (string, error) {
+func(encryption *Encryption) Decrypt(encryptedText string) (string, error) {
 	key, err := getAesKey()
 	if err != nil {
 		return "", err
@@ -86,4 +69,23 @@ func Decrypt(encryptedText string) (string, error) {
 	}
 
 	return string(plainText), nil
+}
+
+// TODO: move encryption key to domain layer
+// TODO: read random-generated key from keychain
+func getAesKey() ([]byte, error) {
+  machineId, err := getMachineId()
+  if err != nil { return nil, err }
+  machineIdRuneSlice := []rune(machineId)
+  machineIdRuneSlice = append(machineIdRuneSlice[0:8], machineIdRuneSlice[8+1:]...)
+  machineIdRuneSlice = append(machineIdRuneSlice[0:12], machineIdRuneSlice[12+1:]...)
+  machineIdRuneSlice = append(machineIdRuneSlice[0:16], machineIdRuneSlice[16+1:]...)
+  machineIdRuneSlice = append(machineIdRuneSlice[0:20], machineIdRuneSlice[20+1:]...)
+  return []byte(string(machineIdRuneSlice)), nil
+}
+
+func getMachineId() (string, error) {
+  id, err := machineid.ID()
+  if err != nil { return "", err }
+  return id, nil
 }

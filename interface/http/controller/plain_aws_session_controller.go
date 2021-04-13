@@ -3,9 +3,9 @@ package controller
 import (
   "github.com/gin-gonic/gin"
   logging2 "leapp_daemon/infrastructure/logging"
-  plain_aws_session_dto2 "leapp_daemon/interfaces/http/controller/dto/request_dto/plain_aws_session_dto"
-  response_dto2 "leapp_daemon/interfaces/http/controller/dto/response_dto"
-  service2 "leapp_daemon/use_cases/service"
+  plain_aws_session_dto2 "leapp_daemon/interface/http/controller/dto/request_dto/plain_aws_session_dto"
+  response_dto2 "leapp_daemon/interface/http/controller/dto/response_dto"
+  "leapp_daemon/use_case"
   "net/http"
 )
 
@@ -19,7 +19,7 @@ func GetPlainAwsSessionController(context *gin.Context) {
 		return
 	}
 
-	sess, err := service2.GetPlainAwsSession(requestDto.Id)
+	sess, err := use_case.GetPlainAwsSession(requestDto.Id)
 	if err != nil {
 		_ = context.Error(err)
 		return
@@ -39,7 +39,7 @@ func CreatePlainAwsSessionController(context *gin.Context) {
 		return
 	}
 
-	err = service2.CreatePlainAwsSession(
+	err = use_case.CreatePlainAwsSession(
 		requestDto.Name,
 		requestDto.AccountNumber,
 		requestDto.Region,
@@ -74,7 +74,7 @@ func EditPlainAwsSessionController(context *gin.Context) {
 		return
 	}
 
-	err = service2.UpdatePlainAwsSession(
+	err = use_case.UpdatePlainAwsSession(
 		requestUriDto.Id,
 		requestDto.Name,
 		requestDto.AccountNumber,
@@ -104,7 +104,7 @@ func DeletePlainAwsSessionController(context *gin.Context) {
 		return
 	}
 
-	err = service2.DeletePlainAwsSession(requestDto.Id)
+	err = use_case.DeletePlainAwsSession(requestDto.Id)
 
 	if err != nil {
 		_ = context.Error(err)
@@ -125,7 +125,7 @@ func StartPlainAwsSessionController(context *gin.Context) {
 		return
 	}
 
-	err = service2.StartPlainAwsSession(requestDto.Id)
+	err = use_case.StartPlainAwsSession(requestDto.Id)
 
 	if err != nil {
 		_ = context.Error(err)
@@ -146,7 +146,7 @@ func StopPlainAwsSessionController(context *gin.Context) {
 		return
 	}
 
-	err = service2.StopPlainAwsSession(requestDto.Id)
+	err = use_case.StopPlainAwsSession(requestDto.Id)
 
 	if err != nil {
 		_ = context.Error(err)

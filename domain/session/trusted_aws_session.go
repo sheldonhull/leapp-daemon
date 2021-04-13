@@ -1,11 +1,11 @@
 package session
 
 type TrustedAwsSession struct {
-	Id              string
-	Status          Status
-	StartTime       string
-  ParentId        string
-	Account         *TrustedAwsAccount
+	Id        string
+	Status    Status
+	StartTime string
+  ParentId  string
+	Account   *TrustedAwsAccount
 }
 
 type TrustedAwsAccount struct {

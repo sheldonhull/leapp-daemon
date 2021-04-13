@@ -2,13 +2,10 @@ package session_token
 
 import (
   "encoding/json"
-  "fmt"
+  //"fmt"
   "github.com/aws/aws-sdk-go/service/sts"
-  "gopkg.in/ini.v1"
-  "leapp_daemon/domain"
-  credentials_ini_file2 "leapp_daemon/domain/credentials_ini_file"
+  "leapp_daemon/domain/constant"
   "leapp_daemon/infrastructure/aws/sts_client"
-  "leapp_daemon/infrastructure/file_system"
   "leapp_daemon/infrastructure/http/http_error"
   "leapp_daemon/infrastructure/keychain"
   "sync"
@@ -50,7 +47,7 @@ func IsExpired(accountName string) (bool, error) {
 }
 
 func Generate(accountName string, region string, mfaDevice string, mfaToken *string) (*sts.Credentials, error) {
-	accessKeyId, secretAccessKey, err := domain.Get(accountName)
+	accessKeyId, secretAccessKey, err := Get(accountName)
 	if err != nil {
 		return nil, err
 	}
@@ -61,7 +58,7 @@ func Generate(accountName string, region string, mfaDevice string, mfaToken *str
 		return nil, err
 	}
 
-	durationSeconds := domain.SessionTokenDurationInSeconds
+	durationSeconds := constant.SessionTokenDurationInSeconds
 	var getSessionTokenInput sts.GetSessionTokenInput
 
 	if mfaToken == nil {
@@ -129,6 +126,7 @@ func SaveInKeychain(accountName string, credentials *sts.Credentials) error {
 }
 
 func SaveInIniFile(accessKeyId string, secretAccessKey string, sessionToken string, region string, profileName string) error {
+  /*
 	iniFileMutex.Lock()
 	defer iniFileMutex.Unlock()
 
@@ -137,7 +135,7 @@ func SaveInIniFile(accessKeyId string, secretAccessKey string, sessionToken stri
 		return err
 	}
 
-	credentialsFilePath := homeDir + "/" + domain.CredentialsFilePath
+	credentialsFilePath := homeDir + "/" + constant.CredentialsFilePath
 
 	if file_system.DoesFileExist(credentialsFilePath) {
 		credentialsFile, err := ini.Load(credentialsFilePath)
@@ -151,26 +149,26 @@ func SaveInIniFile(accessKeyId string, secretAccessKey string, sessionToken stri
 		}
 
 		if section == nil {
-			_, err = credentials_ini_file2.CreateNamedProfileSection(credentialsFile, profileName, accessKeyId, secretAccessKey,
+			_, err = credentials_ini_file.CreateNamedProfileSection(credentialsFile, profileName, accessKeyId, secretAccessKey,
 				sessionToken, region)
 			if err != nil {
 				return err
 			}
 
-			err = credentials_ini_file2.AppendToFile(credentialsFile, credentialsFilePath)
+			err = credentials_ini_file.AppendToFile(credentialsFile, credentialsFilePath)
 			if err != nil {
 				return err
 			}
 		} else {
 			credentialsFile.DeleteSection(profileName)
 
-			_, err = credentials_ini_file2.CreateNamedProfileSection(credentialsFile, profileName, accessKeyId, secretAccessKey,
+			_, err = credentials_ini_file.CreateNamedProfileSection(credentialsFile, profileName, accessKeyId, secretAccessKey,
 				sessionToken, region)
 			if err != nil {
 				return err
 			}
 
-			err = credentials_ini_file2.OverwriteFile(credentialsFile, credentialsFilePath)
+			err = credentials_ini_file.OverwriteFile(credentialsFile, credentialsFilePath)
 			if err != nil {
 				return err
 			}
@@ -178,22 +176,24 @@ func SaveInIniFile(accessKeyId string, secretAccessKey string, sessionToken stri
 	} else {
 		credentialsFile := ini.Empty()
 
-		_, err = credentials_ini_file2.CreateNamedProfileSection(credentialsFile, profileName, accessKeyId, secretAccessKey,
+		_, err = credentials_ini_file.CreateNamedProfileSection(credentialsFile, profileName, accessKeyId, secretAccessKey,
 			sessionToken, region)
 		if err != nil {
 			return err
 		}
 
-		err = credentials_ini_file2.OverwriteFile(credentialsFile, credentialsFilePath)
+		err = credentials_ini_file.OverwriteFile(credentialsFile, credentialsFilePath)
 		if err != nil {
 			return err
 		}
 	}
+   */
 
 	return nil
 }
 
 func RemoveFromIniFile(profileName string) error {
+  /*
 	iniFileMutex.Lock()
 	defer iniFileMutex.Unlock()
 
@@ -202,7 +202,7 @@ func RemoveFromIniFile(profileName string) error {
 		return err
 	}
 
-	credentialsFilePath := homeDir + "/" + domain.CredentialsFilePath
+	credentialsFilePath := homeDir + "/" + constant.CredentialsFilePath
 
 	if file_system.DoesFileExist(credentialsFilePath) {
 		credentialsFile, err := ini.Load(credentialsFilePath)
@@ -212,11 +212,12 @@ func RemoveFromIniFile(profileName string) error {
 
 		credentialsFile.DeleteSection(profileName)
 
-		err = credentials_ini_file2.OverwriteFile(credentialsFile, credentialsFilePath)
+		err = credentials_ini_file.OverwriteFile(credentialsFile, credentialsFilePath)
 		if err != nil {
 			return err
 		}
 	}
+   */
 
 	return nil
 }

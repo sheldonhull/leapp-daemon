@@ -3,9 +3,9 @@ package controller
 import (
   "github.com/gin-gonic/gin"
   "leapp_daemon/infrastructure/logging"
-  "leapp_daemon/interfaces/http/controller/dto/request_dto/federated_aws_session_dto"
-  "leapp_daemon/interfaces/http/controller/dto/response_dto"
-  service2 "leapp_daemon/use_cases/service"
+  "leapp_daemon/interface/http/controller/dto/request_dto/federated_aws_session_dto"
+  "leapp_daemon/interface/http/controller/dto/response_dto"
+  "leapp_daemon/use_case"
   "net/http"
 )
 
@@ -21,7 +21,7 @@ func GetFederatedAwsSessionController(context *gin.Context) {
 		return
 	}
 
-	sess, err := service2.GetFederatedAwsSession(requestDto.Id)
+	sess, err := use_case.GetFederatedAwsSession(requestDto.Id)
 	if err != nil {
 		_ = context.Error(err)
 		return
@@ -41,7 +41,7 @@ func CreateFederatedAwsSessionController(context *gin.Context) {
 		return
 	}
 
-	err = service2.CreateFederatedAwsSession(requestDto.Name, requestDto.AccountNumber, requestDto.RoleName,
+	err = use_case.CreateFederatedAwsSession(requestDto.Name, requestDto.AccountNumber, requestDto.RoleName,
 		                                    requestDto.RoleArn, requestDto.IdpArn, requestDto.Region, requestDto.SsoUrl,
 		                                    requestDto.ProfileName)
 	if err != nil {
@@ -70,7 +70,7 @@ func EditFederatedAwsSessionController(context *gin.Context) {
 		return
 	}
 
-	err = service2.UpdateFederatedAwsSession(
+	err = use_case.UpdateFederatedAwsSession(
 		requestUriDto.Id,
 		requestDto.Name,
 		requestDto.AccountNumber,
@@ -100,7 +100,7 @@ func DeleteFederatedAwsSessionController(context *gin.Context) {
 		return
 	}
 
-	err = service2.DeleteFederatedAwsSession(requestDto.Id)
+	err = use_case.DeleteFederatedAwsSession(requestDto.Id)
 
 	if err != nil {
 		_ = context.Error(err)
@@ -121,7 +121,7 @@ func StartFederatedAwsSessionController(context *gin.Context) {
 		return
 	}
 
-	err = service2.StartFederatedAwsSession(requestDto.Id)
+	err = use_case.StartFederatedAwsSession(requestDto.Id)
 
 	if err != nil {
 		_ = context.Error(err)
@@ -142,7 +142,7 @@ func StopFederatedAwsSessionController(context *gin.Context) {
 		return
 	}
 
-	err = service2.StopFederatedAwsSession(requestDto.Id)
+	err = use_case.StopFederatedAwsSession(requestDto.Id)
 
 	if err != nil {
 		_ = context.Error(err)

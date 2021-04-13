@@ -3,10 +3,10 @@ package controller
 import (
   "github.com/gin-gonic/gin"
   logging2 "leapp_daemon/infrastructure/logging"
-  federated_aws_session_dto2 "leapp_daemon/interfaces/http/controller/dto/request_dto/federated_aws_session_dto"
-  trusted_aws_session_dto2 "leapp_daemon/interfaces/http/controller/dto/request_dto/trusted_aws_session_dto"
-  response_dto2 "leapp_daemon/interfaces/http/controller/dto/response_dto"
-  service2 "leapp_daemon/use_cases/service"
+  federated_aws_session_dto2 "leapp_daemon/interface/http/controller/dto/request_dto/federated_aws_session_dto"
+  trusted_aws_session_dto2 "leapp_daemon/interface/http/controller/dto/request_dto/trusted_aws_session_dto"
+  response_dto2 "leapp_daemon/interface/http/controller/dto/response_dto"
+  "leapp_daemon/use_case"
   "net/http"
 )
 
@@ -20,7 +20,7 @@ func CreateTrustedAwsSessionController(context *gin.Context) {
 		return
 	}
 
-	err = service2.CreateTrustedAwsSession(requestDto.ParentId, requestDto.AccountName, requestDto.AccountNumber, requestDto.RoleName, requestDto.Region)
+	err = use_case.CreateTrustedAwsSession(requestDto.ParentId, requestDto.AccountName, requestDto.AccountNumber, requestDto.RoleName, requestDto.Region)
 	if err != nil {
 		_ = context.Error(err)
 		return
@@ -40,7 +40,7 @@ func GetTrustedAwsSessionController(context *gin.Context) {
 		return
 	}
 
-	sess, err := service2.GetTrustedAwsSession(requestDto.Id)
+	sess, err := use_case.GetTrustedAwsSession(requestDto.Id)
 	if err != nil {
 		_ = context.Error(err)
 		return
@@ -67,7 +67,7 @@ func EditTrustedAwsSessionController(context *gin.Context) {
 		return
 	}
 
-	err = service2.UpdateTrustedAwsSession(
+	err = use_case.UpdateTrustedAwsSession(
 		requestUriDto.Id,
 		requestDto.ParentId,
 		requestDto.AccountName,
@@ -94,7 +94,7 @@ func DeleteTrustedAwsSessionController(context *gin.Context) {
 		return
 	}
 
-	err = service2.DeleteTrustedAwsSession(requestDto.Id)
+	err = use_case.DeleteTrustedAwsSession(requestDto.Id)
 
 	if err != nil {
 		_ = context.Error(err)

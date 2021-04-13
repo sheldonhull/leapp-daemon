@@ -1,3 +1,5 @@
+// TODO: decouple logging and http/context
+
 package logging
 
 import (
@@ -5,7 +7,7 @@ import (
   "github.com/gin-gonic/gin"
   "github.com/sirupsen/logrus"
   "io"
-	"leapp_daemon/interface/http/context"
+  "leapp_daemon/infrastructure/http/context"
   "os"
   "os/user"
 )

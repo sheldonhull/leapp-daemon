@@ -1,7 +1,6 @@
-package domain
+package constant
 
 const CredentialsFilePath = `.aws/credentials`
-
 
 const SessionTypePlain = "PLAIN"
 const SessionTypeFederated = "FEDERATED"
