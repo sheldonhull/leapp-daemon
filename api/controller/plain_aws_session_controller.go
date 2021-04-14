@@ -5,9 +5,15 @@ import (
 	"leapp_daemon/api/controller/dto/request_dto/plain_aws_session_dto"
 	"leapp_daemon/api/controller/dto/response_dto"
 	"leapp_daemon/core/service"
+	"leapp_daemon/core/session"
 	"leapp_daemon/logging"
 	"net/http"
 )
+
+type createPlainAwsSessionResponse struct {
+	Message string
+	Data    session.PlainAwsSession
+}
 
 func GetPlainAwsSessionController(context *gin.Context) {
 	logging.SetContext(context)

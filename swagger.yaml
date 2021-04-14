@@ -1,7 +1,42 @@
-basePath: /api/v1
+basePath: /api/v1/
 consumes:
 - application/json
 definitions:
+  CreateTrustedAwsSessionRequestDto:
+    properties:
+      accountName:
+        description: the name which will be displayed
+        type: string
+        x-go-name: AccountName
+      accountNumber:
+        description: the account number of the aws account related to the role
+        type: string
+        x-go-name: AccountNumber
+      parentId:
+        description: |-
+          the parent session id, can be an aws plain or federated session
+          it's generated with an uuid v4
+        type: string
+        x-go-name: ParentId
+      region:
+        description: the region on which the session will be initialized
+        type: string
+        x-go-name: Region
+      roleName:
+        description: the role name
+        type: string
+        x-go-name: RoleName
+    required:
+    - parentId
+    - accountName
+    - accountNumber
+    - roleName
+    type: object
+    x-go-package: leapp_daemon/api/controller/dto/request_dto/trusted_aws_session_dto
+  Status:
+    format: int64
+    type: integer
+    x-go-package: leapp_daemon/core/session
   TrustedAwsAccount:
     properties:
       AccountNumber:
@@ -22,30 +57,96 @@ definitions:
         type: string
     type: object
     x-go-package: leapp_daemon/core/session
+  TrustedAwsSession:
+    description: TrustedAwsSession represents
+    properties:
+      Account:
+        $ref: '#/definitions/TrustedAwsAccount'
+      Id:
+        description: the id for this user
+        type: string
+      ParentId:
+        type: string
+      StartTime:
+        type: string
+      Status:
+        $ref: '#/definitions/Status'
+    required:
+    - Id
+    type: object
+    x-go-package: leapp_daemon/core/session
+  getTrustedAwsSessionResponse:
+    properties:
+      Data:
+        $ref: '#/definitions/TrustedAwsSession'
+      Message:
+        type: string
+    type: object
+    x-go-package: leapp_daemon/api/controller
 host: localhost
 info:
-  description: Documentation for Trusted AWS Accounts API
-  title: of Trusted AWS Accounts API
+  description: Documentation for leapp-daemon api package
+  title: API package for leapp-daemon
 paths:
-  /session/trusted:
+  /trusted:
     post:
-      description: Region is optional
+      description: Create a new trusted aws session
       operationId: createTrustedAwsSession
+      parameters:
+      - description: This text will appear as description of your request body.
+        in: body
+        name: Body
+        schema:
+          $ref: '#/definitions/CreateTrustedAwsSessionRequestDto'
       responses:
         "200":
-          $ref: '#/responses/createTrustedAwsSessionResponse'
-      summary: Create a new AWS Trusted session
+          $ref: '#/responses/messageResponse'
+      tags:
+      - session-trusted-aws
+  /trusted/{id}:
+    delete:
+      description: Delete a Trusted AWS Session
+      operationId: deleteTrustedAwsSession
+      parameters:
+      - description: the id of the session
+        in: path
+        name: id
+        required: true
+        type: string
+        x-go-name: Id
+      tags:
+      - session-trusted-aws
+    get:
+      description: Get a Trusted AWS Session
+      operationId: getTrustedAwsSession
+      parameters:
+      - description: the id of the session
+        in: path
+        name: id
+        required: true
+        type: string
+        x-go-name: Id
+      tags:
+      - session-trusted-aws
+    put:
+      description: Edit a Trusted AWS Session
+      operationId: editTrustedAwsSession
+      parameters:
+      - description: the id of the session
+        in: path
+        name: id
+        required: true
+        type: string
+        x-go-name: Id
+      tags:
+      - session-trusted-aws
 produces:
 - application/json
 responses:
-  createTrustedAwsSessionResponse:
+  getTrustedAwsSessionResponse:
     description: ""
-    headers:
-      Data: {}
-      Message:
-        type: string
     schema:
-      $ref: '#/definitions/TrustedAwsAccount'
+      $ref: '#/definitions/getTrustedAwsSessionResponse'
 schemes:
 - http
 swagger: "2.0"

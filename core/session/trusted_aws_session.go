@@ -1,18 +1,24 @@
 package session
 
+// TrustedAwsSession represents
+//
+// swagger:model
 type TrustedAwsSession struct {
-	Id              string
-	Status          Status
-	StartTime       string
-  ParentId        string
-	Account         *TrustedAwsAccount
+	// the id for this user
+	//
+	// required: true
+	Id        string
+	Status    Status
+	StartTime string
+	ParentId  string
+	Account   *TrustedAwsAccount
 }
 
 type TrustedAwsAccount struct {
-	AccountNumber     string
-	Name              string
-	Role              *TrustedAwsRole
-	Region            string
+	AccountNumber string
+	Name          string
+	Role          *TrustedAwsRole
+	Region        string
 	// Type            string
 	// ParentSessionId string
 	// ParentRole      string

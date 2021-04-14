@@ -1,16 +1,11 @@
-// Package classification of Trusted AWS Accounts API
+// Package controller Controller of Trusted AWS Sessions API
 //
 // Documentation for Trusted AWS Accounts API
 //
 //  Schemes: http
 //  Host: localhost
-//  BasePath: /api/v1
+//  BasePath: /api/v1/session
 //
-//  Consumes:
-//   - application/json
-//
-//  Produces:
-//   - application/json
 // swagger:meta
 package controller
 
@@ -25,23 +20,30 @@ import (
 	"net/http"
 )
 
-// swagger:response createTrustedAwsSessionResponse
-type createTrustedAwsSessionResponse struct {
-	Message string
-	Data    session.TrustedAwsAccount
+// swagger:response getTrustedAwsSessionResponse
+type getTrustedAwsSessionResponseWrapper struct {
+	// in: body
+	Body getTrustedAwsSessionResponse
 }
 
-// CreateTrustedAwsSessionController returns a new AWS Trusted session
-func CreateTrustedAwsSessionController(context *gin.Context) {
+type getTrustedAwsSessionResponse struct {
+	Message string
+	Data    session.TrustedAwsSession
+}
 
-	// swagger:route POST /session/trusted createTrustedAwsSession
-	//
-	// Create a new AWS Trusted session
-	//
-	// Region is optional
-	//
-	//  Responses:
-	//    200: createTrustedAwsSessionResponse
+// swagger:parameters getTrustedAwsSession deleteTrustedAwsSession editTrustedAwsSession
+type idTrustedAwsSessionParameterWrapper struct {
+	// the id of the session
+	// in: path
+	// required: true
+	Id string `json:"id"`
+}
+
+func CreateTrustedAwsSessionController(context *gin.Context) {
+	// swagger:route POST /trusted session-trusted-aws createTrustedAwsSession
+	// Create a new trusted aws session
+	//   Responses:
+	//     200: messageResponse
 
 	logging.SetContext(context)
 
@@ -63,6 +65,9 @@ func CreateTrustedAwsSessionController(context *gin.Context) {
 }
 
 func GetTrustedAwsSessionController(context *gin.Context) {
+	// swagger:route GET /trusted/{id} session-trusted-aws getTrustedAwsSession
+	// Get a Trusted AWS Session
+
 	logging.SetContext(context)
 
 	requestDto := trusted_aws_session_dto.GetTrustedAwsSessionRequestDto{}
@@ -83,6 +88,9 @@ func GetTrustedAwsSessionController(context *gin.Context) {
 }
 
 func EditTrustedAwsSessionController(context *gin.Context) {
+	// swagger:route PUT /trusted/{id} session-trusted-aws editTrustedAwsSession
+	// Edit a Trusted AWS Session
+
 	logging.SetContext(context)
 
 	requestUriDto := trusted_aws_session_dto.EditTrustedAwsSessionUriRequestDto{}
@@ -117,6 +125,9 @@ func EditTrustedAwsSessionController(context *gin.Context) {
 }
 
 func DeleteTrustedAwsSessionController(context *gin.Context) {
+	// swagger:route DELETE /trusted/{id} session-trusted-aws deleteTrustedAwsSession
+	// Delete a Trusted AWS Session
+
 	logging.SetContext(context)
 
 	requestDto := federated_aws_session_dto.DeleteFederatedAwsSessionRequestDto{}
