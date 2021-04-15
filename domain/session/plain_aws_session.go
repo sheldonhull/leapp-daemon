@@ -1,18 +1,15 @@
 package session
 
 import (
-  "encoding/json"
-  "fmt"
-  "github.com/google/uuid"
-  "leapp_daemon/domain/accesskeys"
   "leapp_daemon/domain/constant"
-  "leapp_daemon/domain/session_token"
-  http_error2 "leapp_daemon/infrastructure/http/http_error"
-  logging2 "leapp_daemon/infrastructure/logging"
-  websocket2 "leapp_daemon/infrastructure/websocket"
-  "strings"
   "time"
 )
+
+type PlainAwsSessionContainer interface {
+  AddPlainAwsSession(PlainAwsSession) error
+  GetAllPlainAwsSessions() ([]PlainAwsSession, error)
+  RemovePlainAwsSession(session PlainAwsSession) error
+}
 
 type PlainAwsSession struct {
 	Id        string
@@ -48,6 +45,9 @@ func(sess *PlainAwsSession) IsRotationIntervalExpired() (bool, error) {
 	return int64(secondsPassedFromStart) > constant.RotationIntervalInSeconds, nil
 }
 
+
+
+/*
 func(sess *PlainAwsSession) Rotate(rotateConfiguration *RotateConfiguration) error {
 	if sess.Status == Active {
 		isRotationIntervalExpired, err := sess.IsRotationIntervalExpired()
@@ -80,7 +80,7 @@ func(sess *PlainAwsSession) RotatePlainAwsSessionCredentials(mfaToken *string) e
 		}
 
 		if isSessionTokenExpired {
-			logging2.Entry().Error("Plain AWS session token no more valid")
+			logging.Entry().Error("Plain AWS session token no more valid")
 
 			isMfaTokenRequired, err := sess.IsMfaRequired()
 			if err != nil {
@@ -117,7 +117,7 @@ func(sess *PlainAwsSession) RotatePlainAwsSessionCredentials(mfaToken *string) e
 			sess.Status = Active
 			sess.StartTime = time.Now().Format(time.RFC3339)
 		} else {
-			logging2.Entry().Error("Plain AWS session token still valid")
+			logging.Entry().Error("Plain AWS session token still valid")
 
 			data, err := sess.unmarshallSessionToken()
 			if err != nil {
@@ -163,7 +163,7 @@ func(sess *PlainAwsSession) RotatePlainAwsSessionCredentials(mfaToken *string) e
 }
 
 func (sess *PlainAwsSession) unmarshallSessionToken() (AwsSessionToken, error) {
-	sessionTokenJson, _, err := accesskeys.Get(sess.Account.Name)
+	sessionTokenJson, _, err := access_keys.Get(sess.Account.Name)
 
 	var data AwsSessionToken
 
@@ -187,26 +187,26 @@ func getById(sessionContainer Container, id string) (*PlainAwsSession, error) {
 		}
 	}
 
-	err = http_error2.NewNotFoundError(fmt.Errorf("plain AWS session with id " + id + " not found"))
+	err = http_error.NewNotFoundError(fmt.Errorf("plain AWS session with id " + id + " not found"))
 	return sess, err
 }
 
 func sendMfaRequestMessage(sess *PlainAwsSession) error {
-	messageData := websocket2.MfaTokenRequestData{
+	messageData := websocket.MfaTokenRequestData{
 		SessionId: sess.Id,
 	}
 
 	messageDataJson, err := json.Marshal(messageData)
 	if err != nil {
-		return http_error2.NewUnprocessableEntityError(err)
+		return http_error.NewUnprocessableEntityError(err)
 	}
 
-	msg := websocket2.Message{
-		MessageType: websocket2.MfaTokenRequest,
+	msg := websocket.Message{
+		MessageType: websocket.MfaTokenRequest,
 		Data:        string(messageDataJson),
 	}
 
-	err = websocket2.SendMessage(msg)
+	err = websocket.SendMessage(msg)
 	if err != nil {
 		return err
 	}
@@ -225,7 +225,7 @@ func CreatePlainAwsSession(sessionContainer Container, name string, accountNumbe
 	for _, sess := range sessions {
 		account := sess.Account
 		if account.AccountNumber == accountNumber && account.User == user {
-			err := http_error2.NewUnprocessableEntityError(fmt.Errorf("a session with the same account number and user is already present"))
+			err := http_error.NewUnprocessableEntityError(fmt.Errorf("a session with the same account number and user is already present"))
 			return err
 		}
 	}
@@ -243,7 +243,7 @@ func CreatePlainAwsSession(sessionContainer Container, name string, accountNumbe
 	uuidString := uuid.New().String()
 	uuidString = strings.Replace(uuidString, "-", "", -1)
 
-	namedProfileId, err := CreateNamedProfile(sessionContainer, profile)
+	namedProfileId, err := named_profile.CreateNamedProfile(sessionContainer, profile)
 	if err != nil {
 		return err
 	}
@@ -308,7 +308,7 @@ func UpdatePlainAwsSession(sessionContainer Container, id string, name string, a
 	found := false
 	for index := range sessions {
 		if sessions[index].Id == id {
-			namedProfileId, err := EditNamedProfile(sessionContainer, sessions[index].Profile, profile)
+			namedProfileId, err := named_profile.EditNamedProfile(sessionContainer, sessions[index].Profile, profile)
 			if err != nil { return err }
 
 			sessions[index].Profile = namedProfileId
@@ -326,7 +326,7 @@ func UpdatePlainAwsSession(sessionContainer Container, id string, name string, a
 	}
 
 	if found == false {
-		err = http_error2.NewNotFoundError(fmt.Errorf("plain AWS session with id " + id + " not found"))
+		err = http_error.NewNotFoundError(fmt.Errorf("plain AWS session with id " + id + " not found"))
 		return err
 	}
 
@@ -352,7 +352,7 @@ func DeletePlainAwsSession(sessionContainer Container, id string) error {
 	}
 
 	if found == false {
-		err = http_error2.NewNotFoundError(fmt.Errorf("plain AWS session with id " + id + " not found"))
+		err = http_error.NewNotFoundError(fmt.Errorf("plain AWS session with id " + id + " not found"))
 		return err
 	}
 
@@ -395,3 +395,4 @@ func StopPlainAwsSession(sessionContainer Container, id string) error {
 	sess.Status = NotActive
 	return nil
 }
+*/

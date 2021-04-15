@@ -2,17 +2,24 @@ package configuration
 
 import (
   "encoding/json"
+  "fmt"
+  "leapp_daemon/domain/named_profile"
   "leapp_daemon/domain/session"
+  "leapp_daemon/infrastructure/http/http_error"
 )
 
-//const configurationFilePath = `.Leapp/Leapp-lock.json`
+type Repository interface {
+  CreateConfiguration(Configuration) error
+  GetConfiguration() (Configuration, error)
+  UpdateConfiguration(Configuration) error
+}
 
 type Configuration struct {
-	ProxyConfiguration   *ProxyConfiguration
-	PlainAwsSessions     []*session.PlainAwsSession
-	FederatedAwsSessions []*session.FederatedAwsSession
-	TrustedAwsSessions   []*session.TrustedAwsSession
-	NamedProfiles        []*session.NamedProfile
+	ProxyConfiguration   ProxyConfiguration
+	PlainAwsSessions     []session.PlainAwsSession
+	FederatedAwsSessions []session.FederatedAwsSession
+	TrustedAwsSessions   []session.TrustedAwsSession
+	NamedProfiles        []named_profile.NamedProfile
 }
 
 type ProxyConfiguration struct {
@@ -23,24 +30,96 @@ type ProxyConfiguration struct {
 	Password string
 }
 
-func GetInitialConfiguration() *Configuration {
-  return &Configuration{
-    ProxyConfiguration: &ProxyConfiguration{
+func GetInitialConfiguration() Configuration {
+  return Configuration{
+    ProxyConfiguration: ProxyConfiguration{
       ProxyProtocol: "https",
       ProxyUrl: "",
       ProxyPort: 8080,
       Username: "",
       Password: "",
     },
-    FederatedAwsSessions: make([]*session.FederatedAwsSession, 0),
-    PlainAwsSessions:     make([]*session.PlainAwsSession, 0),
+    FederatedAwsSessions: make([]session.FederatedAwsSession, 0),
+    PlainAwsSessions:     make([]session.PlainAwsSession, 0),
   }
 }
 
-func UnmarshalConfiguration(configurationJson string) *Configuration {
-  var tmp Configuration
-  _ = json.Unmarshal([]byte(configurationJson), &tmp)
-  return &tmp
+func UnmarshalConfiguration(configurationJson string) Configuration {
+  var config Configuration
+  _ = json.Unmarshal([]byte(configurationJson), &config)
+  return config
+}
+
+func(config *Configuration) AddPlainAwsSession(plainAwsSession session.PlainAwsSession) error {
+  sessions, err := config.GetAllPlainAwsSessions()
+  if err != nil {
+    return err
+  }
+
+  for _, sess := range sessions {
+    if plainAwsSession.Id == sess.Id {
+      return http_error.NewConflictError(fmt.Errorf("a PlainAwsSession with id " + plainAwsSession.Id +
+        " is already present"))
+    }
+  }
+
+  sessions = append(sessions, plainAwsSession)
+  config.PlainAwsSessions = sessions
+
+  return nil
+}
+
+func(config *Configuration) GetAllPlainAwsSessions() ([]session.PlainAwsSession, error) {
+  return config.PlainAwsSessions, nil
+}
+
+func(config *Configuration) RemovePlainAwsSession(plainAwsSession session.PlainAwsSession) error {
+  sessions, err := config.GetAllPlainAwsSessions()
+  if err != nil {
+    return err
+  }
+
+  for i, sess := range sessions {
+    if plainAwsSession.Id == sess.Id {
+      config.PlainAwsSessions = append(config.PlainAwsSessions[:i], config.PlainAwsSessions[i+1:]...)
+      return nil
+    }
+  }
+
+  return http_error.NewNotFoundError(fmt.Errorf("PlainAwsSession with id " + plainAwsSession.Id +
+    " not found"))
+}
+
+func(config *Configuration) AddNamedProfile(namedProfile named_profile.NamedProfile) error {
+  for _, tmpNamedProfile := range config.NamedProfiles {
+    if namedProfile.Name == tmpNamedProfile.Name {
+      return http_error.NewConflictError(fmt.Errorf("a NamedProfile with name " + namedProfile.Name +
+        " is already present"))
+    }
+  }
+  config.NamedProfiles = append(config.NamedProfiles, namedProfile)
+  return nil
+}
+
+func(config *Configuration) FindNamedProfileByName(name string) (named_profile.NamedProfile, error) {
+  var namedProfile named_profile.NamedProfile
+
+  for _, tmpNamedProfile := range config.NamedProfiles {
+    if name == tmpNamedProfile.Name {
+      return tmpNamedProfile, nil
+    }
+  }
+
+  return namedProfile, http_error.NewNotFoundError(fmt.Errorf("NamedProfile with name " + name + " not found"))
+}
+
+func(config *Configuration) DoesNamedProfileExist(name string) bool {
+  for _, tmpNamedProfile := range config.NamedProfiles {
+    if name == tmpNamedProfile.Name {
+      return true
+    }
+  }
+  return false
 }
 
 /*
@@ -95,7 +174,7 @@ func UpdateConfiguration(configuration *Configuration, deleteExistingFile bool) 
 	encryptedConfigurationJson, err := encryption.Encrypt(string(configurationJson))
 	if err != nil { return err }
 
-	err = ioutil.WriteFile(configurationFilePath, []byte(encryptedConfigurationJson), 0644)
+	err = ioutil.WriteToFile(configurationFilePath, []byte(encryptedConfigurationJson), 0644)
 	if err != nil { return err }
 
 	return nil
@@ -107,16 +186,6 @@ func (config *Configuration) Update() error {
     return err
   }
   return nil
-}
-*/
-
-func (config *Configuration) GetPlainAwsSessions() ([]*session.PlainAwsSession, error) {
-	return config.PlainAwsSessions, nil
-}
-
-func (config *Configuration) SetPlainAwsSessions(plainAwsSessions []*session.PlainAwsSession) error {
-	config.PlainAwsSessions = plainAwsSessions
-	return nil
 }
 
 func (config *Configuration) GetFederatedAwsSessions() ([]*session.FederatedAwsSession, error) {
@@ -137,11 +206,11 @@ func (config *Configuration) SetTrustedAwsSessions(trustedAwsSessions []*session
   return nil
 }
 
-func (config *Configuration) GetNamedProfiles() ([]*session.NamedProfile, error) {
+func (config *Configuration) GetNamedProfiles() ([]*named_profile.NamedProfile, error) {
 	return config.NamedProfiles, nil
 }
 
-func (config *Configuration) SetNamedProfiles(namedProfiles []*session.NamedProfile) error {
+func (config *Configuration) SetNamedProfiles(namedProfiles []*named_profile.NamedProfile) error {
 	config.NamedProfiles = namedProfiles
 	return nil
 }
@@ -161,3 +230,4 @@ func (config *Configuration) GetAllSessions() []session.Rotatable {
 
   return sessions
 }
+ */

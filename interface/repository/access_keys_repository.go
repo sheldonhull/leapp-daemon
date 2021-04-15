@@ -1,15 +1,15 @@
 package repository
 
 import (
-  "leapp_daemon/domain/accesskeys"
+  "leapp_daemon/domain/access_keys"
   "leapp_daemon/infrastructure/http/http_error"
   "leapp_daemon/infrastructure/keychain"
 )
 
 type AccessKeyIdRepository struct {}
 
-func(repository *AccessKeyIdRepository) Get(accountName string) (accesskeys.AccessKeys, error) {
-  var accessKeys accesskeys.AccessKeys
+func(repository *AccessKeyIdRepository) Get(accountName string) (access_keys.AccessKeys, error) {
+  var accessKeys access_keys.AccessKeys
   accessKeyIdSecretName := accountName + "-plain-aws-session-access-key-id"
 
   accessKeyId, err := keychain.GetSecret(accessKeyIdSecretName)
@@ -30,6 +30,6 @@ func(repository *AccessKeyIdRepository) Get(accountName string) (accesskeys.Acce
   return accessKeys, nil
 }
 
-func(repository *AccessKeyIdRepository) Store(accessKeys accesskeys.AccessKeys) error {
+func(repository *AccessKeyIdRepository) Store(accessKeys access_keys.AccessKeys) error {
   return nil
 }

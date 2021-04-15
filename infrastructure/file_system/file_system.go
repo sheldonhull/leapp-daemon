@@ -42,7 +42,7 @@ func(fileSystem *FileSystem) RemoveFile(path string) error {
   return nil
 }
 
-func(fileSystem *FileSystem) WriteFile(path string, data []byte) error {
+func(fileSystem *FileSystem) WriteToFile(path string, data []byte) error {
   err := ioutil.WriteFile(path, data, 0644)
   if err != nil {
     return err

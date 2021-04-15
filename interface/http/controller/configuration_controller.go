@@ -6,6 +6,7 @@ import (
   "leapp_daemon/infrastructure/file_system"
   "leapp_daemon/infrastructure/logging"
   "leapp_daemon/interface/http/controller/dto/response_dto"
+  "leapp_daemon/interface/repository"
   "leapp_daemon/use_case"
   "net/http"
 )
@@ -13,9 +14,11 @@ import (
 func CreateConfigurationController(context *gin.Context) {
 	logging.SetContext(context)
 
-	service := use_case.ConfigurationService{
-    FileSystem: &file_system.FileSystem{},
-    Encryption: &encryption.Encryption{},
+  service := use_case.ConfigurationService{
+    ConfigurationRepository: &repository.FileConfigurationRepository{
+      FileSystem: &file_system.FileSystem{},
+      Encryption: &encryption.Encryption{},
+    },
   }
 
 	err := service.Create()
@@ -32,11 +35,13 @@ func ReadConfigurationController(context *gin.Context) {
 	logging.SetContext(context)
 
   service := use_case.ConfigurationService{
-    FileSystem: &file_system.FileSystem{},
-    Encryption: &encryption.Encryption{},
+    ConfigurationRepository: &repository.FileConfigurationRepository{
+      FileSystem: &file_system.FileSystem{},
+      Encryption: &encryption.Encryption{},
+    },
   }
 
-	config, err := service.Read()
+	config, err := service.Get()
 	if err != nil {
 		_ = context.Error(err)
 		return

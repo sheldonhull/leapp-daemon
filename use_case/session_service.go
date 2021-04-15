@@ -1,6 +1,7 @@
 package use_case
 
 import (
+  "leapp_daemon/domain/named_profile"
   session2 "leapp_daemon/domain/session"
 )
 
@@ -33,8 +34,8 @@ func ListAllSessions(query string, listType string) (*map[string]interface{}, er
 	}, nil
 }
 
-func ListAllNamedProfiles() ([]*session2.NamedProfile, error) {
-	var namedProfiles []*session2.NamedProfile
+func ListAllNamedProfiles() ([]*named_profile.NamedProfile, error) {
+	var namedProfiles []*named_profile.NamedProfile
 
 	/*
 	config, err := configuration.ReadConfiguration()

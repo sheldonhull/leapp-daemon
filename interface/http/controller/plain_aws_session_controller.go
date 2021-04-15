@@ -2,72 +2,92 @@ package controller
 
 import (
   "github.com/gin-gonic/gin"
-  logging2 "leapp_daemon/infrastructure/logging"
-  plain_aws_session_dto2 "leapp_daemon/interface/http/controller/dto/request_dto/plain_aws_session_dto"
-  response_dto2 "leapp_daemon/interface/http/controller/dto/response_dto"
+  "leapp_daemon/infrastructure/encryption"
+  "leapp_daemon/infrastructure/file_system"
+  "leapp_daemon/infrastructure/logging"
+  "leapp_daemon/interface/http/controller/dto/request_dto/plain_aws_session_dto"
+  "leapp_daemon/interface/http/controller/dto/response_dto"
+  "leapp_daemon/interface/repository"
   "leapp_daemon/use_case"
   "net/http"
 )
 
-func GetPlainAwsSessionController(context *gin.Context) {
-	logging2.SetContext(context)
-
-	requestDto := plain_aws_session_dto2.GetPlainAwsSessionRequestDto{}
-	err := (&requestDto).Build(context)
-	if err != nil {
-		_ = context.Error(err)
-		return
-	}
-
-	sess, err := use_case.GetPlainAwsSession(requestDto.Id)
-	if err != nil {
-		_ = context.Error(err)
-		return
-	}
-
-	responseDto := response_dto2.MessageAndDataResponseDto{Message: "success", Data: *sess}
-	context.JSON(http.StatusOK, responseDto.ToMap())
-}
-
 func CreatePlainAwsSessionController(context *gin.Context) {
-	logging2.SetContext(context)
+	logging.SetContext(context)
 
-	requestDto := plain_aws_session_dto2.CreatePlainAwsSessionRequestDto{}
+	requestDto := plain_aws_session_dto.CreatePlainAwsSessionRequestDto{}
 	err := (&requestDto).Build(context)
 	if err != nil {
 		_ = context.Error(err)
 		return
 	}
 
-	err = use_case.CreatePlainAwsSession(
-		requestDto.Name,
-		requestDto.AccountNumber,
-		requestDto.Region,
-		requestDto.User,
-		requestDto.AwsAccessKeyId,
-		requestDto.AwsSecretAccessKey,
-		requestDto.MfaDevice,
-		requestDto.ProfileName)
-	if err != nil {
-		_ = context.Error(err)
-		return
+	configurationService := use_case.ConfigurationService{
+	  ConfigurationRepository: &repository.FileConfigurationRepository{
+      FileSystem: &file_system.FileSystem{},
+      Encryption: &encryption.Encryption{},
+	  },
 	}
 
-	responseDto := response_dto2.MessageOnlyResponseDto{Message: "success"}
+	configuration, err := configurationService.Get()
+	if err != nil {
+    _ = context.Error(err)
+    return
+  }
+
+  plainAwsSessionService := use_case.PlainAwsSessionService{
+    PlainAwsSessionContainer: &configuration,
+    NamedProfileContainer:    &configuration,
+  }
+
+  err = plainAwsSessionService.Create(requestDto.Name, requestDto.AccountNumber, requestDto.Region, requestDto.User,
+    requestDto.AwsAccessKeyId, requestDto.AwsSecretAccessKey, requestDto.MfaDevice, requestDto.ProfileName)
+  if err != nil {
+    _ = context.Error(err)
+    return
+  }
+
+  err = configurationService.Update(configuration)
+  if err != nil {
+    _ = context.Error(err)
+    return
+  }
+
+	responseDto := response_dto.MessageOnlyResponseDto{Message: "success"}
 	context.JSON(http.StatusOK, responseDto.ToMap())
 }
 
-func EditPlainAwsSessionController(context *gin.Context) {
-	logging2.SetContext(context)
+func GetPlainAwsSessionController(context *gin.Context) {
+  logging.SetContext(context)
 
-	requestUriDto := plain_aws_session_dto2.EditPlainAwsSessionUriRequestDto{}
+  requestDto := plain_aws_session_dto.GetPlainAwsSessionRequestDto{}
+  err := (&requestDto).Build(context)
+  if err != nil {
+  _ = context.Error(err)
+  return
+  }
+
+  sess, err := use_case.GetPlainAwsSession(requestDto.Id)
+  if err != nil {
+  _ = context.Error(err)
+  return
+  }
+
+  responseDto := response_dto.MessageAndDataResponseDto{Message: "success", Data: *sess}
+  context.JSON(http.StatusOK, responseDto.ToMap())
+}
+
+func UpdatePlainAwsSessionController(context *gin.Context) {
+	logging.SetContext(context)
+
+	requestUriDto := plain_aws_session_dto.UpdatePlainAwsSessionUriRequestDto{}
 	err := (&requestUriDto).Build(context)
 	if err != nil {
 		_ = context.Error(err)
 		return
 	}
 
-	requestDto := plain_aws_session_dto2.EditPlainAwsSessionRequestDto{}
+	requestDto := plain_aws_session_dto.UpdatePlainAwsSessionRequestDto{}
 	err = (&requestDto).Build(context)
 	if err != nil {
 		_ = context.Error(err)
@@ -90,35 +110,45 @@ func EditPlainAwsSessionController(context *gin.Context) {
 		return
 	}
 
-	responseDto := response_dto2.MessageOnlyResponseDto{Message: "success"}
+	responseDto := response_dto.MessageOnlyResponseDto{Message: "success"}
 	context.JSON(http.StatusOK, responseDto.ToMap())
 }
 
 func DeletePlainAwsSessionController(context *gin.Context) {
-	logging2.SetContext(context)
+  /*
+	logging.SetContext(context)
 
-	requestDto := plain_aws_session_dto2.DeletePlainAwsSessionRequestDto{}
+	requestDto := plain_aws_session_dto.DeletePlainAwsSessionRequestDto{}
 	err := (&requestDto).Build(context)
 	if err != nil {
 		_ = context.Error(err)
 		return
 	}
 
-	err = use_case.DeletePlainAwsSession(requestDto.Id)
+  configurationService := use_case.ConfigurationService{
+    ConfigurationRepository: &repository.FileConfigurationRepository{
+      FileSystem: &file_system.FileSystem{},
+      Encryption: &encryption.Encryption{},
+    },
+  }
 
-	if err != nil {
-		_ = context.Error(err)
-		return
-	}
+  configuration, err := configurationService.Get()
+  if err != nil {
+    _ = context.Error(err)
+    return
+  }
 
-	responseDto := response_dto2.MessageOnlyResponseDto{Message: "success"}
+  configuration.
+
+	responseDto := response_dto.MessageOnlyResponseDto{Message: "success"}
 	context.JSON(http.StatusOK, responseDto.ToMap())
+   */
 }
 
 func StartPlainAwsSessionController(context *gin.Context) {
-	logging2.SetContext(context)
+	logging.SetContext(context)
 
-	requestDto := plain_aws_session_dto2.StartPlainAwsSessionRequestDto{}
+	requestDto := plain_aws_session_dto.StartPlainAwsSessionRequestDto{}
 	err := (&requestDto).Build(context)
 	if err != nil {
 		_ = context.Error(err)
@@ -132,14 +162,14 @@ func StartPlainAwsSessionController(context *gin.Context) {
 		return
 	}
 
-	responseDto := response_dto2.MessageOnlyResponseDto{Message: "success"}
+	responseDto := response_dto.MessageOnlyResponseDto{Message: "success"}
 	context.JSON(http.StatusOK, responseDto.ToMap())
 }
 
 func StopPlainAwsSessionController(context *gin.Context) {
-	logging2.SetContext(context)
+	logging.SetContext(context)
 
-	requestDto := plain_aws_session_dto2.StopPlainAwsSessionRequestDto{}
+	requestDto := plain_aws_session_dto.StopPlainAwsSessionRequestDto{}
 	err := (&requestDto).Build(context)
 	if err != nil {
 		_ = context.Error(err)
@@ -153,6 +183,6 @@ func StopPlainAwsSessionController(context *gin.Context) {
 		return
 	}
 
-	responseDto := response_dto2.MessageOnlyResponseDto{Message: "success"}
+	responseDto := response_dto.MessageOnlyResponseDto{Message: "success"}
 	context.JSON(http.StatusOK, responseDto.ToMap())
 }

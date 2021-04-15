@@ -1,11 +1,7 @@
 package session
 
 import (
-  "fmt"
-  "github.com/google/uuid"
   "leapp_daemon/domain/constant"
-  http_error2 "leapp_daemon/infrastructure/http/http_error"
-  "strings"
   "time"
 )
 
@@ -42,6 +38,7 @@ func(sess *FederatedAwsSession) IsRotationIntervalExpired() (bool, error) {
 	return int64(secondsPassedFromStart) > constant.RotationIntervalInSeconds, nil
 }
 
+/*
 func CreateFederatedAwsSession(sessionContainer Container, name string, accountNumber string, roleName string, roleArn string, idpArn string,
 	region string, ssoUrl string, profile string) error {
 
@@ -76,7 +73,7 @@ func CreateFederatedAwsSession(sessionContainer Container, name string, accountN
 	uuidString := uuid.New().String()
 	uuidString = strings.Replace(uuidString, "-", "", -1)
 
-	namedProfileId, err := CreateNamedProfile(sessionContainer, profile)
+	namedProfileId, err := named_profile.CreateNamedProfile(sessionContainer, profile)
 	if err != nil {
 		return err
 	}
@@ -149,7 +146,7 @@ func UpdateFederatedAwsSession(sessionContainer Container, id string, name strin
 	found := false
 	for index := range sessions {
 		if sessions[index].Id == id {
-			namedProfileId, err := EditNamedProfile(sessionContainer, sessions[index].Profile, profile)
+			namedProfileId, err := named_profile.EditNamedProfile(sessionContainer, sessions[index].Profile, profile)
 			if err != nil { return err }
 
 			sessions[index].Profile = namedProfileId
@@ -231,3 +228,4 @@ func StopFederatedAwsSession(sessionContainer Container, id string) error {
 	sess.Status = NotActive
 	return nil
 }
+ */

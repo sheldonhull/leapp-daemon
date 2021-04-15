@@ -1,16 +1,17 @@
-package session
+package named_profile
 
-import (
-  "fmt"
-  "github.com/google/uuid"
-  "strings"
-)
+type NamedProfileContainer interface {
+  AddNamedProfile(namedProfile NamedProfile) error
+  DoesNamedProfileExist(name string) bool
+  FindNamedProfileByName(name string) (NamedProfile, error)
+}
 
 type NamedProfile struct {
 	Id string
 	Name string
 }
 
+/*
 func CreateNamedProfile(sessionContainer Container, name string) (string, error) {
 
 	if name == "" {
@@ -63,4 +64,4 @@ func EditNamedProfile(sessionContainer Container, namedProfileId string, newName
 
 	return "", fmt.Errorf("No named profile exists with Id: " + namedProfileId + ". Unable to edit profile's name")
 }
-
+*/

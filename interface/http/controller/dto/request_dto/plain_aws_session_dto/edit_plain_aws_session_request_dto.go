@@ -5,11 +5,11 @@ import (
   http_error2 "leapp_daemon/infrastructure/http/http_error"
 )
 
-type EditPlainAwsSessionUriRequestDto struct {
+type UpdatePlainAwsSessionUriRequestDto struct {
 	Id string `uri:"id" binding:"required"`
 }
 
-type EditPlainAwsSessionRequestDto struct {
+type UpdatePlainAwsSessionRequestDto struct {
 	Name string `json:"name" binding:"required"`
 	AccountNumber string `json:"accountNumber" binding:"required"`
 	Region string `json:"region" binding:"required"`
@@ -20,7 +20,7 @@ type EditPlainAwsSessionRequestDto struct {
 	ProfileName string `json:"profileName"`
 }
 
-func (requestDto *EditPlainAwsSessionRequestDto) Build(context *gin.Context) error {
+func (requestDto *UpdatePlainAwsSessionRequestDto) Build(context *gin.Context) error {
 	err := context.ShouldBindJSON(requestDto)
 	if err != nil {
 		return http_error2.NewBadRequestError(err)
@@ -29,7 +29,7 @@ func (requestDto *EditPlainAwsSessionRequestDto) Build(context *gin.Context) err
 	}
 }
 
-func (requestDto *EditPlainAwsSessionUriRequestDto) Build(context *gin.Context) error {
+func (requestDto *UpdatePlainAwsSessionUriRequestDto) Build(context *gin.Context) error {
 	err := context.ShouldBindUri(requestDto)
 	if err != nil {
 		return http_error2.NewBadRequestError(err)

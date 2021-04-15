@@ -1,8 +1,8 @@
 package session
 
+/*
 type Container interface {
-	GetPlainAwsSessions() ([]*PlainAwsSession, error)
-	SetPlainAwsSessions([]*PlainAwsSession) error
+	PlainAwsSessionContainer
 
 	GetFederatedAwsSessions() ([]*FederatedAwsSession, error)
 	SetFederatedAwsSessions([]*FederatedAwsSession) error
@@ -10,3 +10,4 @@ type Container interface {
 	GetNamedProfiles() ([]*NamedProfile, error)
 	SetNamedProfiles([]*NamedProfile) error
 }
+*/

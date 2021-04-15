@@ -193,6 +193,7 @@ func DeleteTrustedAwsSession(id string) error {
 }
 
 func CheckParentExist(parentId string, config *configuration.Configuration) error {
+  /*
 	foundId := false
 	plains, err := config.GetPlainAwsSessions()
 	if err != nil {
@@ -218,6 +219,7 @@ func CheckParentExist(parentId string, config *configuration.Configuration) erro
 		err := http_error2.NewNotFoundError(fmt.Errorf("no plain or federated session with id %s found", parentId))
 		return err
 	}
+   */
 
 	return nil
 }

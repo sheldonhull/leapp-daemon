@@ -1,4 +1,4 @@
-package accesskeys
+package access_keys
 
 import (
 	"leapp_daemon/infrastructure/http/http_error"
