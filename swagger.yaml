@@ -33,6 +33,38 @@ definitions:
     - roleName
     type: object
     x-go-package: leapp_daemon/api/controller/dto/request_dto/trusted_aws_session_dto
+  EditTrustedAwsSessionRequestDto:
+    properties:
+      accountName:
+        description: the name which will be displayed
+        type: string
+        x-go-name: AccountName
+      accountNumber:
+        description: the account number of the aws account related to the role
+        type: string
+        x-go-name: AccountNumber
+      parentId:
+        description: |-
+          the parent session id, can be an aws plain or federated session
+          it's generated with an uuid v4
+        type: string
+        x-go-name: ParentId
+      region:
+        description: the region on which the session will be initialized
+        type: string
+        x-go-name: Region
+      roleName:
+        description: the role name
+        type: string
+        x-go-name: RoleName
+    type: object
+    x-go-package: leapp_daemon/api/controller/dto/request_dto/trusted_aws_session_dto
+  MessageOnlyResponseDto:
+    properties:
+      Message:
+        type: string
+    type: object
+    x-go-package: leapp_daemon/api/controller/dto/response_dto
   Status:
     format: int64
     type: integer
@@ -114,6 +146,9 @@ paths:
         required: true
         type: string
         x-go-name: Id
+      responses:
+        "200":
+          $ref: '#/responses/messageResponse'
       tags:
       - session-trusted-aws
     get:
@@ -126,18 +161,29 @@ paths:
         required: true
         type: string
         x-go-name: Id
+      responses:
+        "200":
+          $ref: '#/responses/getTrustedAwsSessionResponse'
       tags:
       - session-trusted-aws
     put:
       description: Edit a Trusted AWS Session
       operationId: editTrustedAwsSession
       parameters:
+      - description: This text will appear as description of your request body.
+        in: body
+        name: Body
+        schema:
+          $ref: '#/definitions/EditTrustedAwsSessionRequestDto'
       - description: the id of the session
         in: path
         name: id
         required: true
         type: string
         x-go-name: Id
+      responses:
+        "200":
+          $ref: '#/responses/messageResponse'
       tags:
       - session-trusted-aws
 produces:
@@ -147,6 +193,10 @@ responses:
     description: ""
     schema:
       $ref: '#/definitions/getTrustedAwsSessionResponse'
+  messageResponse:
+    description: ""
+    schema:
+      $ref: '#/definitions/MessageOnlyResponseDto'
 schemes:
 - http
 swagger: "2.0"

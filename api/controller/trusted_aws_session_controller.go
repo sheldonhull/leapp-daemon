@@ -67,6 +67,8 @@ func CreateTrustedAwsSessionController(context *gin.Context) {
 func GetTrustedAwsSessionController(context *gin.Context) {
 	// swagger:route GET /trusted/{id} session-trusted-aws getTrustedAwsSession
 	// Get a Trusted AWS Session
+	//  Responses:
+	//    200: getTrustedAwsSessionResponse
 
 	logging.SetContext(context)
 
@@ -90,6 +92,8 @@ func GetTrustedAwsSessionController(context *gin.Context) {
 func EditTrustedAwsSessionController(context *gin.Context) {
 	// swagger:route PUT /trusted/{id} session-trusted-aws editTrustedAwsSession
 	// Edit a Trusted AWS Session
+	//   Responses:
+	//     200: messageResponse
 
 	logging.SetContext(context)
 
@@ -127,6 +131,8 @@ func EditTrustedAwsSessionController(context *gin.Context) {
 func DeleteTrustedAwsSessionController(context *gin.Context) {
 	// swagger:route DELETE /trusted/{id} session-trusted-aws deleteTrustedAwsSession
 	// Delete a Trusted AWS Session
+	//   Responses:
+	//     200: messageResponse
 
 	logging.SetContext(context)
 
