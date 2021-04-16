@@ -1,8 +1,8 @@
 package trusted_aws_session_dto
 
 import (
-  "github.com/gin-gonic/gin"
-  http_error2 "leapp_daemon/infrastructure/http/http_error"
+	"github.com/gin-gonic/gin"
+	"leapp_daemon/infrastructure/http/http_error"
 )
 
 // swagger:parameters editTrustedAwsSession
@@ -12,7 +12,11 @@ type EditTrustedAwsSessionParamsWrapper struct {
 	Body EditTrustedAwsSessionRequestDto
 }
 
+// swagger:parameters editTrustedAwsSession
 type EditTrustedAwsSessionUriRequestDto struct {
+	// the id of the trusted aws session
+	// in: path
+	// required: true
 	Id string `uri:"id" binding:"required"`
 }
 
@@ -37,7 +41,7 @@ type EditTrustedAwsSessionRequestDto struct {
 func (requestDto *EditTrustedAwsSessionRequestDto) Build(context *gin.Context) error {
 	err := context.ShouldBindJSON(requestDto)
 	if err != nil {
-		return http_error2.NewBadRequestError(err)
+		return http_error.NewBadRequestError(err)
 	} else {
 		return nil
 	}
@@ -46,7 +50,7 @@ func (requestDto *EditTrustedAwsSessionRequestDto) Build(context *gin.Context) e
 func (requestDto *EditTrustedAwsSessionUriRequestDto) Build(context *gin.Context) error {
 	err := context.ShouldBindUri(requestDto)
 	if err != nil {
-		return http_error2.NewBadRequestError(err)
+		return http_error.NewBadRequestError(err)
 	} else {
 		return nil
 	}

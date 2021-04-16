@@ -1,7 +1,40 @@
-basePath: /api/v1/
-consumes:
-- application/json
+basePath: /api/v1/session
 definitions:
+  CreatePlainAwsSessionRequestDto:
+    properties:
+      accountNumber:
+        description: the account number of the aws account related to the role
+        type: string
+        x-go-name: AccountNumber
+      awsAccessKeyId:
+        type: string
+        x-go-name: AwsAccessKeyId
+      awsSecretAccessKey:
+        type: string
+        x-go-name: AwsSecretAccessKey
+      mfaDevice:
+        type: string
+        x-go-name: MfaDevice
+      name:
+        description: the name which will be displayed
+        type: string
+        x-go-name: Name
+      profileName:
+        type: string
+        x-go-name: ProfileName
+      region:
+        description: the region on which the session will be initialized
+        type: string
+        x-go-name: Region
+      user:
+        type: string
+        x-go-name: User
+    required:
+    - name
+    - accountNumber
+    - region
+    type: object
+    x-go-package: leapp_daemon/interface/http/controller/dto/request_dto/plain_aws_session_dto
   CreateTrustedAwsSessionRequestDto:
     properties:
       accountName:
@@ -32,7 +65,7 @@ definitions:
     - accountNumber
     - roleName
     type: object
-    x-go-package: leapp_daemon/api/controller/dto/request_dto/trusted_aws_session_dto
+    x-go-package: leapp_daemon/interface/http/controller/dto/request_dto/trusted_aws_session_dto
   EditTrustedAwsSessionRequestDto:
     properties:
       accountName:
@@ -58,17 +91,49 @@ definitions:
         type: string
         x-go-name: RoleName
     type: object
-    x-go-package: leapp_daemon/api/controller/dto/request_dto/trusted_aws_session_dto
+    x-go-package: leapp_daemon/interface/http/controller/dto/request_dto/trusted_aws_session_dto
   MessageOnlyResponseDto:
     properties:
       Message:
         type: string
     type: object
-    x-go-package: leapp_daemon/api/controller/dto/response_dto
+    x-go-package: leapp_daemon/interface/http/controller/dto/response_dto
+  PlainAwsAccount:
+    properties:
+      AccountNumber:
+        type: string
+      AwsAccessKeyId:
+        type: string
+      AwsSecretAccessKey:
+        type: string
+      MfaDevice:
+        type: string
+      Name:
+        type: string
+      Region:
+        type: string
+      User:
+        type: string
+    type: object
+    x-go-package: leapp_daemon/domain/session
+  PlainAwsSession:
+    properties:
+      Account:
+        $ref: '#/definitions/PlainAwsAccount'
+      Id:
+        type: string
+      Profile:
+        type: string
+      StartTime:
+        type: string
+      Status:
+        $ref: '#/definitions/Status'
+    type: object
+    x-go-package: leapp_daemon/domain/session
   Status:
     format: int64
     type: integer
-    x-go-package: leapp_daemon/core/session
+    x-go-package: leapp_daemon/domain/session
   TrustedAwsAccount:
     properties:
       AccountNumber:
@@ -80,7 +145,7 @@ definitions:
       Role:
         $ref: '#/definitions/TrustedAwsRole'
     type: object
-    x-go-package: leapp_daemon/core/session
+    x-go-package: leapp_daemon/domain/session
   TrustedAwsRole:
     properties:
       Arn:
@@ -88,14 +153,12 @@ definitions:
       Name:
         type: string
     type: object
-    x-go-package: leapp_daemon/core/session
+    x-go-package: leapp_daemon/domain/session
   TrustedAwsSession:
-    description: TrustedAwsSession represents
     properties:
       Account:
         $ref: '#/definitions/TrustedAwsAccount'
       Id:
-        description: the id for this user
         type: string
       ParentId:
         type: string
@@ -103,10 +166,16 @@ definitions:
         type: string
       Status:
         $ref: '#/definitions/Status'
-    required:
-    - Id
     type: object
-    x-go-package: leapp_daemon/core/session
+    x-go-package: leapp_daemon/domain/session
+  getPlainAwsSessionResponse:
+    properties:
+      Data:
+        $ref: '#/definitions/PlainAwsSession'
+      Message:
+        type: string
+    type: object
+    x-go-package: leapp_daemon/interface/http/controller
   getTrustedAwsSessionResponse:
     properties:
       Data:
@@ -114,12 +183,52 @@ definitions:
       Message:
         type: string
     type: object
-    x-go-package: leapp_daemon/api/controller
+    x-go-package: leapp_daemon/interface/http/controller
 host: localhost
 info:
-  description: Documentation for leapp-daemon api package
-  title: API package for leapp-daemon
+  description: Documentation for Trusted AWS Accounts API
+  title: Trusted AWS Sessions API
 paths:
+  /plain:
+    post:
+      description: Create a new plain aws session
+      operationId: createPlainAwsSession
+      parameters:
+      - description: This text will appear as description of your request body.
+        in: body
+        name: Body
+        schema:
+          $ref: '#/definitions/CreatePlainAwsSessionRequestDto'
+      responses:
+        "200":
+          $ref: '#/responses/messageResponse'
+      tags:
+      - session-plain-aws
+  /plain/{id}:
+    delete:
+      description: Delete a Plain AWS Session
+      operationId: deletePlainAwsSession
+      responses:
+        "200":
+          $ref: '#/responses/messageResponse'
+      tags:
+      - session-plain-aws
+    get:
+      description: Get a Plain AWS Session
+      operationId: getPlainAwsSession
+      responses:
+        "200":
+          $ref: '#/responses/getPlainAwsSessionResponse'
+      tags:
+      - session-plain-aws
+    put:
+      description: Edit a Plain AWS Session
+      operationId: editPlainAwsSession
+      responses:
+        "200":
+          $ref: '#/responses/messageResponse'
+      tags:
+      - session-plain-aws
   /trusted:
     post:
       description: Create a new trusted aws session
@@ -140,12 +249,11 @@ paths:
       description: Delete a Trusted AWS Session
       operationId: deleteTrustedAwsSession
       parameters:
-      - description: the id of the session
+      - description: the id of the trusted aws session
         in: path
-        name: id
+        name: Id
         required: true
         type: string
-        x-go-name: Id
       responses:
         "200":
           $ref: '#/responses/messageResponse'
@@ -155,12 +263,11 @@ paths:
       description: Get a Trusted AWS Session
       operationId: getTrustedAwsSession
       parameters:
-      - description: the id of the session
+      - description: the id of the trusted aws session
         in: path
-        name: id
+        name: Id
         required: true
         type: string
-        x-go-name: Id
       responses:
         "200":
           $ref: '#/responses/getTrustedAwsSessionResponse'
@@ -175,20 +282,21 @@ paths:
         name: Body
         schema:
           $ref: '#/definitions/EditTrustedAwsSessionRequestDto'
-      - description: the id of the session
+      - description: the id of the trusted aws session
         in: path
-        name: id
+        name: Id
         required: true
         type: string
-        x-go-name: Id
       responses:
         "200":
           $ref: '#/responses/messageResponse'
       tags:
       - session-trusted-aws
-produces:
-- application/json
 responses:
+  getPlainAwsSessionResponse:
+    description: ""
+    schema:
+      $ref: '#/definitions/getPlainAwsSessionResponse'
   getTrustedAwsSessionResponse:
     description: ""
     schema:

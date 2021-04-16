@@ -1,8 +1,8 @@
 package trusted_aws_session_dto
 
 import (
-  "github.com/gin-gonic/gin"
-  http_error2 "leapp_daemon/infrastructure/http/http_error"
+	"github.com/gin-gonic/gin"
+	"leapp_daemon/infrastructure/http/http_error"
 )
 
 // swagger:parameters createTrustedAwsSession
@@ -37,7 +37,7 @@ type CreateTrustedAwsSessionRequestDto struct {
 func (requestDto *CreateTrustedAwsSessionRequestDto) Build(context *gin.Context) error {
 	err := context.ShouldBindJSON(requestDto)
 	if err != nil {
-		return http_error2.NewBadRequestError(err)
+		return http_error.NewBadRequestError(err)
 	} else {
 		return nil
 	}
