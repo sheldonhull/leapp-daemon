@@ -1,12 +1,3 @@
-// Package controller Trusted AWS Sessions API
-//
-// Documentation for Trusted AWS Accounts API
-//
-//  Schemes: http
-//  Host: localhost
-//  BasePath: /api/v1/session
-//
-// swagger:meta
 package controller
 
 import (
@@ -31,7 +22,7 @@ type getTrustedAwsSessionResponse struct {
 }
 
 func CreateTrustedAwsSessionController(context *gin.Context) {
-	// swagger:route POST /trusted session-trusted-aws createTrustedAwsSession
+	// swagger:route POST /session/trusted session-trusted-aws createTrustedAwsSession
 	// Create a new trusted aws session
 	//   Responses:
 	//     200: messageResponse
@@ -56,7 +47,7 @@ func CreateTrustedAwsSessionController(context *gin.Context) {
 }
 
 func GetTrustedAwsSessionController(context *gin.Context) {
-	// swagger:route GET /trusted/{id} session-trusted-aws getTrustedAwsSession
+	// swagger:route GET /session/trusted/{id} session-trusted-aws getTrustedAwsSession
 	// Get a Trusted AWS Session
 	//   Responses:
 	//     200: getTrustedAwsSessionResponse
@@ -81,7 +72,7 @@ func GetTrustedAwsSessionController(context *gin.Context) {
 }
 
 func EditTrustedAwsSessionController(context *gin.Context) {
-	// swagger:route PUT /trusted/{id} session-trusted-aws editTrustedAwsSession
+	// swagger:route PUT /session/trusted/{id} session-trusted-aws editTrustedAwsSession
 	// Edit a Trusted AWS Session
 	//   Responses:
 	//     200: messageResponse
@@ -120,7 +111,7 @@ func EditTrustedAwsSessionController(context *gin.Context) {
 }
 
 func DeleteTrustedAwsSessionController(context *gin.Context) {
-	// swagger:route DELETE /trusted/{id} session-trusted-aws deleteTrustedAwsSession
+	// swagger:route DELETE /session/trusted/{id} session-trusted-aws deleteTrustedAwsSession
 	// Delete a Trusted AWS Session
 	//   Responses:
 	//     200: messageResponse

@@ -1,12 +1,3 @@
-// Package controller Plain AWS Sessions API
-//
-// Documentation for Plain AWS Accounts API
-//
-//  Schemes: http
-//  Host: localhost
-//  BasePath: /api/v1/session
-//
-// swagger:meta
 package controller
 
 import (
@@ -34,7 +25,7 @@ type getPlainAwsSessionResponse struct {
 }
 
 func CreatePlainAwsSessionController(context *gin.Context) {
-	// swagger:route POST /plain session-plain-aws createPlainAwsSession
+	// swagger:route POST /session/plain session-plain-aws createPlainAwsSession
 	// Create a new plain aws session
 	//   Responses:
 	//     200: messageResponse
@@ -84,7 +75,7 @@ func CreatePlainAwsSessionController(context *gin.Context) {
 }
 
 func GetPlainAwsSessionController(context *gin.Context) {
-	// swagger:route GET /plain/{id} session-plain-aws getPlainAwsSession
+	// swagger:route GET /session/plain/{id} session-plain-aws getPlainAwsSession
 	// Get a Plain AWS Session
 	//   Responses:
 	//     200: getPlainAwsSessionResponse
@@ -109,7 +100,7 @@ func GetPlainAwsSessionController(context *gin.Context) {
 }
 
 func UpdatePlainAwsSessionController(context *gin.Context) {
-	// swagger:route PUT /plain/{id} session-plain-aws editPlainAwsSession
+	// swagger:route PUT /session/plain/{id} session-plain-aws editPlainAwsSession
 	// Edit a Plain AWS Session
 	//   Responses:
 	//     200: messageResponse
@@ -151,38 +142,38 @@ func UpdatePlainAwsSessionController(context *gin.Context) {
 }
 
 func DeletePlainAwsSessionController(context *gin.Context) {
-	// swagger:route DELETE /plain/{id} session-plain-aws deletePlainAwsSession
+	// swagger:route DELETE /session/plain/{id} session-plain-aws deletePlainAwsSession
 	// Delete a Plain AWS Session
 	//   Responses:
 	//     200: messageResponse
 
 	/*
-		logging.SetContext(context)
+			logging.SetContext(context)
 
-		requestDto := plain_aws_session_dto.DeletePlainAwsSessionRequestDto{}
-		err := (&requestDto).Build(context)
-		if err != nil {
-			_ = context.Error(err)
-			return
-		}
+			requestDto := plain_aws_session_dto.DeletePlainAwsSessionRequestDto{}
+			err := (&requestDto).Build(context)
+			if err != nil {
+				_ = context.Error(err)
+				return
+			}
 
-	  configurationService := use_case.ConfigurationService{
-	    ConfigurationRepository: &repository.FileConfigurationRepository{
-	      FileSystem: &file_system.FileSystem{},
-	      Encryption: &encryption.Encryption{},
-	    },
-	  }
+		  configurationService := use_case.ConfigurationService{
+		    ConfigurationRepository: &repository.FileConfigurationRepository{
+		      FileSystem: &file_system.FileSystem{},
+		      Encryption: &encryption.Encryption{},
+		    },
+		  }
 
-	  configuration, err := configurationService.Get()
-	  if err != nil {
-	    _ = context.Error(err)
-	    return
-	  }
+		  configuration, err := configurationService.Get()
+		  if err != nil {
+		    _ = context.Error(err)
+		    return
+		  }
 
-	  configuration.
+		  configuration.
 
-		responseDto := response_dto.MessageOnlyResponseDto{Message: "success"}
-		context.JSON(http.StatusOK, responseDto.ToMap())
+			responseDto := response_dto.MessageOnlyResponseDto{Message: "success"}
+			context.JSON(http.StatusOK, responseDto.ToMap())
 	*/
 }
 

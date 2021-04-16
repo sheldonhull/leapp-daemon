@@ -1,5 +1,26 @@
-basePath: /api/v1/session
 definitions:
+  Configuration:
+    properties:
+      FederatedAwsSessions:
+        items:
+          $ref: '#/definitions/FederatedAwsSession'
+        type: array
+      NamedProfiles:
+        items:
+          $ref: '#/definitions/NamedProfile'
+        type: array
+      PlainAwsSessions:
+        items:
+          $ref: '#/definitions/PlainAwsSession'
+        type: array
+      ProxyConfiguration:
+        $ref: '#/definitions/ProxyConfiguration'
+      TrustedAwsSessions:
+        items:
+          $ref: '#/definitions/TrustedAwsSession'
+        type: array
+    type: object
+    x-go-package: leapp_daemon/domain/configuration
   CreatePlainAwsSessionRequestDto:
     properties:
       accountNumber:
@@ -92,12 +113,58 @@ definitions:
         x-go-name: RoleName
     type: object
     x-go-package: leapp_daemon/interface/http/controller/dto/request_dto/trusted_aws_session_dto
+  FederatedAwsAccount:
+    properties:
+      AccountNumber:
+        type: string
+      IdpArn:
+        type: string
+      Name:
+        type: string
+      Region:
+        type: string
+      Role:
+        $ref: '#/definitions/FederatedAwsRole'
+      SsoUrl:
+        type: string
+    type: object
+    x-go-package: leapp_daemon/domain/session
+  FederatedAwsRole:
+    properties:
+      Arn:
+        type: string
+      Name:
+        type: string
+    type: object
+    x-go-package: leapp_daemon/domain/session
+  FederatedAwsSession:
+    properties:
+      Account:
+        $ref: '#/definitions/FederatedAwsAccount'
+      Id:
+        type: string
+      Profile:
+        type: string
+      StartTime:
+        type: string
+      Status:
+        $ref: '#/definitions/Status'
+    type: object
+    x-go-package: leapp_daemon/domain/session
   MessageOnlyResponseDto:
     properties:
       Message:
         type: string
     type: object
     x-go-package: leapp_daemon/interface/http/controller/dto/response_dto
+  NamedProfile:
+    properties:
+      Id:
+        type: string
+      Name:
+        type: string
+    type: object
+    x-go-package: leapp_daemon/domain/named_profile
   PlainAwsAccount:
     properties:
       AccountNumber:
@@ -130,6 +197,21 @@ definitions:
         $ref: '#/definitions/Status'
     type: object
     x-go-package: leapp_daemon/domain/session
+  ProxyConfiguration:
+    properties:
+      Password:
+        type: string
+      ProxyPort:
+        format: uint64
+        type: integer
+      ProxyProtocol:
+        type: string
+      ProxyUrl:
+        type: string
+      Username:
+        type: string
+    type: object
+    x-go-package: leapp_daemon/domain/configuration
   Status:
     format: int64
     type: integer
@@ -168,6 +250,14 @@ definitions:
         $ref: '#/definitions/Status'
     type: object
     x-go-package: leapp_daemon/domain/session
+  getConfigurationResponse:
+    properties:
+      Data:
+        $ref: '#/definitions/Configuration'
+      Message:
+        type: string
+    type: object
+    x-go-package: leapp_daemon/interface/http/controller
   getPlainAwsSessionResponse:
     properties:
       Data:
@@ -184,12 +274,25 @@ definitions:
         type: string
     type: object
     x-go-package: leapp_daemon/interface/http/controller
-host: localhost
-info:
-  description: Documentation for Trusted AWS Accounts API
-  title: Trusted AWS Sessions API
 paths:
-  /plain:
+  /configuration:
+    get:
+      description: Create a new configuration
+      operationId: getConfiguration
+      responses:
+        "200":
+          $ref: '#/responses/getConfigurationResponse'
+      tags:
+      - configuration
+    post:
+      description: Create a new configuration
+      operationId: createConfiguration
+      responses:
+        "200":
+          $ref: '#/responses/messageResponse'
+      tags:
+      - configuration
+  /session/plain:
     post:
       description: Create a new plain aws session
       operationId: createPlainAwsSession
@@ -204,7 +307,7 @@ paths:
           $ref: '#/responses/messageResponse'
       tags:
       - session-plain-aws
-  /plain/{id}:
+  /session/plain/{id}:
     delete:
       description: Delete a Plain AWS Session
       operationId: deletePlainAwsSession
@@ -229,7 +332,7 @@ paths:
           $ref: '#/responses/messageResponse'
       tags:
       - session-plain-aws
-  /trusted:
+  /session/trusted:
     post:
       description: Create a new trusted aws session
       operationId: createTrustedAwsSession
@@ -244,7 +347,7 @@ paths:
           $ref: '#/responses/messageResponse'
       tags:
       - session-trusted-aws
-  /trusted/{id}:
+  /session/trusted/{id}:
     delete:
       description: Delete a Trusted AWS Session
       operationId: deleteTrustedAwsSession
@@ -293,6 +396,10 @@ paths:
       tags:
       - session-trusted-aws
 responses:
+  getConfigurationResponse:
+    description: ""
+    schema:
+      $ref: '#/definitions/getConfigurationResponse'
   getPlainAwsSessionResponse:
     description: ""
     schema:
@@ -305,6 +412,4 @@ responses:
     description: ""
     schema:
       $ref: '#/definitions/MessageOnlyResponseDto'
-schemes:
-- http
 swagger: "2.0"
