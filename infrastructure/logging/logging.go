@@ -105,7 +105,7 @@ func createLogDir() error {
 	}
 
 	if _, err := os.Stat(dirPath); os.IsNotExist(err) {
-		err := os.Mkdir(dirPath, 0755)
+		err := os.MkdirAll(dirPath, 0755)
 		if err != nil {
 			return err
 		}
