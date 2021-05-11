@@ -2,9 +2,9 @@ package main
 
 import (
   "leapp_daemon/infrastructure/http/engine"
-  logging2 "leapp_daemon/infrastructure/logging"
-  timer2 "leapp_daemon/infrastructure/timer"
-  websocket2 "leapp_daemon/infrastructure/websocket"
+  "leapp_daemon/infrastructure/logging"
+  "leapp_daemon/infrastructure/timer"
+  "leapp_daemon/infrastructure/websocket"
   "leapp_daemon/use_case"
 )
 
@@ -13,8 +13,8 @@ func main() {
 	//testMFA()
 
 	// ======= Deferred functions ========
-	defer logging2.CloseLogFile()
-	defer timer2.Close()
+	defer logging.CloseLogFile()
+	defer timer.Close()
 
 	/*
 	// Check and create config file
@@ -24,17 +24,17 @@ func main() {
 		fmt.Printf("%+v", err)
 		err = configuration.CreateConfiguration()
 		if err != nil {
-			logging2.Entry().Error(err)
+			logging.Entry().Error(err)
 			panic(err)
 		}
 	}
 	 */
 
 	// ======== Sessions Timer ========
-	timer2.Initialize(1, use_case.RotateAllSessionsCredentials)
+	timer.Initialize(1, use_case.RotateAllSessionsCredentials)
 
 	// ======== WebSocket Hub ========
-	go websocket2.Hub.Run()
+	go websocket.Hub.Run()
 
 	// ======== REST API Server ========
 	eng := engine.Engine()
@@ -45,7 +45,7 @@ func main() {
 func testMFA() {
 	config, err := configuration.ReadConfiguration()
 	if err != nil {
-		logging2.Info(err)
+		logging.Info(err)
 	}
 
 	isMfaTokenRequired, err := session2.IsMfaRequiredForPlainAwsSession(config, "dc6b8f6015084ab885c00b5bc0fceb7b")
@@ -54,12 +54,12 @@ func testMFA() {
 		var token = "014729"
 		err = session2.StartPlainAwsSession(config, "dc6b8f6015084ab885c00b5bc0fceb7b", &token)
 		if err != nil {
-			logging2.Info(err)
+			logging.Info(err)
 		}
 	} else {
 		err = session2.StartPlainAwsSession(config,"dc6b8f6015084ab885c00b5bc0fceb7b", nil)
 		if err != nil {
-			logging2.Info(err)
+			logging.Info(err)
 		}
 	}
 }
