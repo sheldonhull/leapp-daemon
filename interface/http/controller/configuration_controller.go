@@ -1,17 +1,6 @@
 package controller
 
-import (
-	"github.com/gin-gonic/gin"
-	"leapp_daemon/domain/configuration"
-	"leapp_daemon/infrastructure/encryption"
-	"leapp_daemon/infrastructure/file_system"
-	"leapp_daemon/infrastructure/logging"
-	"leapp_daemon/interface/http/controller/dto/response_dto"
-	"leapp_daemon/interface/repository"
-	"leapp_daemon/use_case"
-	"net/http"
-)
-
+/*
 // swagger:response getConfigurationResponse
 type getConfigurationResponseWrapper struct {
 	// in: body
@@ -31,7 +20,7 @@ func CreateConfigurationController(context *gin.Context) {
 
 	logging.SetContext(context)
 
-	service := use_case.ConfigurationService{
+	service := configuration.facade{
 		ConfigurationRepository: &repository.FileConfigurationRepository{
 			FileSystem: &file_system.FileSystem{},
 			Encryption: &encryption.Encryption{},
@@ -56,7 +45,7 @@ func ReadConfigurationController(context *gin.Context) {
 
 	logging.SetContext(context)
 
-	service := use_case.ConfigurationService{
+	service := configuration.facade{
 		ConfigurationRepository: &repository.FileConfigurationRepository{
 			FileSystem: &file_system.FileSystem{},
 			Encryption: &encryption.Encryption{},
@@ -72,3 +61,4 @@ func ReadConfigurationController(context *gin.Context) {
 	responseDto := response_dto.MessageAndDataResponseDto{Message: "success", Data: config}
 	context.JSON(http.StatusOK, responseDto.ToMap())
 }
+*/

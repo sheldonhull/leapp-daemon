@@ -218,8 +218,8 @@ func (config *Configuration) SetNamedProfiles(namedProfiles []*named_profile.Nam
 func (config *Configuration) GetAllSessions() []session.Rotatable {
   sessions := make([]session.Rotatable, 0)
 
-  for i := range config.PlainAwsSessions {
-    sess := config.PlainAwsSessions[i]
+  for i := range config.plainAwsSessions {
+    sess := config.plainAwsSessions[i]
     sessions = append(sessions, sess)
   }
 

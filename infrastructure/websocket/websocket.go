@@ -116,6 +116,7 @@ func (s Subscription) ReadPump() {
 		return nil
 	})
 	c.Ws.SetCloseHandler(func(int, string) error {
+	  // TODO: should we add 'Hub.Unregister <- s'?
 		c.Ws.Close()
 		return nil
 	})

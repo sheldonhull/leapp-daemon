@@ -2,6 +2,7 @@ package controller
 
 import (
 	"github.com/gin-gonic/gin"
+	configuration2 "leapp_daemon/domain/configuration"
 	"leapp_daemon/domain/session"
 	"leapp_daemon/infrastructure/encryption"
 	"leapp_daemon/infrastructure/file_system"
@@ -39,7 +40,7 @@ func CreatePlainAwsSessionController(context *gin.Context) {
 		return
 	}
 
-	configurationService := use_case.ConfigurationService{
+	configurationService := configuration2.facade{
 		ConfigurationRepository: &repository.FileConfigurationRepository{
 			FileSystem: &file_system.FileSystem{},
 			Encryption: &encryption.Encryption{},
@@ -157,7 +158,7 @@ func DeletePlainAwsSessionController(context *gin.Context) {
 				return
 			}
 
-		  configurationService := use_case.ConfigurationService{
+		  configurationService := use_case.facade{
 		    ConfigurationRepository: &repository.FileConfigurationRepository{
 		      FileSystem: &file_system.FileSystem{},
 		      Encryption: &encryption.Encryption{},

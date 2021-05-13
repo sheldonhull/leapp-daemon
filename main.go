@@ -1,10 +1,12 @@
 package main
 
 import (
-  "leapp_daemon/infrastructure/http/engine"
+  "github.com/google/uuid"
+  "leapp_daemon/domain/session"
+  "leapp_daemon/infrastructure/encryption"
+  "leapp_daemon/infrastructure/file_system"
   "leapp_daemon/infrastructure/logging"
-  "leapp_daemon/infrastructure/timer"
-  "leapp_daemon/infrastructure/websocket"
+  "leapp_daemon/interface/repository"
   "leapp_daemon/use_case"
 )
 
@@ -13,8 +15,8 @@ func main() {
 	//testMFA()
 
 	// ======= Deferred functions ========
-	defer logging.CloseLogFile()
-	defer timer.Close()
+	//defer logging.CloseLogFile()
+	//defer timer.Close()
 
 	/*
 	// Check and create config file
@@ -31,14 +33,52 @@ func main() {
 	 */
 
 	// ======== Sessions Timer ========
-	timer.Initialize(1, use_case.RotateAllSessionsCredentials)
+	//timer.Initialize(1, use_case.RotateAllSessionsCredentials)
 
 	// ======== WebSocket Hub ========
-	go websocket.Hub.Run()
+	//go websocket.Hub.Run()
 
 	// ======== REST API Server ========
-	eng := engine.Engine()
-	eng.Serve(8080)
+	//eng := engine.Engine()
+	//eng.Serve(8080)
+
+  fileSystem := &file_system.FileSystem{}
+
+  fileConfigurationRepository := repository.FileConfigurationRepository{
+    FileSystem: fileSystem,
+    Encryption: &encryption.Encryption{},
+  }
+
+  config, err := fileConfigurationRepository.GetConfiguration()
+  if err != nil {
+    logging.Entry().Error(err)
+    panic(err)
+  }
+
+  plainAwsSessions := config.PlainAwsSessions
+
+  logging.Info(config)
+
+  plainAwsSessionFacade := session.GetPlainAwsSessionsFacade()
+  plainAwsSessionFacade.SetPlainAwsSessions(plainAwsSessions)
+
+  plainAwsSessionFacade.Subscribe(&use_case.SessionsWriter{
+    ConfigurationRepository: &fileConfigurationRepository,
+  })
+
+  fakePlainAwsSession := session.PlainAwsSession{
+    Id:        uuid.New().String(),
+    Status:    0,
+    StartTime: "",
+    Account:   nil,
+    Profile:   "",
+  }
+
+  err = plainAwsSessionFacade.AddPlainAwsSession(fakePlainAwsSession)
+  if err != nil {
+    logging.Entry().Error(err)
+    panic(err)
+  }
 }
 
 /*

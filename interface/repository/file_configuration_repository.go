@@ -79,6 +79,10 @@ func(repository *FileConfigurationRepository) GetConfiguration() (configuration.
 
   configurationFilePath := fmt.Sprintf("%s/%s", homeDir, configurationFilePath)
 
+  if !repository.FileSystem.DoesFileExist(configurationFilePath) {
+    return configuration.GetInitialConfiguration(), nil
+  }
+
   encryptedText, err := repository.FileSystem.ReadFile(configurationFilePath)
   if err != nil {
     return config, http_error.NewInternalServerError(err)

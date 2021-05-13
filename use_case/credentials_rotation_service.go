@@ -30,8 +30,8 @@ func RotateSessionCredentialsWithMfaToken(sessionId string, mfaToken string) err
 	config, err := configuration.ReadConfiguration()
 	if err != nil { return err }
 
-	for i := range config.PlainAwsSessions {
-		sess := config.PlainAwsSessions[i]
+	for i := range config.plainAwsSessions {
+		sess := config.plainAwsSessions[i]
 		if sess.Id == sessionId {
 			err = sess.Rotate(&session2.RotateConfiguration{MfaToken: mfaToken})
 			if err != nil {

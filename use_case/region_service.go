@@ -18,7 +18,7 @@ func EditAwsSessionRegion(sessionId string, region string) error {
 	}
 
 	// Find a valid Aws Session
-	for _, plainSession := range config.PlainAwsSessions {
+	for _, plainSession := range config.plainAwsSessions {
 		if plainSession.Id == sessionId {
 			plainSession.Account.Region = region
 			err = configuration.UpdateConfiguration(config, false)
