@@ -42,6 +42,14 @@ func(fileSystem *FileSystem) RemoveFile(path string) error {
   return nil
 }
 
+func(fileSystem *FileSystem) RenameFile(from string, to string) error {
+  err := os.Rename(from, to)
+  if err != nil {
+    return err
+  }
+  return nil
+}
+
 func(fileSystem *FileSystem) WriteToFile(path string, data []byte) error {
   err := ioutil.WriteFile(path, data, 0644)
   if err != nil {
