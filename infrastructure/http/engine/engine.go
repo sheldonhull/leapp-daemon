@@ -52,9 +52,6 @@ func (engineWrapper *engineWrapper) Serve(port int) {
 func initializeRoutes(ginEngine *gin.Engine) {
 	v1 := ginEngine.Group("/api/v1")
   {
-    v1.POST("/configuration/", controller.CreateConfigurationController)
-    v1.GET("/configuration/", controller.ReadConfigurationController)
-
     v1.GET("/session/list", controller.ListSessionController)
     v1.POST("/session/mfa/token/confirm", controller.ConfirmMfaTokenController)
 

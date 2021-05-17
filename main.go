@@ -5,6 +5,7 @@ import (
   "leapp_daemon/domain/session"
   "leapp_daemon/infrastructure/encryption"
   "leapp_daemon/infrastructure/file_system"
+  "leapp_daemon/infrastructure/http/engine"
   "leapp_daemon/infrastructure/logging"
   "leapp_daemon/interface/repository"
   "leapp_daemon/use_case"
@@ -62,8 +63,8 @@ func main() {
 
   //timer.Initialize(1, use_case.RotateAllSessionsCredentials)
   //go websocket.Hub.Run()
-  //eng := engine.Engine()
-  //eng.Serve(8080)
+  eng := engine.Engine()
+  eng.Serve(8080)
 
   /*fakePlainAwsSession := session.PlainAwsSession{
       Id:        uuid.New().String(),
