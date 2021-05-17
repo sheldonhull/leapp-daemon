@@ -15,29 +15,30 @@ type Repository interface {
 }
 
 type Configuration struct {
-	ProxyConfiguration   ProxyConfiguration
-	PlainAwsSessions     []session.PlainAwsSession
-	FederatedAwsSessions []session.FederatedAwsSession
-	TrustedAwsSessions   []session.TrustedAwsSession
-	NamedProfiles        []named_profile.NamedProfile
+  ProxyConfiguration   ProxyConfiguration
+  PlainAwsSessions     []session.PlainAwsSession
+  FederatedAwsSessions []session.FederatedAwsSession
+  TrustedAwsSessions   []session.TrustedAwsSession
+  PlainGcpSessions     []session.PlainGcpSession
+  NamedProfiles        []named_profile.NamedProfile
 }
 
 type ProxyConfiguration struct {
-	ProxyProtocol string
-	ProxyUrl string
-	ProxyPort uint64
-	Username string
-	Password string
+  ProxyProtocol string
+  ProxyUrl      string
+  ProxyPort     uint64
+  Username      string
+  Password      string
 }
 
 func GetInitialConfiguration() Configuration {
   return Configuration{
     ProxyConfiguration: ProxyConfiguration{
       ProxyProtocol: "https",
-      ProxyUrl: "",
-      ProxyPort: 8080,
-      Username: "",
-      Password: "",
+      ProxyUrl:      "",
+      ProxyPort:     8080,
+      Username:      "",
+      Password:      "",
     },
     FederatedAwsSessions: make([]session.FederatedAwsSession, 0),
     PlainAwsSessions:     make([]session.PlainAwsSession, 0),
@@ -50,7 +51,7 @@ func UnmarshalConfiguration(configurationJson string) Configuration {
   return config
 }
 
-func(config *Configuration) AddPlainAwsSession(plainAwsSession session.PlainAwsSession) error {
+func (config *Configuration) AddPlainAwsSession(plainAwsSession session.PlainAwsSession) error {
   sessions, err := config.GetAllPlainAwsSessions()
   if err != nil {
     return err
@@ -69,11 +70,11 @@ func(config *Configuration) AddPlainAwsSession(plainAwsSession session.PlainAwsS
   return nil
 }
 
-func(config *Configuration) GetAllPlainAwsSessions() ([]session.PlainAwsSession, error) {
+func (config *Configuration) GetAllPlainAwsSessions() ([]session.PlainAwsSession, error) {
   return config.PlainAwsSessions, nil
 }
 
-func(config *Configuration) RemovePlainAwsSession(plainAwsSession session.PlainAwsSession) error {
+func (config *Configuration) RemovePlainAwsSession(plainAwsSession session.PlainAwsSession) error {
   sessions, err := config.GetAllPlainAwsSessions()
   if err != nil {
     return err
@@ -90,7 +91,47 @@ func(config *Configuration) RemovePlainAwsSession(plainAwsSession session.PlainA
     " not found"))
 }
 
-func(config *Configuration) AddNamedProfile(namedProfile named_profile.NamedProfile) error {
+func (config *Configuration) AddPlainGcpSession(plainGcpSession session.PlainGcpSession) error {
+  sessions, err := config.GetAllPlainGcpSessions()
+  if err != nil {
+    return err
+  }
+
+  for _, sess := range sessions {
+    if plainGcpSession.Id == sess.Id {
+      return http_error.NewConflictError(fmt.Errorf("a PlainGcpSession with id " + plainGcpSession.Id +
+        " is already present"))
+    }
+  }
+
+  sessions = append(sessions, plainGcpSession)
+  config.PlainGcpSessions = sessions
+
+  return nil
+}
+
+func (config *Configuration) GetAllPlainGcpSessions() ([]session.PlainGcpSession, error) {
+  return config.PlainGcpSessions, nil
+}
+
+func (config *Configuration) RemovePlainGcpSession(plainGcpSession session.PlainGcpSession) error {
+  sessions, err := config.GetAllPlainGcpSessions()
+  if err != nil {
+    return err
+  }
+
+  for i, sess := range sessions {
+    if plainGcpSession.Id == sess.Id {
+      config.PlainGcpSessions = append(config.PlainGcpSessions[:i], config.PlainGcpSessions[i+1:]...)
+      return nil
+    }
+  }
+
+  return http_error.NewNotFoundError(fmt.Errorf("PlainGcpSession with id " + plainGcpSession.Id +
+    " not found"))
+}
+
+func (config *Configuration) AddNamedProfile(namedProfile named_profile.NamedProfile) error {
   for _, tmpNamedProfile := range config.NamedProfiles {
     if namedProfile.Name == tmpNamedProfile.Name {
       return http_error.NewConflictError(fmt.Errorf("a NamedProfile with name " + namedProfile.Name +
@@ -101,7 +142,7 @@ func(config *Configuration) AddNamedProfile(namedProfile named_profile.NamedProf
   return nil
 }
 
-func(config *Configuration) FindNamedProfileByName(name string) (named_profile.NamedProfile, error) {
+func (config *Configuration) FindNamedProfileByName(name string) (named_profile.NamedProfile, error) {
   var namedProfile named_profile.NamedProfile
 
   for _, tmpNamedProfile := range config.NamedProfiles {
@@ -113,7 +154,7 @@ func(config *Configuration) FindNamedProfileByName(name string) (named_profile.N
   return namedProfile, http_error.NewNotFoundError(fmt.Errorf("NamedProfile with name " + name + " not found"))
 }
 
-func(config *Configuration) DoesNamedProfileExist(name string) bool {
+func (config *Configuration) DoesNamedProfileExist(name string) bool {
   for _, tmpNamedProfile := range config.NamedProfiles {
     if name == tmpNamedProfile.Name {
       return true
@@ -230,4 +271,4 @@ func (config *Configuration) GetAllSessions() []session.Rotatable {
 
   return sessions
 }
- */
+*/
