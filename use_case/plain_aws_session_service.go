@@ -1,7 +1,6 @@
 package use_case
 
 import (
-  "fmt"
   "github.com/google/uuid"
   "leapp_daemon/domain/named_profile"
   "leapp_daemon/domain/session"
@@ -9,80 +8,71 @@ import (
   "strings"
 )
 
-type PlainAwsSessionService struct {
-  PlainAwsSessionContainer session.PlainAwsSessionContainer
-  NamedProfileContainer    named_profile.NamedProfileContainer
+type Keychain interface {
+  DoesSecretExist(label string) (bool, error)
+  GetSecret(label string) (string, error)
+  SetSecret(secret string, label string) error
 }
 
-func(service *PlainAwsSessionService) Create(name string, accountNumber string, region string, user string,
-  awsAccessKeyId string, awsSecretAccessKey string, mfaDevice string, profileName string) error {
+type PlainAwsSessionService struct {
+  Keychain Keychain
+}
 
-  sessions, err := service.PlainAwsSessionContainer.GetAllPlainAwsSessions()
-  if err != nil {
-    return err
-  }
+func(service *PlainAwsSessionService) Create(alias string, awsAccessKeyId string, awsSecretAccessKey string,
+  mfaDevice string, region string, profileName string) error {
 
-  for _, sess := range sessions {
-    account := sess.Account
-    if account.AccountNumber == accountNumber && account.User == user {
-      err := http_error.NewUnprocessableEntityError(fmt.Errorf("a session with the same account number and user is already present"))
+  namedProfile := named_profile.GetNamedProfilesFacade().GetNamedProfileByName(profileName)
+
+  if namedProfile == nil {
+    // TODO: extract UUID generation logic
+    uuidString := uuid.New().String()
+    uuidString = strings.Replace(uuidString, "-", "", -1)
+
+    namedProfile = &named_profile.NamedProfile{
+      Id:   uuidString,
+      Name: profileName,
+    }
+
+    err := named_profile.GetNamedProfilesFacade().AddNamedProfile(*namedProfile)
+    if err != nil {
       return err
     }
   }
 
   plainAwsAccount := session.PlainAwsAccount{
-    AccountNumber: accountNumber,
-    Name:          name,
-    Region:        region,
-    User:          user,
-    AwsAccessKeyId: awsAccessKeyId,
-    AwsSecretAccessKey: awsSecretAccessKey,
-    MfaDevice:     mfaDevice,
+    MfaDevice: mfaDevice,
+    Region: region,
+    NamedProfileId: namedProfile.Id,
+    SessionTokenExpiration: "",
   }
 
   // TODO: extract UUID generation logic
   uuidString := uuid.New().String()
   uuidString = strings.Replace(uuidString, "-", "", -1)
 
-  if profileName == "" {
-    profileName = "default"
-  }
-
-  doesNamedProfileExist := service.NamedProfileContainer.DoesNamedProfileExist(profileName)
-
-  var namedProfile named_profile.NamedProfile
-
-  if !doesNamedProfileExist {
-    namedProfile = named_profile.NamedProfile{
-      Id:   strings.Replace(uuid.New().String(), "-", "", -1),
-      Name: profileName,
-    }
-
-    err = service.NamedProfileContainer.AddNamedProfile(namedProfile)
-    if err != nil {
-      return err
-    }
-  } else {
-    namedProfile, err = service.NamedProfileContainer.FindNamedProfileByName(profileName)
-    if err != nil {
-      return err
-    }
-  }
-
   sess := session.PlainAwsSession{
-    Id:        uuidString,
-    Status:    session.NotActive,
+    Id: uuidString,
+    Alias: alias,
+    Status: session.NotActive,
     StartTime: "",
-    Account:   &plainAwsAccount,
-    Profile:   namedProfile.Id,
+    LastStopTime: "",
+    Account: &plainAwsAccount,
   }
 
-  err = service.PlainAwsSessionContainer.AddPlainAwsSession(sess)
+  err := session.GetPlainAwsSessionsFacade().AddPlainAwsSession(sess)
   if err != nil {
     return err
   }
 
+  err = service.Keychain.SetSecret(awsAccessKeyId, sess.Id+"-plain-aws-session-access-key-id")
+  if err != nil {
+    return http_error.NewInternalServerError(err)
+  }
 
+  err = service.Keychain.SetSecret(awsSecretAccessKey, sess.Id+"-plain-aws-session-secret-access-key")
+  if err != nil {
+    return http_error.NewInternalServerError(err)
+  }
 
   return nil
 }

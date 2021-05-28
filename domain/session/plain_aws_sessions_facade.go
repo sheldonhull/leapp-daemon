@@ -6,41 +6,45 @@ import (
   "sync"
 )
 
-var facadeSingleton *facade
-var facadeLock sync.Mutex
+var plainAwsSessionsFacadeSingleton *plainAwsSessionsFacade
+var plainAwsSessionsFacadeLock sync.Mutex
 var plainAwsSessionsLock sync.Mutex
 
 type PlainAwsSessionsObserver interface {
   UpdatePlainAwsSessions(plainAwsSessions []PlainAwsSession) error
 }
 
-type facade struct {
+type plainAwsSessionsFacade struct {
   plainAwsSessions []PlainAwsSession
   observers        []PlainAwsSessionsObserver
 }
 
-func GetPlainAwsSessionsFacade() *facade {
-  facadeLock.Lock()
-  defer facadeLock.Unlock()
+func GetPlainAwsSessionsFacade() *plainAwsSessionsFacade {
+  plainAwsSessionsFacadeLock.Lock()
+  defer plainAwsSessionsFacadeLock.Unlock()
 
-  if facadeSingleton == nil {
-    facadeSingleton = &facade {
+  if plainAwsSessionsFacadeSingleton == nil {
+    plainAwsSessionsFacadeSingleton = &plainAwsSessionsFacade{
       plainAwsSessions: make([]PlainAwsSession, 0),
     }
   }
 
-  return facadeSingleton
+  return plainAwsSessionsFacadeSingleton
 }
 
-func(fac *facade) Subscribe(observer PlainAwsSessionsObserver) {
+func(fac *plainAwsSessionsFacade) Subscribe(observer PlainAwsSessionsObserver) {
   fac.observers = append(fac.observers, observer)
 }
 
-func(fac *facade) SetPlainAwsSessions(plainAwsSessions []PlainAwsSession) {
+func(fac *plainAwsSessionsFacade) GetPlainAwsSessions() []PlainAwsSession {
+  return fac.plainAwsSessions
+}
+
+func(fac *plainAwsSessionsFacade) SetPlainAwsSessions(plainAwsSessions []PlainAwsSession) {
   fac.plainAwsSessions = plainAwsSessions
 }
 
-func(fac *facade) AddPlainAwsSession(plainAwsSession PlainAwsSession) error {
+func(fac *plainAwsSessionsFacade) AddPlainAwsSession(plainAwsSession PlainAwsSession) error {
   plainAwsSessionsLock.Lock()
   defer plainAwsSessionsLock.Unlock()
 
@@ -50,6 +54,11 @@ func(fac *facade) AddPlainAwsSession(plainAwsSession PlainAwsSession) error {
     if plainAwsSession.Id == sess.Id {
       return http_error.NewConflictError(fmt.Errorf("a PlainAwsSession with id " + plainAwsSession.Id +
         " is already present"))
+    }
+
+    if plainAwsSession.Alias == sess.Alias {
+      return http_error.NewUnprocessableEntityError(fmt.Errorf("a session with the same alias " +
+        "is already present"))
     }
   }
 
@@ -64,7 +73,7 @@ func(fac *facade) AddPlainAwsSession(plainAwsSession PlainAwsSession) error {
   return nil
 }
 
-func(fac *facade) notifyObservers() error {
+func(fac *plainAwsSessionsFacade) notifyObservers() error {
   for _, observer := range fac.observers {
     err := observer.UpdatePlainAwsSessions(fac.plainAwsSessions)
     if err != nil {

@@ -1,17 +1,14 @@
 package controller
 
 import (
-	"github.com/gin-gonic/gin"
-	configuration2 "leapp_daemon/domain/configuration"
-	"leapp_daemon/domain/session"
-	"leapp_daemon/infrastructure/encryption"
-	"leapp_daemon/infrastructure/file_system"
-	"leapp_daemon/infrastructure/logging"
-	"leapp_daemon/interface/http/controller/dto/request_dto/plain_aws_session_dto"
-	"leapp_daemon/interface/http/controller/dto/response_dto"
-	"leapp_daemon/interface/repository"
-	"leapp_daemon/use_case"
-	"net/http"
+  "github.com/gin-gonic/gin"
+  "leapp_daemon/domain/session"
+  "leapp_daemon/infrastructure/keychain"
+  "leapp_daemon/infrastructure/logging"
+  "leapp_daemon/interface/http/controller/dto/request_dto/plain_aws_session_dto"
+  "leapp_daemon/interface/http/controller/dto/response_dto"
+  "leapp_daemon/use_case"
+  "net/http"
 )
 
 // swagger:response getPlainAwsSessionResponse
@@ -40,36 +37,16 @@ func CreatePlainAwsSessionController(context *gin.Context) {
 		return
 	}
 
-	configurationService := configuration2.facade{
-		ConfigurationRepository: &repository.FileConfigurationRepository{
-			FileSystem: &file_system.FileSystem{},
-			Encryption: &encryption.Encryption{},
-		},
-	}
-
-	configuration, err := configurationService.Get()
-	if err != nil {
-		_ = context.Error(err)
-		return
-	}
-
 	plainAwsSessionService := use_case.PlainAwsSessionService{
-		PlainAwsSessionContainer: &configuration,
-		NamedProfileContainer:    &configuration,
-	}
+	  Keychain: &keychain.Keychain{},
+  }
 
-	err = plainAwsSessionService.Create(requestDto.Name, requestDto.AccountNumber, requestDto.Region, requestDto.User,
-		requestDto.AwsAccessKeyId, requestDto.AwsSecretAccessKey, requestDto.MfaDevice, requestDto.ProfileName)
+	err = plainAwsSessionService.Create(requestDto.Name, requestDto.AwsAccessKeyId, requestDto.AwsSecretAccessKey,
+	  requestDto.MfaDevice, requestDto.Region, requestDto.ProfileName)
 	if err != nil {
-		_ = context.Error(err)
-		return
-	}
-
-	err = configurationService.Update(configuration)
-	if err != nil {
-		_ = context.Error(err)
-		return
-	}
+    _ = context.Error(err)
+    return
+  }
 
 	responseDto := response_dto.MessageOnlyResponseDto{Message: "success"}
 	context.JSON(http.StatusOK, responseDto.ToMap())

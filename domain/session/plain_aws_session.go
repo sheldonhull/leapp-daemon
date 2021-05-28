@@ -12,21 +12,19 @@ type PlainAwsSessionContainer interface {
 }
 
 type PlainAwsSession struct {
-	Id        string
-	Status    Status
-	StartTime string
-	Account   *PlainAwsAccount
-	Profile   string
+	Id            string
+	Alias         string
+	Status        Status
+  StartTime     string
+	LastStopTime  string
+	Account       *PlainAwsAccount
 }
 
 type PlainAwsAccount struct {
-	AccountNumber       string
-	Name                string
-	Region              string
-	User                string
-	AwsAccessKeyId      string
-	AwsSecretAccessKey  string
-	MfaDevice           string
+  MfaDevice               string
+  Region                  string
+  NamedProfileId          string
+  SessionTokenExpiration  string
 }
 
 type AwsSessionToken struct {
@@ -44,8 +42,6 @@ func(sess *PlainAwsSession) IsRotationIntervalExpired() (bool, error) {
 	secondsPassedFromStart := time.Now().Sub(startTime).Seconds()
 	return int64(secondsPassedFromStart) > constant.RotationIntervalInSeconds, nil
 }
-
-
 
 /*
 func(sess *PlainAwsSession) Rotate(rotateConfiguration *RotateConfiguration) error {

@@ -12,14 +12,14 @@ func(repository *AccessKeyIdRepository) Get(accountName string) (access_keys.Acc
   var accessKeys access_keys.AccessKeys
   accessKeyIdSecretName := accountName + "-plain-aws-session-access-key-id"
 
-  accessKeyId, err := keychain.GetSecret(accessKeyIdSecretName)
+  accessKeyId, err := (&keychain.Keychain{}).GetSecret(accessKeyIdSecretName)
   if err != nil {
     return accessKeys, http_error.NewUnprocessableEntityError(err)
   }
 
   secretAccessKeySecretName := accountName + "-plain-aws-session-secret-access-key"
 
-  secretAccessKey, err := keychain.GetSecret(secretAccessKeySecretName)
+  secretAccessKey, err := (&keychain.Keychain{}).GetSecret(secretAccessKeySecretName)
   if err != nil {
     return accessKeys, http_error.NewUnprocessableEntityError(err)
   }

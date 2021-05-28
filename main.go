@@ -12,7 +12,6 @@ import (
 )
 
 func main() {
-
 	defer logging.CloseLogFile()
 	//defer timer.Close()
 
@@ -65,42 +64,4 @@ func main() {
   //go websocket.Hub.Run()
   eng := engine.Engine()
   eng.Serve(8080)
-
-  /*fakePlainAwsSession := session.PlainAwsSession{
-      Id:        uuid.New().String(),
-      Status:    0,
-      StartTime: "",
-      Account:   nil,
-      Profile:   "",
-    }
-
-    err = plainAwsSessionFacade.AddPlainAwsSession(fakePlainAwsSession)
-    if err != nil {
-      logging.Entry().Error(err)
-      panic(err)
-    }*/
 }
-
-/*
-func testMFA() {
-	config, err := configuration.ReadConfiguration()
-	if err != nil {
-		logging.Info(err)
-	}
-
-	isMfaTokenRequired, err := session2.IsMfaRequiredForPlainAwsSession(config, "dc6b8f6015084ab885c00b5bc0fceb7b")
-
-	if isMfaTokenRequired {
-		var token = "014729"
-		err = session2.StartPlainAwsSession(config, "dc6b8f6015084ab885c00b5bc0fceb7b", &token)
-		if err != nil {
-			logging.Info(err)
-		}
-	} else {
-		err = session2.StartPlainAwsSession(config,"dc6b8f6015084ab885c00b5bc0fceb7b", nil)
-		if err != nil {
-			logging.Info(err)
-		}
-	}
-}
- */

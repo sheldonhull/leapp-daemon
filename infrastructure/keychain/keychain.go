@@ -10,7 +10,9 @@ import (
 
 const ServiceName = "Leapp"
 
-func SetSecret(secret string, label string) error {
+type Keychain struct {}
+
+func(keychain *Keychain) SetSecret(secret string, label string) error {
 	err := keyring.Set(ServiceName, label, secret)
 	if err != nil {
 		return http_error.NewUnprocessableEntityError(err)
@@ -18,7 +20,7 @@ func SetSecret(secret string, label string) error {
 	return nil
 }
 
-func GetSecret(label string) (string, error) {
+func(keychain *Keychain) GetSecret(label string) (string, error) {
 	secret, err := keyring.Get(ServiceName, label)
 	if err != nil {
 		return "", http_error.NewNotFoundError(err)
@@ -26,7 +28,7 @@ func GetSecret(label string) (string, error) {
 	return secret, nil
 }
 
-func DoesSecretExist(label string) (bool, error) {
+func(keychain *Keychain) DoesSecretExist(label string) (bool, error) {
 	_, err := keyring.Get(ServiceName, label)
 	if err != nil {
 		if err.Error() == "secret not found in keyring" {

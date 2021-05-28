@@ -23,7 +23,7 @@ type CreatePlainAwsSessionRequestDto struct {
 
 	// the region on which the session will be initialized
 	// required: true
-	Region string `json:"region" binding:"required,awsregion"`
+	Region string `json:"region" binding:"required"`
 
 	User               string `json:"user" binding:"required"`
 	MfaDevice          string `json:"mfaDevice"`
