@@ -9,13 +9,13 @@ type SessionsWriter struct {
   ConfigurationRepository configuration.Repository
 }
 
-func(sessionWriter *SessionsWriter) UpdatePlainAwsSessions(plainAwsSessions []session.PlainAwsSession) error {
+func(sessionWriter *SessionsWriter) UpdatePlainAwsSessions(oldPlainAwsSessions []session.PlainAwsSession, newPlainAwsSessions []session.PlainAwsSession) error {
   config, err := sessionWriter.ConfigurationRepository.GetConfiguration()
   if err != nil {
     return err
   }
 
-  config.PlainAwsSessions = plainAwsSessions
+  config.PlainAwsSessions = newPlainAwsSessions
   err = sessionWriter.ConfigurationRepository.UpdateConfiguration(config)
 
   return err

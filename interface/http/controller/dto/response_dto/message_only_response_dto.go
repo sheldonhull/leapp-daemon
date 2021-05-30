@@ -3,16 +3,16 @@ package response_dto
 import "github.com/gin-gonic/gin"
 
 // swagger:response messageResponse
-type MessageOnlyResponseWrapper struct {
+type MessageResponseWrapper struct {
 	// in: body
-	Body MessageOnlyResponseDto
+	Body MessageResponse
 }
 
-type MessageOnlyResponseDto struct {
+type MessageResponse struct {
 	Message string
 }
 
-func (responseDto *MessageOnlyResponseDto) ToMap() gin.H {
+func (responseDto *MessageResponse) ToMap() gin.H {
 	return gin.H{
 		"message": responseDto.Message,
 	}

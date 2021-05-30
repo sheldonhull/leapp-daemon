@@ -19,12 +19,12 @@ var keychainMutex sync.Mutex
 var iniFileMutex sync.Mutex
 
 func DoExist(accountName string) (bool, error) {
-	doesSessionTokenExpirationExist, err := keychain.DoesSecretExist(accountName + "-plain-aws-session-session-token-expiration")
+	doesSessionTokenExpirationExist, err := (&keychain.Keychain{}).DoesSecretExist(accountName + "-plain-aws-session-session-token-expiration")
 	if err != nil {
 		return false, err
 	}
 
-	doesSessionTokenExist, err := keychain.DoesSecretExist(accountName + "-plain-aws-session-session-token")
+	doesSessionTokenExist, err := (&keychain.Keychain{}).DoesSecretExist(accountName + "-plain-aws-session-session-token")
 	if err != nil {
 		return false, err
 	}
@@ -33,7 +33,7 @@ func DoExist(accountName string) (bool, error) {
 }
 
 func IsExpired(accountName string) (bool, error) {
-	secret, err := keychain.GetSecret(accountName + "-plain-aws-session-session-token-expiration")
+	secret, err := (&keychain.Keychain{}).GetSecret(accountName + "-plain-aws-session-session-token-expiration")
 	if err != nil {
 		return false, err
 	}
@@ -86,14 +86,14 @@ func Generate(accountName string, region string, mfaDevice string, mfaToken *str
 func Get(accountName string) (string, string, error) {
 	sessionTokenSecretName := accountName + "-plain-aws-session-session-token"
 
-	sessionToken, err := keychain.GetSecret(sessionTokenSecretName)
+	sessionToken, err := (&keychain.Keychain{}).GetSecret(sessionTokenSecretName)
 	if err != nil {
 		return "", "", http_error.NewUnprocessableEntityError(err)
 	}
 
 	sessionTokenExpirationSecretName := accountName + "-plain-aws-session-session-token-expiration"
 
-	sessionTokenExpiration, err := keychain.GetSecret(sessionTokenExpirationSecretName)
+	sessionTokenExpiration, err := (&keychain.Keychain{}).GetSecret(sessionTokenExpirationSecretName)
 	if err != nil {
 		return "", "", http_error.NewUnprocessableEntityError(err)
 	}
@@ -110,13 +110,13 @@ func SaveInKeychain(accountName string, credentials *sts.Credentials) error {
 		return err
 	}
 
-	err = keychain.SetSecret(string(credentialsJson),
+	err = (&keychain.Keychain{}).SetSecret(string(credentialsJson),
 		accountName + "-plain-aws-session-session-token")
 	if err != nil {
 		return err
 	}
 
-	err = keychain.SetSecret(credentials.Expiration.Format(time.RFC3339),
+	err = (&keychain.Keychain{}).SetSecret(credentials.Expiration.Format(time.RFC3339),
 		accountName + "-plain-aws-session-session-token-expiration")
 	if err != nil {
 		return err

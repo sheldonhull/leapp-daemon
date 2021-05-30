@@ -1,27 +1,5 @@
 definitions:
-  Configuration:
-    properties:
-      FederatedAwsSessions:
-        items:
-          $ref: '#/definitions/FederatedAwsSession'
-        type: array
-      NamedProfiles:
-        items:
-          $ref: '#/definitions/NamedProfile'
-        type: array
-      PlainAwsSessions:
-        items:
-          $ref: '#/definitions/PlainAwsSession'
-        type: array
-      ProxyConfiguration:
-        $ref: '#/definitions/ProxyConfiguration'
-      TrustedAwsSessions:
-        items:
-          $ref: '#/definitions/TrustedAwsSession'
-        type: array
-    type: object
-    x-go-package: leapp_daemon/domain/configuration
-  CreatePlainAwsSessionRequestDto:
+  CreatePlainAwsSessionRequest:
     properties:
       accountNumber:
         description: the account number of the aws account related to the role
@@ -113,73 +91,29 @@ definitions:
         x-go-name: RoleName
     type: object
     x-go-package: leapp_daemon/interface/http/controller/dto/request_dto/trusted_aws_session_dto
-  FederatedAwsAccount:
+  GetPlainAwsSessionResponse:
     properties:
-      AccountNumber:
-        type: string
-      IdpArn:
-        type: string
-      Name:
-        type: string
-      Region:
-        type: string
-      Role:
-        $ref: '#/definitions/FederatedAwsRole'
-      SsoUrl:
+      Data:
+        $ref: '#/definitions/PlainAwsSession'
+      Message:
         type: string
     type: object
-    x-go-package: leapp_daemon/domain/session
-  FederatedAwsRole:
-    properties:
-      Arn:
-        type: string
-      Name:
-        type: string
-    type: object
-    x-go-package: leapp_daemon/domain/session
-  FederatedAwsSession:
-    properties:
-      Account:
-        $ref: '#/definitions/FederatedAwsAccount'
-      Id:
-        type: string
-      Profile:
-        type: string
-      StartTime:
-        type: string
-      Status:
-        $ref: '#/definitions/Status'
-    type: object
-    x-go-package: leapp_daemon/domain/session
-  MessageOnlyResponseDto:
+    x-go-package: leapp_daemon/interface/http/controller/dto/response_dto/plain_aws_session_dto
+  MessageResponse:
     properties:
       Message:
         type: string
     type: object
     x-go-package: leapp_daemon/interface/http/controller/dto/response_dto
-  NamedProfile:
-    properties:
-      Id:
-        type: string
-      Name:
-        type: string
-    type: object
-    x-go-package: leapp_daemon/domain/named_profile
   PlainAwsAccount:
     properties:
-      AccountNumber:
-        type: string
-      AwsAccessKeyId:
-        type: string
-      AwsSecretAccessKey:
-        type: string
       MfaDevice:
         type: string
-      Name:
+      NamedProfileId:
         type: string
       Region:
         type: string
-      User:
+      SessionTokenExpiration:
         type: string
     type: object
     x-go-package: leapp_daemon/domain/session
@@ -187,9 +121,11 @@ definitions:
     properties:
       Account:
         $ref: '#/definitions/PlainAwsAccount'
+      Alias:
+        type: string
       Id:
         type: string
-      Profile:
+      LastStopTime:
         type: string
       StartTime:
         type: string
@@ -197,21 +133,6 @@ definitions:
         $ref: '#/definitions/Status'
     type: object
     x-go-package: leapp_daemon/domain/session
-  ProxyConfiguration:
-    properties:
-      Password:
-        type: string
-      ProxyPort:
-        format: uint64
-        type: integer
-      ProxyProtocol:
-        type: string
-      ProxyUrl:
-        type: string
-      Username:
-        type: string
-    type: object
-    x-go-package: leapp_daemon/domain/configuration
   Status:
     format: int64
     type: integer
@@ -250,22 +171,40 @@ definitions:
         $ref: '#/definitions/Status'
     type: object
     x-go-package: leapp_daemon/domain/session
-  getConfigurationResponse:
+  UpdatePlainAwsSessionRequest:
     properties:
-      Data:
-        $ref: '#/definitions/Configuration'
-      Message:
+      accountNumber:
+        type: string
+        x-go-name: AccountNumber
+      awsAccessKeyId:
+        type: string
+        x-go-name: AwsAccessKeyId
+      awsSecretAccessKey:
+        type: string
+        x-go-name: AwsSecretAccessKey
+      mfaDevice:
+        type: string
+        x-go-name: MfaDevice
+      name:
+        type: string
+        x-go-name: Name
+      profileName:
+        type: string
+        x-go-name: ProfileName
+      region:
+        type: string
+        x-go-name: Region
+      user:
+        type: string
+        x-go-name: User
+    type: object
+    x-go-package: leapp_daemon/interface/http/controller/dto/request_dto/plain_aws_session_dto
+  UpdatePlainAwsSessionUriRequest:
+    properties:
+      Id:
         type: string
     type: object
-    x-go-package: leapp_daemon/interface/http/controller
-  getPlainAwsSessionResponse:
-    properties:
-      Data:
-        $ref: '#/definitions/PlainAwsSession'
-      Message:
-        type: string
-    type: object
-    x-go-package: leapp_daemon/interface/http/controller
+    x-go-package: leapp_daemon/interface/http/controller/dto/request_dto/plain_aws_session_dto
   getTrustedAwsSessionResponse:
     properties:
       Data:
@@ -275,63 +214,60 @@ definitions:
     type: object
     x-go-package: leapp_daemon/interface/http/controller
 paths:
-  /configuration:
-    get:
-      description: Create a new configuration
-      operationId: getConfiguration
-      responses:
-        "200":
-          $ref: '#/responses/getConfigurationResponse'
-      tags:
-      - configuration
-    post:
-      description: Create a new configuration
-      operationId: createConfiguration
-      responses:
-        "200":
-          $ref: '#/responses/messageResponse'
-      tags:
-      - configuration
   /session/plain:
     post:
-      description: Create a new plain aws session
+      description: Create a new Plain AWS Session
       operationId: createPlainAwsSession
       parameters:
-      - description: This text will appear as description of your request body.
+      - description: plain aws session create body
         in: body
         name: Body
         schema:
-          $ref: '#/definitions/CreatePlainAwsSessionRequestDto'
+          $ref: '#/definitions/CreatePlainAwsSessionRequest'
       responses:
         "200":
-          $ref: '#/responses/messageResponse'
+          description: MessageResponse
+          schema:
+            $ref: '#/definitions/MessageResponse'
       tags:
-      - session-plain-aws
+      - plainAwsSession
   /session/plain/{id}:
     delete:
       description: Delete a Plain AWS Session
       operationId: deletePlainAwsSession
       responses:
         "200":
-          $ref: '#/responses/messageResponse'
+          description: MessageResponse
+          schema:
+            $ref: '#/definitions/MessageResponse'
       tags:
-      - session-plain-aws
+      - plainAwsSession
     get:
       description: Get a Plain AWS Session
       operationId: getPlainAwsSession
       responses:
         "200":
-          $ref: '#/responses/getPlainAwsSessionResponse'
+          description: GetPlainAwsSessionResponse
+          schema:
+            $ref: '#/definitions/GetPlainAwsSessionResponse'
       tags:
-      - session-plain-aws
+      - plainAwsSession
     put:
       description: Edit a Plain AWS Session
-      operationId: editPlainAwsSession
+      operationId: updatePlainAwsSession
+      parameters:
+      - description: plain aws session update uri body
+        in: body
+        name: Body
+        schema:
+          $ref: '#/definitions/UpdatePlainAwsSessionRequest'
       responses:
         "200":
-          $ref: '#/responses/messageResponse'
+          description: MessageResponse
+          schema:
+            $ref: '#/definitions/MessageResponse'
       tags:
-      - session-plain-aws
+      - plainAwsSession
   /session/trusted:
     post:
       description: Create a new trusted aws session
@@ -396,14 +332,10 @@ paths:
       tags:
       - session-trusted-aws
 responses:
-  getConfigurationResponse:
-    description: ""
-    schema:
-      $ref: '#/definitions/getConfigurationResponse'
   getPlainAwsSessionResponse:
     description: ""
     schema:
-      $ref: '#/definitions/getPlainAwsSessionResponse'
+      $ref: '#/definitions/GetPlainAwsSessionResponse'
   getTrustedAwsSessionResponse:
     description: ""
     schema:
@@ -411,5 +343,5 @@ responses:
   messageResponse:
     description: ""
     schema:
-      $ref: '#/definitions/MessageOnlyResponseDto'
+      $ref: '#/definitions/MessageResponse'
 swagger: "2.0"

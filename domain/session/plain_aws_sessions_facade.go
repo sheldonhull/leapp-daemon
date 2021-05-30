@@ -3,6 +3,7 @@ package session
 import (
   "fmt"
   "leapp_daemon/infrastructure/http/http_error"
+  "leapp_daemon/infrastructure/logging"
   "sync"
 )
 
@@ -11,7 +12,7 @@ var plainAwsSessionsFacadeLock sync.Mutex
 var plainAwsSessionsLock sync.Mutex
 
 type PlainAwsSessionsObserver interface {
-  UpdatePlainAwsSessions(plainAwsSessions []PlainAwsSession) error
+  UpdatePlainAwsSessions(oldPlainAwsSessions []PlainAwsSession, newPlainAwsSessions []PlainAwsSession) error
 }
 
 type plainAwsSessionsFacade struct {
@@ -62,10 +63,9 @@ func(fac *plainAwsSessionsFacade) AddPlainAwsSession(plainAwsSession PlainAwsSes
     }
   }
 
-  sessions = append(sessions, plainAwsSession)
-  fac.plainAwsSessions = sessions
+  fac.plainAwsSessions = append(sessions, plainAwsSession)
 
-  err := fac.notifyObservers()
+  err := fac.updateState(fac.plainAwsSessions)
   if err != nil {
     return err
   }
@@ -73,13 +73,53 @@ func(fac *plainAwsSessionsFacade) AddPlainAwsSession(plainAwsSession PlainAwsSes
   return nil
 }
 
-func(fac *plainAwsSessionsFacade) notifyObservers() error {
+func(fac *plainAwsSessionsFacade) RemovePlainAwsSession(id string) error {
+  plainAwsSessionsLock.Lock()
+  defer plainAwsSessionsLock.Unlock()
+
+  sessions := fac.plainAwsSessions
+
+  logging.Info(sessions)
+
+  for i, sess := range sessions {
+    if sess.Id == id {
+      sessions = append(sessions[:i], sessions[i+1:]...)
+      break
+    }
+  }
+
+  logging.Info(sessions)
+
+  if len(fac.plainAwsSessions) == len(sessions) {
+    return http_error.NewNotFoundError(fmt.Errorf("plain aws session with id %s not found", id))
+  }
+
+  fac.plainAwsSessions = sessions
+
+  err := fac.updateState(fac.plainAwsSessions)
+  if err != nil {
+    return err
+  }
+
+  return nil
+}
+
+func(fac *plainAwsSessionsFacade) GetPlainAwsSessionById(id string) (*PlainAwsSession, error) {
+  for _, plainAwsSession := range fac.plainAwsSessions {
+    if plainAwsSession.Id == id {
+      return &plainAwsSession, nil
+    }
+  }
+  return nil, http_error.NewNotFoundError(fmt.Errorf("plain aws session with id %s not found", id))
+}
+
+func(fac *plainAwsSessionsFacade) updateState(newState []PlainAwsSession) error {
+  oldPlainAwsSessions := fac.plainAwsSessions
   for _, observer := range fac.observers {
-    err := observer.UpdatePlainAwsSessions(fac.plainAwsSessions)
+    err := observer.UpdatePlainAwsSessions(oldPlainAwsSessions, newState)
     if err != nil {
       return err
     }
   }
-
   return nil
 }

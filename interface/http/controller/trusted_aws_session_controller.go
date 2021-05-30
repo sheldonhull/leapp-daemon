@@ -42,7 +42,7 @@ func CreateTrustedAwsSessionController(context *gin.Context) {
 		return
 	}
 
-	responseDto := response_dto.MessageOnlyResponseDto{Message: "success"}
+	responseDto := response_dto.MessageResponse{Message: "success"}
 	context.JSON(http.StatusOK, responseDto.ToMap())
 }
 
@@ -106,7 +106,7 @@ func EditTrustedAwsSessionController(context *gin.Context) {
 		return
 	}
 
-	responseDto := response_dto.MessageOnlyResponseDto{Message: "success"}
+	responseDto := response_dto.MessageResponse{Message: "success"}
 	context.JSON(http.StatusOK, responseDto.ToMap())
 }
 
@@ -132,6 +132,6 @@ func DeleteTrustedAwsSessionController(context *gin.Context) {
 		return
 	}
 
-	responseDto := response_dto.MessageOnlyResponseDto{Message: "success"}
+	responseDto := response_dto.MessageResponse{Message: "success"}
 	context.JSON(http.StatusOK, responseDto.ToMap())
 }

@@ -111,20 +111,8 @@ func CreatePlainAwsSession(name string, accountNumber string, region string, use
 
 func GetPlainAwsSession(id string) (*session.PlainAwsSession, error) {
 	var sess *session.PlainAwsSession
-
-	/*
-	config, err := configuration.ReadConfiguration()
-	if err != nil {
-		return sess, err
-	}
-
-	sess, err = session.GetPlainAwsSession(config, id)
-	if err != nil {
-		return sess, err
-	}
-	 */
-
-	return sess, nil
+	sess, err := session.GetPlainAwsSessionsFacade().GetPlainAwsSessionById(id)
+  return sess, err
 }
 
 func UpdatePlainAwsSession(sessionId string, name string, accountNumber string, region string, user string,

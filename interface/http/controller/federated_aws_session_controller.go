@@ -47,7 +47,7 @@ func CreateFederatedAwsSessionController(context *gin.Context) {
 		return
 	}
 
-	responseDto := response_dto.MessageOnlyResponseDto{Message: "success"}
+	responseDto := response_dto.MessageResponse{Message: "success"}
 	context.JSON(http.StatusOK, responseDto.ToMap())
 }
 
@@ -84,7 +84,7 @@ func EditFederatedAwsSessionController(context *gin.Context) {
 		return
 	}
 
-	responseDto := response_dto.MessageOnlyResponseDto{Message: "success"}
+	responseDto := response_dto.MessageResponse{Message: "success"}
 	context.JSON(http.StatusOK, responseDto.ToMap())
 }
 
@@ -105,7 +105,7 @@ func DeleteFederatedAwsSessionController(context *gin.Context) {
 		return
 	}
 
-	responseDto := response_dto.MessageOnlyResponseDto{Message: "success"}
+	responseDto := response_dto.MessageResponse{Message: "success"}
 	context.JSON(http.StatusOK, responseDto.ToMap())
 }
 
@@ -126,7 +126,7 @@ func StartFederatedAwsSessionController(context *gin.Context) {
 		return
 	}
 
-	responseDto := response_dto.MessageOnlyResponseDto{Message: "success"}
+	responseDto := response_dto.MessageResponse{Message: "success"}
 	context.JSON(http.StatusOK, responseDto.ToMap())
 }
 
@@ -147,6 +147,6 @@ func StopFederatedAwsSessionController(context *gin.Context) {
 		return
 	}
 
-	responseDto := response_dto.MessageOnlyResponseDto{Message: "success"}
+	responseDto := response_dto.MessageResponse{Message: "success"}
 	context.JSON(http.StatusOK, responseDto.ToMap())
 }

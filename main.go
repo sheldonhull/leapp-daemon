@@ -12,6 +12,8 @@ import (
 )
 
 func main() {
+  // TODO: add logging state observers
+
 	defer logging.CloseLogFile()
 	//defer timer.Close()
 
@@ -52,6 +54,8 @@ func main() {
   }
 
   plainAwsSessions := config.PlainAwsSessions
+
+  logging.Info(fmt.Sprintf("%+v", plainAwsSessions))
 
   plainAwsSessionFacade := session.GetPlainAwsSessionsFacade()
   plainAwsSessionFacade.SetPlainAwsSessions(plainAwsSessions)

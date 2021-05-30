@@ -5,11 +5,25 @@ import (
   http_error2 "leapp_daemon/infrastructure/http/http_error"
 )
 
-type UpdatePlainAwsSessionUriRequestDto struct {
+// swagger:parameters updatePlainAwsSession
+type UpdatePlainAwsSessionUriRequestWrapper struct {
+  // plain aws session update uri body
+  // in:body
+  Body UpdatePlainAwsSessionUriRequest
+}
+
+// swagger:parameters updatePlainAwsSession
+type UpdatePlainAwsSessionRequestWrapper struct {
+  // plain aws session update uri body
+  // in:body
+  Body UpdatePlainAwsSessionRequest
+}
+
+type UpdatePlainAwsSessionUriRequest struct {
 	Id string `uri:"id" binding:"required"`
 }
 
-type UpdatePlainAwsSessionRequestDto struct {
+type UpdatePlainAwsSessionRequest struct {
 	Name string `json:"name" binding:"required"`
 	AccountNumber string `json:"accountNumber" binding:"required"`
 	Region string `json:"region" binding:"required"`
@@ -20,7 +34,7 @@ type UpdatePlainAwsSessionRequestDto struct {
 	ProfileName string `json:"profileName"`
 }
 
-func (requestDto *UpdatePlainAwsSessionRequestDto) Build(context *gin.Context) error {
+func (requestDto *UpdatePlainAwsSessionRequest) Build(context *gin.Context) error {
 	err := context.ShouldBindJSON(requestDto)
 	if err != nil {
 		return http_error2.NewBadRequestError(err)
@@ -29,7 +43,7 @@ func (requestDto *UpdatePlainAwsSessionRequestDto) Build(context *gin.Context) e
 	}
 }
 
-func (requestDto *UpdatePlainAwsSessionUriRequestDto) Build(context *gin.Context) error {
+func (requestDto *UpdatePlainAwsSessionUriRequest) Build(context *gin.Context) error {
 	err := context.ShouldBindUri(requestDto)
 	if err != nil {
 		return http_error2.NewBadRequestError(err)

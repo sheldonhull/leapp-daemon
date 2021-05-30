@@ -33,6 +33,6 @@ func EditAwsRegionController(context *gin.Context) {
 		return
 	}
 
-	responseDto := response_dto2.MessageOnlyResponseDto{Message: "success"}
+	responseDto := response_dto2.MessageResponse{Message: "success"}
 	context.JSON(http.StatusOK, responseDto.ToMap())
 }
