@@ -57,7 +57,11 @@ func GetPlainAwsSessionController(context *gin.Context) {
 		return
 	}
 
-	sess, err := use_case.GetPlainAwsSession(requestDto.Id)
+  plainAwsSessionService := use_case.PlainAwsSessionService{
+    Keychain: &keychain.Keychain{},
+  }
+
+	sess, err := plainAwsSessionService.GetPlainAwsSession(requestDto.Id)
 	if err != nil {
 		_ = context.Error(err)
 		return
@@ -93,7 +97,11 @@ func UpdatePlainAwsSessionController(context *gin.Context) {
 		return
 	}
 
-	err = use_case.UpdatePlainAwsSession(
+  plainAwsSessionService := use_case.PlainAwsSessionService{
+    Keychain: &keychain.Keychain{},
+  }
+
+	err = plainAwsSessionService.UpdatePlainAwsSession(
 		requestUriDto.Id,
 		requestDto.Name,
 		requestDto.AccountNumber,
@@ -148,7 +156,11 @@ func StartPlainAwsSessionController(context *gin.Context) {
 		return
 	}
 
-	err = use_case.StartPlainAwsSession(requestDto.Id)
+  plainAwsSessionService := use_case.PlainAwsSessionService{
+    Keychain: &keychain.Keychain{},
+  }
+
+	err = plainAwsSessionService.StartPlainAwsSession(requestDto.Id)
 
 	if err != nil {
 		_ = context.Error(err)

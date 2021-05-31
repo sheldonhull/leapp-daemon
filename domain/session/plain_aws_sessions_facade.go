@@ -3,7 +3,6 @@ package session
 import (
   "fmt"
   "leapp_daemon/infrastructure/http/http_error"
-  "leapp_daemon/infrastructure/logging"
   "sync"
 )
 
@@ -79,16 +78,12 @@ func(fac *plainAwsSessionsFacade) RemovePlainAwsSession(id string) error {
 
   sessions := fac.plainAwsSessions
 
-  logging.Info(sessions)
-
   for i, sess := range sessions {
     if sess.Id == id {
       sessions = append(sessions[:i], sessions[i+1:]...)
       break
     }
   }
-
-  logging.Info(sessions)
 
   if len(fac.plainAwsSessions) == len(sessions) {
     return http_error.NewNotFoundError(fmt.Errorf("plain aws session with id %s not found", id))
@@ -111,6 +106,54 @@ func(fac *plainAwsSessionsFacade) GetPlainAwsSessionById(id string) (*PlainAwsSe
     }
   }
   return nil, http_error.NewNotFoundError(fmt.Errorf("plain aws session with id %s not found", id))
+}
+
+func(fac *plainAwsSessionsFacade) SetPlainAwsSessionStatusToPending(id string) error {
+  plainAwsSession, err := fac.GetPlainAwsSessionById(id)
+  if err != nil {
+    return err
+  }
+
+  if !(plainAwsSession.Status == NotActive) {
+    return http_error.NewUnprocessableEntityError(fmt.Errorf("plain aws session with id " + id + "cannot be started because it's in pending or active state"))
+  }
+
+  for i, session := range fac.plainAwsSessions {
+    if session.Id == id {
+      fac.plainAwsSessions[i].Status = Pending
+    }
+  }
+
+  err = fac.updateState(fac.plainAwsSessions)
+  if err != nil {
+    return err
+  }
+
+  return nil
+}
+
+func(fac *plainAwsSessionsFacade) SetPlainAwsSessionStatusToActive(id string) error {
+  plainAwsSession, err := fac.GetPlainAwsSessionById(id)
+  if err != nil {
+    return err
+  }
+
+  if !(plainAwsSession.Status == Pending) {
+    return http_error.NewUnprocessableEntityError(fmt.Errorf("plain aws session with id " + id + "cannot be started because it's not in pending state"))
+  }
+
+  for i, session := range fac.plainAwsSessions {
+    if session.Id == id {
+      fac.plainAwsSessions[i].Status = Active
+    }
+  }
+
+  err = fac.updateState(fac.plainAwsSessions)
+  if err != nil {
+    return err
+  }
+
+  return nil
 }
 
 func(fac *plainAwsSessionsFacade) updateState(newState []PlainAwsSession) error {
