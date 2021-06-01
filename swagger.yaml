@@ -268,6 +268,17 @@ paths:
             $ref: '#/definitions/MessageResponse'
       tags:
       - plainAwsSession
+  /session/plain/{id}/start:
+    post:
+      description: Start a Plain AWS Session
+      operationId: startPlainAwsSession
+      responses:
+        "200":
+          description: MessageResponse
+          schema:
+            $ref: '#/definitions/MessageResponse'
+      tags:
+      - plainAwsSession
   /session/trusted:
     post:
       description: Create a new trusted aws session

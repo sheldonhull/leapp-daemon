@@ -2,10 +2,12 @@ package main
 
 import (
   "fmt"
+  "leapp_daemon/domain/named_profile"
   "leapp_daemon/domain/session"
   "leapp_daemon/infrastructure/encryption"
   "leapp_daemon/infrastructure/file_system"
   "leapp_daemon/infrastructure/http/engine"
+  "leapp_daemon/infrastructure/keychain"
   "leapp_daemon/infrastructure/logging"
   "leapp_daemon/interface/repository"
   "leapp_daemon/use_case"
@@ -63,6 +65,24 @@ func main() {
   plainAwsSessionFacade.Subscribe(&use_case.SessionsWriter{
     ConfigurationRepository: &fileConfigurationRepository,
   })
+
+  plainAwsSessionFacade.Subscribe(&use_case.AwsCredentialsApplier{
+    FileSystem: fileSystem,
+    Keychain:   &keychain.Keychain{},
+  })
+
+  namedProfiles := config.NamedProfiles
+
+  logging.Info(fmt.Sprintf("%+v", namedProfiles))
+
+  namedProfilesFacade := named_profile.GetNamedProfilesFacade()
+  namedProfilesFacade.SetNamedProfiles(namedProfiles)
+
+  namedProfilesFacade.Subscribe(&use_case.NamedProfilesWriter{
+    ConfigurationRepository: &fileConfigurationRepository,
+  })
+
+  // TODO: subscribe observer that reads session token from keychain and writes it down into credentials file
 
   //timer.Initialize(1, use_case.RotateAllSessionsCredentials)
   //go websocket.Hub.Run()

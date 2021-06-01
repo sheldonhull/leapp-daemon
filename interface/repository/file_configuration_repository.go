@@ -4,8 +4,6 @@ import (
   "encoding/json"
   "fmt"
   "leapp_daemon/domain/configuration"
-  "leapp_daemon/infrastructure/encryption"
-  "leapp_daemon/infrastructure/file_system"
   "leapp_daemon/infrastructure/http/http_error"
   "sync"
 )
@@ -29,8 +27,8 @@ type Encryption interface {
 }
 
 type FileConfigurationRepository struct {
-  FileSystem *file_system.FileSystem
-  Encryption *encryption.Encryption
+  FileSystem FileSystem
+  Encryption Encryption
 }
 
 func(repository *FileConfigurationRepository) CreateConfiguration(config configuration.Configuration) error {

@@ -1,18 +1,15 @@
 package use_case
 
 import (
+  "encoding/json"
   "github.com/google/uuid"
   "leapp_daemon/domain/named_profile"
   "leapp_daemon/domain/session"
+  "leapp_daemon/infrastructure/aws/sts_client"
   "leapp_daemon/infrastructure/http/http_error"
   "strings"
+  "time"
 )
-
-type Keychain interface {
-  DoesSecretExist(label string) (bool, error)
-  GetSecret(label string) (string, error)
-  SetSecret(secret string, label string) error
-}
 
 type PlainAwsSessionService struct {
   Keychain Keychain
@@ -128,7 +125,46 @@ func DeletePlainAwsSession(sessionId string) error {
 }
 
 func(service *PlainAwsSessionService) StartPlainAwsSession(sessionId string) error {
-  err := session.GetPlainAwsSessionsFacade().SetPlainAwsSessionStatusToPending(sessionId)
+  plainAwsSession, err := session.GetPlainAwsSessionsFacade().GetPlainAwsSessionById(sessionId)
+  if err != nil {
+    return err
+  }
+
+  doesSessionTokenExist, err := service.Keychain.DoesSecretExist(plainAwsSession.Id + "-plain-aws-session-session-token")
+  if err != nil {
+    return err
+  }
+
+  if doesSessionTokenExist {
+    sessionTokenExpiration := plainAwsSession.Account.SessionTokenExpiration
+
+    if sessionTokenExpiration != "" {
+      currentTime := time.Now()
+      sessionTokenExpirationTime, err := time.Parse(time.RFC3339, sessionTokenExpiration)
+      if err != nil {
+        return err
+      }
+
+      if currentTime.After(sessionTokenExpirationTime) {
+        err = service.generateSessionToken(*plainAwsSession)
+        if err != nil {
+          return err
+        }
+      }
+    } else {
+      err = service.generateSessionToken(*plainAwsSession)
+      if err != nil {
+        return err
+      }
+    }
+  } else {
+    err = service.generateSessionToken(*plainAwsSession)
+    if err != nil {
+      return err
+    }
+  }
+
+  err = session.GetPlainAwsSessionsFacade().SetPlainAwsSessionStatusToPending(sessionId)
   if err != nil {
     return err
   }
@@ -167,4 +203,44 @@ func StopPlainAwsSession(sessionId string) error {
    */
 
 	return nil
+}
+
+func(service *PlainAwsSessionService) generateSessionToken(plainAwsSession session.PlainAwsSession) error {
+  accessKeyIdSecretName := plainAwsSession.Id + "-plain-aws-session-access-key-id"
+
+  accessKeyId, err := service.Keychain.GetSecret(accessKeyIdSecretName)
+  if err != nil {
+    return http_error.NewUnprocessableEntityError(err)
+  }
+
+  secretAccessKeySecretName := plainAwsSession.Id + "-plain-aws-session-secret-access-key"
+
+  secretAccessKey, err := service.Keychain.GetSecret(secretAccessKeySecretName)
+  if err != nil {
+    return http_error.NewUnprocessableEntityError(err)
+  }
+
+  credentials, err := sts_client.GenerateAccessToken(plainAwsSession.Account.Region,
+    plainAwsSession.Account.MfaDevice, nil, accessKeyId, secretAccessKey)
+  if err != nil {
+    return err
+  }
+
+  credentialsJson, err := json.Marshal(credentials)
+  if err != nil {
+    return err
+  }
+
+  err = service.Keychain.SetSecret(string(credentialsJson),
+    plainAwsSession.Id + "-plain-aws-session-session-token")
+  if err != nil {
+    return err
+  }
+
+  err = session.GetPlainAwsSessionsFacade().SetPlainAwsSessionSessionTokenExpiration(plainAwsSession.Id, *credentials.Expiration)
+  if err != nil {
+    return err
+  }
+
+  return nil
 }

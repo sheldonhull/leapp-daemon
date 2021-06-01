@@ -52,7 +52,6 @@ func Generate(accountName string, region string, mfaDevice string, mfaToken *str
 		return nil, err
 	}
 
-
 	stsClient, err := sts_client.GetStaticCredentialsClient(accessKeyId, secretAccessKey, &region)
 	if err != nil {
 		return nil, err

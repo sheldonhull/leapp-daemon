@@ -11,7 +11,7 @@ var namedProfilesFacadeLock sync.Mutex
 var namedProfilesLock sync.Mutex
 
 type NamedProfilesObserver interface {
-  UpdateNamedProfiles(namedProfiles []NamedProfile) error
+  UpdateNamedProfiles(oldNamedProfiles []NamedProfile, newNamedProfiles []NamedProfile) error
 }
 
 type namedProfilesFacade struct {
@@ -48,7 +48,9 @@ func(fac *namedProfilesFacade) AddNamedProfile(namedProfile NamedProfile) error 
   namedProfilesLock.Lock()
   defer namedProfilesLock.Unlock()
 
-  for _, np := range fac.namedProfiles {
+  namedProfiles := fac.GetNamedProfiles()
+
+  for _, np := range namedProfiles {
     if namedProfile.Id == np.Id {
       return http_error.NewConflictError(fmt.Errorf("a NamedProfile with id " + namedProfile.Id +
         " is already present"))
@@ -59,9 +61,9 @@ func(fac *namedProfilesFacade) AddNamedProfile(namedProfile NamedProfile) error 
     }
   }
 
-  fac.namedProfiles = append(fac.namedProfiles, namedProfile)
+  namedProfiles = append(namedProfiles, namedProfile)
 
-  err := fac.notifyObservers()
+  err := fac.updateState(namedProfiles)
   if err != nil {
     return err
   }
@@ -78,9 +80,21 @@ func(fac *namedProfilesFacade) GetNamedProfileByName(name string) *NamedProfile 
   return nil
 }
 
-func(fac *namedProfilesFacade) notifyObservers() error {
+func(fac *namedProfilesFacade) GetNamedProfileById(id string) *NamedProfile {
+  for _, np := range fac.namedProfiles {
+    if np.Id == id {
+      return &np
+    }
+  }
+  return nil
+}
+
+func(fac *namedProfilesFacade) updateState(newState []NamedProfile) error {
+  oldNamedProfiles := fac.GetNamedProfiles()
+  fac.SetNamedProfiles(newState)
+
   for _, observer := range fac.observers {
-    err := observer.UpdateNamedProfiles(fac.namedProfiles)
+    err := observer.UpdateNamedProfiles(oldNamedProfiles, newState)
     if err != nil {
       return err
     }

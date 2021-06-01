@@ -147,9 +147,14 @@ func DeletePlainAwsSessionController(context *gin.Context) {
 }
 
 func StartPlainAwsSessionController(context *gin.Context) {
+  // swagger:route POST /session/plain/{id}/start plainAwsSession startPlainAwsSession
+  // Start a Plain AWS Session
+  //   Responses:
+  //     200: MessageResponse
+
 	logging.SetContext(context)
 
-	requestDto := plain_aws_session_request_dto.StartPlainAwsSessionRequestDto{}
+	requestDto := plain_aws_session_request_dto.StartPlainAwsSessionRequest{}
 	err := (&requestDto).Build(context)
 	if err != nil {
 		_ = context.Error(err)

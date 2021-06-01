@@ -4,6 +4,7 @@ import (
   "fmt"
   "leapp_daemon/infrastructure/http/http_error"
   "sync"
+  "time"
 )
 
 var plainAwsSessionsFacadeSingleton *plainAwsSessionsFacade
@@ -48,9 +49,17 @@ func(fac *plainAwsSessionsFacade) AddPlainAwsSession(plainAwsSession PlainAwsSes
   plainAwsSessionsLock.Lock()
   defer plainAwsSessionsLock.Unlock()
 
-  sessions := fac.plainAwsSessions
+  oldPlainAwsSessions := fac.GetPlainAwsSessions()
+  newPlainAwsSessions := make([]PlainAwsSession, 0)
 
-  for _, sess := range sessions {
+  for i := range oldPlainAwsSessions {
+    newPlainAwsSession := oldPlainAwsSessions[i]
+    newPlainAwsSessionAccount := *oldPlainAwsSessions[i].Account
+    newPlainAwsSession.Account = &newPlainAwsSessionAccount
+    newPlainAwsSessions = append(newPlainAwsSessions, newPlainAwsSession)
+  }
+
+  for _, sess := range newPlainAwsSessions {
     if plainAwsSession.Id == sess.Id {
       return http_error.NewConflictError(fmt.Errorf("a PlainAwsSession with id " + plainAwsSession.Id +
         " is already present"))
@@ -62,9 +71,9 @@ func(fac *plainAwsSessionsFacade) AddPlainAwsSession(plainAwsSession PlainAwsSes
     }
   }
 
-  fac.plainAwsSessions = append(sessions, plainAwsSession)
+  newPlainAwsSessions = append(newPlainAwsSessions, plainAwsSession)
 
-  err := fac.updateState(fac.plainAwsSessions)
+  err := fac.updateState(newPlainAwsSessions)
   if err != nil {
     return err
   }
@@ -76,22 +85,28 @@ func(fac *plainAwsSessionsFacade) RemovePlainAwsSession(id string) error {
   plainAwsSessionsLock.Lock()
   defer plainAwsSessionsLock.Unlock()
 
-  sessions := fac.plainAwsSessions
+  oldPlainAwsSessions := fac.GetPlainAwsSessions()
+  newPlainAwsSessions := make([]PlainAwsSession, 0)
 
-  for i, sess := range sessions {
+  for i := range oldPlainAwsSessions {
+    newPlainAwsSession := oldPlainAwsSessions[i]
+    newPlainAwsSessionAccount := *oldPlainAwsSessions[i].Account
+    newPlainAwsSession.Account = &newPlainAwsSessionAccount
+    newPlainAwsSessions = append(newPlainAwsSessions, newPlainAwsSession)
+  }
+
+  for i, sess := range newPlainAwsSessions {
     if sess.Id == id {
-      sessions = append(sessions[:i], sessions[i+1:]...)
+      newPlainAwsSessions = append(newPlainAwsSessions[:i], newPlainAwsSessions[i+1:]...)
       break
     }
   }
 
-  if len(fac.plainAwsSessions) == len(sessions) {
+  if len(fac.GetPlainAwsSessions()) == len(newPlainAwsSessions) {
     return http_error.NewNotFoundError(fmt.Errorf("plain aws session with id %s not found", id))
   }
 
-  fac.plainAwsSessions = sessions
-
-  err := fac.updateState(fac.plainAwsSessions)
+  err := fac.updateState(newPlainAwsSessions)
   if err != nil {
     return err
   }
@@ -100,7 +115,7 @@ func(fac *plainAwsSessionsFacade) RemovePlainAwsSession(id string) error {
 }
 
 func(fac *plainAwsSessionsFacade) GetPlainAwsSessionById(id string) (*PlainAwsSession, error) {
-  for _, plainAwsSession := range fac.plainAwsSessions {
+  for _, plainAwsSession := range fac.GetPlainAwsSessions() {
     if plainAwsSession.Id == id {
       return &plainAwsSession, nil
     }
@@ -109,6 +124,9 @@ func(fac *plainAwsSessionsFacade) GetPlainAwsSessionById(id string) (*PlainAwsSe
 }
 
 func(fac *plainAwsSessionsFacade) SetPlainAwsSessionStatusToPending(id string) error {
+  plainAwsSessionsLock.Lock()
+  defer plainAwsSessionsLock.Unlock()
+
   plainAwsSession, err := fac.GetPlainAwsSessionById(id)
   if err != nil {
     return err
@@ -118,13 +136,23 @@ func(fac *plainAwsSessionsFacade) SetPlainAwsSessionStatusToPending(id string) e
     return http_error.NewUnprocessableEntityError(fmt.Errorf("plain aws session with id " + id + "cannot be started because it's in pending or active state"))
   }
 
-  for i, session := range fac.plainAwsSessions {
+  oldPlainAwsSessions := fac.GetPlainAwsSessions()
+  newPlainAwsSessions := make([]PlainAwsSession, 0)
+
+  for i := range oldPlainAwsSessions {
+    newPlainAwsSession := oldPlainAwsSessions[i]
+    newPlainAwsSessionAccount := *oldPlainAwsSessions[i].Account
+    newPlainAwsSession.Account = &newPlainAwsSessionAccount
+    newPlainAwsSessions = append(newPlainAwsSessions, newPlainAwsSession)
+  }
+
+  for i, session := range newPlainAwsSessions {
     if session.Id == id {
-      fac.plainAwsSessions[i].Status = Pending
+      newPlainAwsSessions[i].Status = Pending
     }
   }
 
-  err = fac.updateState(fac.plainAwsSessions)
+  err = fac.updateState(newPlainAwsSessions)
   if err != nil {
     return err
   }
@@ -133,6 +161,9 @@ func(fac *plainAwsSessionsFacade) SetPlainAwsSessionStatusToPending(id string) e
 }
 
 func(fac *plainAwsSessionsFacade) SetPlainAwsSessionStatusToActive(id string) error {
+  plainAwsSessionsLock.Lock()
+  defer plainAwsSessionsLock.Unlock()
+
   plainAwsSession, err := fac.GetPlainAwsSessionById(id)
   if err != nil {
     return err
@@ -142,13 +173,24 @@ func(fac *plainAwsSessionsFacade) SetPlainAwsSessionStatusToActive(id string) er
     return http_error.NewUnprocessableEntityError(fmt.Errorf("plain aws session with id " + id + "cannot be started because it's not in pending state"))
   }
 
-  for i, session := range fac.plainAwsSessions {
+  oldPlainAwsSessions := fac.GetPlainAwsSessions()
+  newPlainAwsSessions := make([]PlainAwsSession, 0)
+
+  for i := range oldPlainAwsSessions {
+    newPlainAwsSession := oldPlainAwsSessions[i]
+    newPlainAwsSessionAccount := *oldPlainAwsSessions[i].Account
+    newPlainAwsSession.Account = &newPlainAwsSessionAccount
+    newPlainAwsSessions = append(newPlainAwsSessions, newPlainAwsSession)
+  }
+
+  for i, session := range newPlainAwsSessions {
     if session.Id == id {
-      fac.plainAwsSessions[i].Status = Active
+      newPlainAwsSessions[i].Status = Active
+      newPlainAwsSessions[i].StartTime = time.Now().Format(time.RFC3339)
     }
   }
 
-  err = fac.updateState(fac.plainAwsSessions)
+  err = fac.updateState(newPlainAwsSessions)
   if err != nil {
     return err
   }
@@ -156,13 +198,46 @@ func(fac *plainAwsSessionsFacade) SetPlainAwsSessionStatusToActive(id string) er
   return nil
 }
 
+func(fac *plainAwsSessionsFacade) SetPlainAwsSessionSessionTokenExpiration(id string, sessionTokenExpiration time.Time) error {
+  plainAwsSessionsLock.Lock()
+  defer plainAwsSessionsLock.Unlock()
+
+  oldPlainAwsSessions := fac.GetPlainAwsSessions()
+  newPlainAwsSessions := make([]PlainAwsSession, 0)
+
+  for i := range oldPlainAwsSessions {
+    newPlainAwsSession := oldPlainAwsSessions[i]
+    newPlainAwsSessionAccount := *oldPlainAwsSessions[i].Account
+    newPlainAwsSession.Account = &newPlainAwsSessionAccount
+    newPlainAwsSessions = append(newPlainAwsSessions, newPlainAwsSession)
+  }
+
+  for i, session := range newPlainAwsSessions {
+    if session.Id == id {
+      newPlainAwsSessions[i].Account.SessionTokenExpiration = sessionTokenExpiration.Format(time.RFC3339)
+
+      err := fac.updateState(newPlainAwsSessions)
+      if err != nil {
+        return err
+      }
+
+      return nil
+    }
+  }
+
+  return http_error.NewNotFoundError(fmt.Errorf("plain aws session with id %s not found", id))
+}
+
 func(fac *plainAwsSessionsFacade) updateState(newState []PlainAwsSession) error {
-  oldPlainAwsSessions := fac.plainAwsSessions
+  oldPlainAwsSessions := fac.GetPlainAwsSessions()
+  fac.SetPlainAwsSessions(newState)
+
   for _, observer := range fac.observers {
     err := observer.UpdatePlainAwsSessions(oldPlainAwsSessions, newState)
     if err != nil {
       return err
     }
   }
+
   return nil
 }
