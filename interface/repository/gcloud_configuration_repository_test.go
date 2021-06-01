@@ -9,12 +9,51 @@ import (
 	"testing"
 )
 
-func TestIsGcloudCliAvailable_available(t *testing.T) {
-	envMock := mock.NewEnvironmentMock()
-	envMock.ExpIsCommandAvailable = true
-	repo := &GcloudConfigurationRepository{
+var expectedConfigDirPath string
+var expectedConfigFilePath string
+var expectedActiveConfigFilePath string
+var envMock mock.EnvironmentMock
+var fsMock mock.FileSystemMock
+var repo *GcloudConfigurationRepository
+
+func setup() {
+	expectedConfigDirPath = filepath.Join("c:/", "appdata", "gcloud")
+	expectedConfigFilePath = filepath.Join(expectedConfigDirPath, "configurations", "config_leapp_configurationName")
+	expectedActiveConfigFilePath = filepath.Join(expectedConfigDirPath, "active_config")
+
+	envMock = mock.NewEnvironmentMock()
+	fsMock = mock.NewFileSystemMock()
+	repo = &GcloudConfigurationRepository{
 		Environment: &envMock,
+		FileSystem:  &fsMock,
 	}
+}
+
+func verifyExpectedCalls(t *testing.T, envMockCalls []string, fsMockCalls []string) {
+	if !reflect.DeepEqual(envMock.GetCalls(), envMockCalls) {
+		t.Fatalf("envMock expectation violation.\nMock calls: %v", envMock.GetCalls())
+	}
+	if !reflect.DeepEqual(fsMock.GetCalls(), fsMockCalls) {
+		t.Fatalf("fsMock expectation violation.\nMock calls: %v", fsMock.GetCalls())
+	}
+}
+
+func expectHttpError(t *testing.T, err error, expectedStatusCode int, expectedError string) {
+	customError, isCustomError := err.(http_error.CustomError)
+	if !isCustomError {
+		t.Fatalf("expected CustomError")
+	}
+	if customError.StatusCode != expectedStatusCode {
+		t.Fatalf("unexpected error status code: %v", customError.StatusCode)
+	}
+	if customError.Error() != expectedError {
+		t.Fatalf("unexpected error: %v", customError.Error())
+	}
+}
+
+func TestIsGcloudCliAvailable_available(t *testing.T) {
+	setup()
+	envMock.ExpIsCommandAvailable = true
 
 	if !repo.IsGcloudCliAvailable() {
 		t.Fatalf("should be available")
@@ -22,26 +61,16 @@ func TestIsGcloudCliAvailable_available(t *testing.T) {
 }
 
 func TestIsGcloudCliAvailable_unavailable(t *testing.T) {
-	envMock := mock.NewEnvironmentMock()
-	repo := &GcloudConfigurationRepository{
-		Environment: &envMock,
-	}
-
+	setup()
 	if repo.IsGcloudCliAvailable() {
 		t.Fatalf("should be unavailable")
 	}
 }
 
 func TestDoesGcloudConfigFolderExist_exists(t *testing.T) {
-	envMock := mock.NewEnvironmentMock()
-	fsMock := mock.NewFileSystemMock()
+	setup()
 	fsMock.ExpDoesFileExist = true
 	envMock.ExpIsWindows = true
-
-	repo := &GcloudConfigurationRepository{
-		Environment: &envMock,
-		FileSystem:  &fsMock,
-	}
 
 	exists, err := repo.DoesGcloudConfigFolderExist()
 	if err != nil {
@@ -52,21 +81,13 @@ func TestDoesGcloudConfigFolderExist_exists(t *testing.T) {
 		t.Fatalf("directory should exist")
 	}
 
-	expectedConfigDirPath := filepath.Join("c:/", "appdata", "gcloud")
-	if !reflect.DeepEqual(fsMock.GetCalls(), []string{fmt.Sprintf("DoesFileExist(%v)", expectedConfigDirPath)}) {
-		t.Fatalf("mock expectation violation.\nfsMock calls: %v", fsMock.GetCalls())
-	}
+	verifyExpectedCalls(t, []string{"IsWindows()", "GetEnvironmentVariable(APPDATA)"},
+		[]string{fmt.Sprintf("DoesFileExist(%v)", expectedConfigDirPath)})
 }
 
 func TestDoesGcloudConfigFolderExist_not_exists(t *testing.T) {
-	envMock := mock.NewEnvironmentMock()
-	fsMock := mock.NewFileSystemMock()
+	setup()
 	envMock.ExpIsWindows = true
-
-	repo := &GcloudConfigurationRepository{
-		Environment: &envMock,
-		FileSystem:  &fsMock,
-	}
 
 	exists, err := repo.DoesGcloudConfigFolderExist()
 	if err != nil {
@@ -77,37 +98,23 @@ func TestDoesGcloudConfigFolderExist_not_exists(t *testing.T) {
 		t.Fatalf("directory should not exist")
 	}
 
-	expectedConfigDirPath := filepath.Join("c:/", "appdata", "gcloud")
-	if !reflect.DeepEqual(fsMock.GetCalls(), []string{fmt.Sprintf("DoesFileExist(%v)", expectedConfigDirPath)}) {
-		t.Fatalf("mock expectation violation.\nfsMock calls: %v", fsMock.GetCalls())
-	}
+	verifyExpectedCalls(t, []string{"IsWindows()", "GetEnvironmentVariable(APPDATA)"},
+		[]string{fmt.Sprintf("DoesFileExist(%v)", expectedConfigDirPath)})
 }
 
 func TestDoesGcloudConfigFolderExist_errorGettingHomeDir(t *testing.T) {
-	fsMock := mock.NewFileSystemMock()
+	setup()
 	fsMock.ExpErrorOnGetHomeDir = true
-	envMock := mock.NewEnvironmentMock()
-	repo := &GcloudConfigurationRepository{
-		FileSystem:  &fsMock,
-		Environment: &envMock,
-	}
 
 	_, err := repo.DoesGcloudConfigFolderExist()
-	customError, isCustomError := err.(http_error.CustomError)
-	if !isCustomError {
-		t.Fatalf("expected CustomError")
-	}
-	if customError.StatusCode != 500 || customError.Error() != "error getting home dir" {
-		t.Fatalf("unexpected error")
-	}
+	expectHttpError(t, err, 500, "error getting home dir")
+
+	verifyExpectedCalls(t, []string{"IsWindows()"}, []string{})
 }
 
 func TestGcloudConfigurationRepository_onWindows(t *testing.T) {
-	envMock := mock.NewEnvironmentMock()
+	setup()
 	envMock.ExpIsWindows = true
-	repo := &GcloudConfigurationRepository{
-		Environment: &envMock,
-	}
 
 	configDir, err := repo.gcloudConfigDir()
 	if err != nil {
@@ -119,19 +126,11 @@ func TestGcloudConfigurationRepository_onWindows(t *testing.T) {
 		t.Fatalf("expected gcloudConfigDir: %v", expectedConfigDir)
 	}
 
-	if !reflect.DeepEqual(envMock.GetCalls(), []string{"IsWindows()", "GetEnvironmentVariable(APPDATA)"}) {
-		t.Fatalf("mock expectation violation.\nenvMock calls: %v", envMock.GetCalls())
-	}
+	verifyExpectedCalls(t, []string{"IsWindows()", "GetEnvironmentVariable(APPDATA)"}, []string{})
 }
 
 func TestGcloudConfigurationRepository_onUnix(t *testing.T) {
-	fsMock := mock.NewFileSystemMock()
-	envMock := mock.NewEnvironmentMock()
-	repo := &GcloudConfigurationRepository{
-		FileSystem:  &fsMock,
-		Environment: &envMock,
-	}
-
+	setup()
 	configDir, err := repo.gcloudConfigDir()
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -142,41 +141,22 @@ func TestGcloudConfigurationRepository_onUnix(t *testing.T) {
 		t.Fatalf("expected gcloudConfigDir: %v", expectedConfigDir)
 	}
 
-	if !reflect.DeepEqual(fsMock.GetCalls(), []string{"GetHomeDir()"}) ||
-		!reflect.DeepEqual(envMock.GetCalls(), []string{"IsWindows()"}) {
-		t.Fatalf("mock expectation violation.\nfsMock calls: %v\nenvMock calls: %v", fsMock.GetCalls(), envMock.GetCalls())
-	}
+	verifyExpectedCalls(t, []string{"IsWindows()"}, []string{"GetHomeDir()"})
 }
 
 func TestGcloudConfigurationRepository_error(t *testing.T) {
-	fsMock := mock.NewFileSystemMock()
+	setup()
 	fsMock.ExpErrorOnGetHomeDir = true
-	envMock := mock.NewEnvironmentMock()
-	repo := &GcloudConfigurationRepository{
-		FileSystem:  &fsMock,
-		Environment: &envMock,
-	}
 
 	_, err := repo.gcloudConfigDir()
-	customError, isCustomError := err.(http_error.CustomError)
-	if !isCustomError {
-		t.Fatalf("expected CustomError")
-	}
-	if customError.StatusCode != 500 || customError.Error() != "error getting home dir" {
-		t.Fatalf("unexpected error")
-	}
+	expectHttpError(t, err, 500, "error getting home dir")
+
+	verifyExpectedCalls(t, []string{"IsWindows()"}, []string{})
 }
 
-var expectedConfigFilePath = filepath.Join("c:/", "appdata", "gcloud", "configurations", "config_leapp_configurationName")
-
 func TestCreateConfiguration(t *testing.T) {
-	fsMock := mock.NewFileSystemMock()
-	envMock := mock.NewEnvironmentMock()
+	setup()
 	envMock.ExpIsWindows = true
-	repo := &GcloudConfigurationRepository{
-		FileSystem:  &fsMock,
-		Environment: &envMock,
-	}
 
 	err := repo.CreateConfiguration("configurationName", "accountId", "projectId")
 	if err != nil {
@@ -185,58 +165,34 @@ func TestCreateConfiguration(t *testing.T) {
 
 	expectedFileContent := "[core]\naccount = accountId\nproject = projectId\n"
 	expectedFile := fmt.Sprintf("WriteToFile(%v, %v)", expectedConfigFilePath, []byte(expectedFileContent))
-	if !reflect.DeepEqual(fsMock.GetCalls(), []string{expectedFile}) {
-		t.Fatalf("mock expectation violation.\nfsMock calls: %v", fsMock.GetCalls())
-	}
+
+	verifyExpectedCalls(t, []string{"IsWindows()", "GetEnvironmentVariable(APPDATA)"}, []string{expectedFile})
 }
 
 func TestCreateConfiguration_errorGettingHomeDir(t *testing.T) {
-	fsMock := mock.NewFileSystemMock()
+	setup()
 	fsMock.ExpErrorOnGetHomeDir = true
-	envMock := mock.NewEnvironmentMock()
-	repo := &GcloudConfigurationRepository{
-		FileSystem:  &fsMock,
-		Environment: &envMock,
-	}
 
 	err := repo.CreateConfiguration("configurationName", "accountId", "projectId")
-	customError, isCustomError := err.(http_error.CustomError)
-	if !isCustomError {
-		t.Fatalf("expected CustomError")
-	}
-	if customError.StatusCode != 500 || customError.Error() != "error getting home dir" {
-		t.Fatalf("unexpected error")
-	}
+	expectHttpError(t, err, 500, "error getting home dir")
+
+	verifyExpectedCalls(t, []string{"IsWindows()"}, []string{})
 }
 
 func TestCreateConfiguration_errorWritingFile(t *testing.T) {
-	fsMock := mock.NewFileSystemMock()
+	setup()
 	fsMock.ExpErrorOnWriteToFile = true
-	envMock := mock.NewEnvironmentMock()
 	envMock.ExpIsWindows = true
-	repo := &GcloudConfigurationRepository{
-		FileSystem:  &fsMock,
-		Environment: &envMock,
-	}
 
 	err := repo.CreateConfiguration("configurationName", "accountId", "projectId")
-	customError, isCustomError := err.(http_error.CustomError)
-	if !isCustomError {
-		t.Fatalf("expected CustomError")
-	}
-	if customError.StatusCode != 500 || customError.Error() != "error writing file" {
-		t.Fatalf("unexpected error")
-	}
+	expectHttpError(t, err, 500, "error writing file")
+
+	verifyExpectedCalls(t, []string{"IsWindows()", "GetEnvironmentVariable(APPDATA)"}, []string{})
 }
 
 func TestRemoveConfiguration(t *testing.T) {
-	fsMock := mock.NewFileSystemMock()
-	envMock := mock.NewEnvironmentMock()
+	setup()
 	envMock.ExpIsWindows = true
-	repo := &GcloudConfigurationRepository{
-		FileSystem:  &fsMock,
-		Environment: &envMock,
-	}
 
 	err := repo.RemoveConfiguration("configurationName")
 	if err != nil {
@@ -244,45 +200,93 @@ func TestRemoveConfiguration(t *testing.T) {
 	}
 
 	expectedFile := fmt.Sprintf("RemoveFile(%v)", expectedConfigFilePath)
-	if !reflect.DeepEqual(fsMock.GetCalls(), []string{expectedFile}) {
-		t.Fatalf("mock expectation violation.\nfsMock calls: %v", fsMock.GetCalls())
-	}
+	verifyExpectedCalls(t, []string{"IsWindows()", "GetEnvironmentVariable(APPDATA)"}, []string{expectedFile})
 }
 
 func TestRemoveConfiguration_errorGettingHomeDir(t *testing.T) {
-	fsMock := mock.NewFileSystemMock()
+	setup()
 	fsMock.ExpErrorOnGetHomeDir = true
-	envMock := mock.NewEnvironmentMock()
-	repo := &GcloudConfigurationRepository{
-		FileSystem:  &fsMock,
-		Environment: &envMock,
-	}
 
 	err := repo.RemoveConfiguration("configurationName")
-	customError, isCustomError := err.(http_error.CustomError)
-	if !isCustomError {
-		t.Fatalf("expected CustomError")
-	}
-	if customError.StatusCode != 500 || customError.Error() != "error getting home dir" {
-		t.Fatalf("unexpected error")
-	}
+	expectHttpError(t, err, 500, "error getting home dir")
+
+	verifyExpectedCalls(t, []string{"IsWindows()"}, []string{})
 }
 
 func TestRemoveConfiguration_errorRemovingFile(t *testing.T) {
-	fsMock := mock.NewFileSystemMock()
+	setup()
 	fsMock.ExpErrorOnRemoveFile = true
-	envMock := mock.NewEnvironmentMock()
-	repo := &GcloudConfigurationRepository{
-		FileSystem:  &fsMock,
-		Environment: &envMock,
-	}
 
 	err := repo.RemoveConfiguration("configurationName")
-	customError, isCustomError := err.(http_error.CustomError)
-	if !isCustomError {
-		t.Fatalf("expected CustomError")
+	expectHttpError(t, err, 500, "error removing file")
+
+	verifyExpectedCalls(t, []string{"IsWindows()"}, []string{"GetHomeDir()"})
+}
+
+func TestActivateConfiguration(t *testing.T) {
+	setup()
+	envMock.ExpIsWindows = true
+
+	activeConfigurationName := "configurationName"
+	err := repo.ActivateConfiguration(activeConfigurationName)
+	if err != nil {
+		t.Fatalf("unexpected error %v", err)
 	}
-	if customError.StatusCode != 500 || customError.Error() != "error removing file" {
-		t.Fatalf("unexpected error")
+
+	expectedFile := fmt.Sprintf("WriteToFile(%v, %v)", expectedActiveConfigFilePath, []byte(activeConfigurationName))
+	verifyExpectedCalls(t, []string{"IsWindows()", "GetEnvironmentVariable(APPDATA)"}, []string{expectedFile})
+}
+
+func TestActivateConfiguration_errorGettingHomeDir(t *testing.T) {
+	setup()
+	fsMock.ExpErrorOnGetHomeDir = true
+
+	err := repo.ActivateConfiguration("configurationName")
+	expectHttpError(t, err, 500, "error getting home dir")
+
+	verifyExpectedCalls(t, []string{"IsWindows()"}, []string{})
+}
+
+func TestActivateConfiguration_errorWritingFile(t *testing.T) {
+	setup()
+	fsMock.ExpErrorOnWriteToFile = true
+	envMock.ExpIsWindows = true
+
+	err := repo.ActivateConfiguration("configurationName")
+	expectHttpError(t, err, 500, "error writing file")
+
+	verifyExpectedCalls(t, []string{"IsWindows()", "GetEnvironmentVariable(APPDATA)"}, []string{})
+}
+
+func TestDeactivateConfiguration(t *testing.T) {
+	setup()
+	envMock.ExpIsWindows = true
+
+	err := repo.DeactivateConfiguration()
+	if err != nil {
+		t.Fatalf("unexpected error %v", err)
 	}
+
+	expectedFile := fmt.Sprintf("RemoveFile(%v)", expectedActiveConfigFilePath)
+	verifyExpectedCalls(t, []string{"IsWindows()", "GetEnvironmentVariable(APPDATA)"}, []string{expectedFile})
+}
+
+func TestDeactivateConfiguration_errorGettingHomeDir(t *testing.T) {
+	setup()
+	fsMock.ExpErrorOnGetHomeDir = true
+
+	err := repo.DeactivateConfiguration()
+	expectHttpError(t, err, 500, "error getting home dir")
+
+	verifyExpectedCalls(t, []string{"IsWindows()"}, []string{})
+}
+
+func TestDeactivateConfiguration_errorRemovingFile(t *testing.T) {
+	setup()
+	fsMock.ExpErrorOnRemoveFile = true
+
+	err := repo.DeactivateConfiguration()
+	expectHttpError(t, err, 500, "error removing file")
+
+	verifyExpectedCalls(t, []string{"IsWindows()"}, []string{"GetHomeDir()"})
 }

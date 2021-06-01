@@ -44,6 +44,14 @@ func (repo *GcloudConfigurationRepository) getGcloudConfigFilePath(configuration
 	return filepath.Join(configDir, "configurations", fmt.Sprintf("config_leapp_%v", configurationName)), nil
 }
 
+func (repo *GcloudConfigurationRepository) getGcloudActiveConfigFilePath() (string, error) {
+	configDir, err := repo.gcloudConfigDir()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(configDir, "active_config"), nil
+}
+
 func (repo *GcloudConfigurationRepository) IsGcloudCliAvailable() bool {
 	return repo.Environment.IsCommandAvailable("gcloud")
 }
@@ -78,5 +86,31 @@ func (repo *GcloudConfigurationRepository) RemoveConfiguration(configurationName
 	if err != nil {
 		return http_error.NewInternalServerError(err)
 	}
+	return nil
+}
+
+func (repo *GcloudConfigurationRepository) ActivateConfiguration(configurationName string) error {
+	activeConfigFilePath, err := repo.getGcloudActiveConfigFilePath()
+	if err != nil {
+		return err
+	}
+
+	err = repo.FileSystem.WriteToFile(activeConfigFilePath, []byte(configurationName))
+	if err != nil {
+		return http_error.NewInternalServerError(err)
+	}
+	return nil
+}
+
+func (repo *GcloudConfigurationRepository) DeactivateConfiguration() error {
+	activeConfigFilePath, err := repo.getGcloudActiveConfigFilePath()
+	if err != nil {
+		return err
+	}
+	err = repo.FileSystem.RemoveFile(activeConfigFilePath)
+	if err != nil {
+		return http_error.NewInternalServerError(err)
+	}
+
 	return nil
 }
