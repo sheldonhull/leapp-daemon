@@ -29,10 +29,12 @@ func (repo *GcloudConfigurationRepository) gcloudConfigDir() (string, error) {
 	if repo.Environment.IsWindows() {
 		return filepath.Join(repo.Environment.GetEnvironmentVariable("APPDATA"), gcloudDirectory), nil
 	}
+
 	dir, err := repo.FileSystem.GetHomeDir()
 	if err != nil {
 		return "", http_error.NewInternalServerError(err)
 	}
+
 	return filepath.Join(dir, ".config", gcloudDirectory), nil
 }
 
@@ -41,6 +43,7 @@ func (repo *GcloudConfigurationRepository) getGcloudConfigFilePath(configuration
 	if err != nil {
 		return "", err
 	}
+
 	return filepath.Join(configDir, "configurations", fmt.Sprintf("config_leapp_%v", configurationName)), nil
 }
 
@@ -49,7 +52,17 @@ func (repo *GcloudConfigurationRepository) getGcloudActiveConfigFilePath() (stri
 	if err != nil {
 		return "", err
 	}
+
 	return filepath.Join(configDir, "active_config"), nil
+}
+
+func (repo *GcloudConfigurationRepository) getGcloudDefaultCredentialFilePath() (string, error) {
+	configDir, err := repo.gcloudConfigDir()
+	if err != nil {
+		return "", err
+	}
+
+	return filepath.Join(configDir, "application_default_credentials.json"), nil
 }
 
 func (repo *GcloudConfigurationRepository) IsGcloudCliAvailable() bool {
@@ -61,6 +74,7 @@ func (repo *GcloudConfigurationRepository) DoesGcloudConfigFolderExist() (bool, 
 	if err != nil {
 		return false, err
 	}
+
 	return repo.FileSystem.DoesFileExist(configDir), nil
 }
 
@@ -69,11 +83,13 @@ func (repo *GcloudConfigurationRepository) CreateConfiguration(configurationName
 	if err != nil {
 		return err
 	}
+
 	configFileContent := fmt.Sprintf("[core]\naccount = %v\nproject = %v\n", account, project)
 	err = repo.FileSystem.WriteToFile(configFilePath, []byte(configFileContent))
 	if err != nil {
 		return http_error.NewInternalServerError(err)
 	}
+
 	return nil
 }
 
@@ -82,6 +98,7 @@ func (repo *GcloudConfigurationRepository) RemoveConfiguration(configurationName
 	if err != nil {
 		return err
 	}
+
 	err = repo.FileSystem.RemoveFile(configFilePath)
 	if err != nil {
 		return http_error.NewInternalServerError(err)
@@ -107,7 +124,36 @@ func (repo *GcloudConfigurationRepository) DeactivateConfiguration() error {
 	if err != nil {
 		return err
 	}
+
 	err = repo.FileSystem.RemoveFile(activeConfigFilePath)
+	if err != nil {
+		return http_error.NewInternalServerError(err)
+	}
+
+	return nil
+}
+
+func (repo *GcloudConfigurationRepository) WriteDefaultCredentials(accountId string, credentialJson string) error {
+	defaultCredentialFilePath, err := repo.getGcloudDefaultCredentialFilePath()
+	if err != nil {
+		return err
+	}
+
+	err = repo.FileSystem.WriteToFile(defaultCredentialFilePath, []byte(credentialJson))
+	if err != nil {
+		return http_error.NewInternalServerError(err)
+	}
+
+	return nil
+}
+
+func (repo *GcloudConfigurationRepository) RemoveDefaultCredentials() error {
+	defaultCredentialFilePath, err := repo.getGcloudDefaultCredentialFilePath()
+	if err != nil {
+		return err
+	}
+
+	err = repo.FileSystem.RemoveFile(defaultCredentialFilePath)
 	if err != nil {
 		return http_error.NewInternalServerError(err)
 	}

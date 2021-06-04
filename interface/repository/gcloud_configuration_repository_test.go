@@ -12,6 +12,7 @@ import (
 var expectedConfigDirPath string
 var expectedConfigFilePath string
 var expectedActiveConfigFilePath string
+var expectedDefaultCredentialsFilePath string
 var envMock mock.EnvironmentMock
 var fsMock mock.FileSystemMock
 var repo *GcloudConfigurationRepository
@@ -20,6 +21,7 @@ func setup() {
 	expectedConfigDirPath = filepath.Join("c:/", "appdata", "gcloud")
 	expectedConfigFilePath = filepath.Join(expectedConfigDirPath, "configurations", "config_leapp_configurationName")
 	expectedActiveConfigFilePath = filepath.Join(expectedConfigDirPath, "active_config")
+	expectedDefaultCredentialsFilePath = filepath.Join(expectedConfigDirPath, "application_default_credentials.json")
 
 	envMock = mock.NewEnvironmentMock()
 	fsMock = mock.NewFileSystemMock()
@@ -286,6 +288,75 @@ func TestDeactivateConfiguration_errorRemovingFile(t *testing.T) {
 	fsMock.ExpErrorOnRemoveFile = true
 
 	err := repo.DeactivateConfiguration()
+	expectHttpError(t, err, 500, "error removing file")
+
+	verifyExpectedCalls(t, []string{"IsWindows()"}, []string{"GetHomeDir()"})
+}
+
+func TestWriteDefaultCredentials(t *testing.T) {
+	setup()
+	envMock.ExpIsWindows = true
+
+	accountId := "account@domain.com"
+	defaultCredentialJson := "{\"credentials\":\"json\"}"
+	err := repo.WriteDefaultCredentials(accountId, defaultCredentialJson)
+	if err != nil {
+		t.Fatalf("unexpected error %v", err)
+	}
+
+	expectedFile := fmt.Sprintf("WriteToFile(%v, %v)", expectedDefaultCredentialsFilePath, []byte(defaultCredentialJson))
+	verifyExpectedCalls(t, []string{"IsWindows()", "GetEnvironmentVariable(APPDATA)"}, []string{expectedFile})
+}
+
+func TestWriteDefaultCredentials_errorGettingHomeDir(t *testing.T) {
+	setup()
+	fsMock.ExpErrorOnGetHomeDir = true
+
+	err := repo.WriteDefaultCredentials("account@domain.com", "{\"credentials\":\"json\"}")
+	expectHttpError(t, err, 500, "error getting home dir")
+
+	verifyExpectedCalls(t, []string{"IsWindows()"}, []string{})
+}
+
+func TestWriteDefaultCredentials_errorWritingFile(t *testing.T) {
+	setup()
+	fsMock.ExpErrorOnWriteToFile = true
+	envMock.ExpIsWindows = true
+
+	err := repo.WriteDefaultCredentials("account@domain.com", "{\"credentials\":\"json\"}")
+	expectHttpError(t, err, 500, "error writing file")
+
+	verifyExpectedCalls(t, []string{"IsWindows()", "GetEnvironmentVariable(APPDATA)"}, []string{})
+}
+
+func TestRemoveDefaultCredentials(t *testing.T) {
+	setup()
+	envMock.ExpIsWindows = true
+
+	err := repo.RemoveDefaultCredentials()
+	if err != nil {
+		t.Fatalf("unexpected error %v", err)
+	}
+
+	expectedFile := fmt.Sprintf("RemoveFile(%v)", expectedDefaultCredentialsFilePath)
+	verifyExpectedCalls(t, []string{"IsWindows()", "GetEnvironmentVariable(APPDATA)"}, []string{expectedFile})
+}
+
+func TestRemoveDefaultCredentials_errorGettingHomeDir(t *testing.T) {
+	setup()
+	fsMock.ExpErrorOnGetHomeDir = true
+
+	err := repo.RemoveDefaultCredentials()
+	expectHttpError(t, err, 500, "error getting home dir")
+
+	verifyExpectedCalls(t, []string{"IsWindows()"}, []string{})
+}
+
+func TestRemoveDefaultCredentials_errorRemovingFile(t *testing.T) {
+	setup()
+	fsMock.ExpErrorOnRemoveFile = true
+
+	err := repo.RemoveDefaultCredentials()
 	expectHttpError(t, err, 500, "error removing file")
 
 	verifyExpectedCalls(t, []string{"IsWindows()"}, []string{"GetHomeDir()"})
