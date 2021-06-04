@@ -61,6 +61,7 @@ func(service *PlainAwsSessionService) Create(alias string, awsAccessKeyId string
     return err
   }
 
+  // TODO: use access keys repository instead of direct keychain abstraction
   err = service.Keychain.SetSecret(awsAccessKeyId, sess.Id+"-plain-aws-session-access-key-id")
   if err != nil {
     return http_error.NewInternalServerError(err)
@@ -205,6 +206,7 @@ func StopPlainAwsSession(sessionId string) error {
 	return nil
 }
 
+// TODO: encapsulate this logic inside a session token generation interface
 func(service *PlainAwsSessionService) generateSessionToken(plainAwsSession session.PlainAwsSession) error {
   accessKeyIdSecretName := plainAwsSession.Id + "-plain-aws-session-access-key-id"
 
