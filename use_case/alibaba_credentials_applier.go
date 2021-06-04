@@ -7,7 +7,6 @@ import (
 	"leapp_daemon/domain/named_profile"
 	"leapp_daemon/domain/session"
 	"leapp_daemon/infrastructure/http/http_error"
-	"leapp_daemon/infrastructure/logging"
 )
 
 // temporaneamente forzo ad AK
@@ -100,8 +99,6 @@ func (alibabaCredentialsApplier *AlibabaCredentialsApplier) getAccessKeys(sessio
 }
 
 func (alibabaCredentialsApplier *AlibabaCredentialsApplier) overwriteFile(content []byte, path string) error {
-	logging.Entry().Error("flag 3")
-
 	err := ioutil.WriteFile(path, content, 0644)
 	if err != nil {
 		return http_error.NewUnprocessableEntityError(err)

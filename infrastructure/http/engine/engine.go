@@ -75,10 +75,6 @@ func initializeRoutes(ginEngine *gin.Engine) {
 		v1.PUT("/session/trusted/:id", controller.EditTrustedAwsSessionController)
 		v1.DELETE("/session/trusted/:id", controller.DeleteTrustedAwsSessionController)
 
-		v1.POST("/g_suite_auth/first_step", controller.GSuiteAuthFirstStepController)
-		v1.POST("/g_suite_auth/second_step", controller.GSuiteAuthSecondStepController)
-		v1.POST("/g_suite_auth/third_step", controller.GSuiteAuthThirdStepController)
-
 		v1.GET("/region/aws/list", controller.GetAwsRegionListController)
 		v1.PUT("/region/aws/", controller.EditAwsRegionController)
 

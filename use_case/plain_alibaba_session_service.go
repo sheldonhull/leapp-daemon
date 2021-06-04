@@ -11,15 +11,9 @@ import (
 	"github.com/google/uuid"
 )
 
-type AlibabaKeychain interface {
-	DoesSecretExist(label string) (bool, error)
-	GetSecret(label string) (string, error)
-	SetSecret(secret string, label string) error
-}
-
 type PlainAlibabaSessionService struct {
-	Keychain AlibabaKeychain
-}
+	Keychain Keychain
+  }
 
 func (service *PlainAlibabaSessionService) Create(alias string, alibabaAccessKeyId string, alibabaSecretAccessKey string, regionName string, profileName string) error {
 

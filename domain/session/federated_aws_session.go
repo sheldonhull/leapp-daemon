@@ -27,11 +27,6 @@ type FederatedAwsRole struct {
 	Arn  string
 }
 
-func(sess *FederatedAwsSession) Rotate(rotateConfiguration *RotateConfiguration) error {
-	// TODO: implement rotate method for federated
-	return nil
-}
-
 func(sess *FederatedAwsSession) IsRotationIntervalExpired() (bool, error) {
 	startTime, _ := time.Parse(time.RFC3339, sess.StartTime)
 	secondsPassedFromStart := time.Now().Sub(startTime).Seconds()

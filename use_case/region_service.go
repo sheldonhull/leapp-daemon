@@ -2,14 +2,14 @@ package use_case
 
 import (
   "fmt"
-  http_error2 "leapp_daemon/infrastructure/http/http_error"
+  "leapp_daemon/infrastructure/http/http_error"
 )
 
 func EditAwsSessionRegion(sessionId string, region string) error {
   /*
 	isRegionValid := region2.IsRegionValid(region)
 	if !isRegionValid {
-		return http_error2.NewUnprocessableEntityError(fmt.Errorf("Region " + region + " not valid"))
+		return http_error.NewUnprocessableEntityError(fmt.Errorf("Region " + region + " not valid"))
 	}
 
 	config, err := configuration.ReadConfiguration()
@@ -37,5 +37,5 @@ func EditAwsSessionRegion(sessionId string, region string) error {
 	}
    */
 
-	return http_error2.NewUnprocessableEntityError(fmt.Errorf("no valid AWS session found for editing region"))
+	return http_error.NewUnprocessableEntityError(fmt.Errorf("no valid AWS session found for editing region"))
 }
