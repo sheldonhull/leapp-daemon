@@ -35,7 +35,7 @@ var regionalEndpoints = map[string]string {
 }
 
 func GetRegionalEndpoint(regionName *string) (*string, error) {
-	isRegionValid := region.IsRegionValid(*regionName)
+	isRegionValid := region.IsAwsRegionValid(*regionName)
 	if !isRegionValid {
 		return nil, http_error.NewUnprocessableEntityError(fmt.Errorf("Region " + *regionName + " not valid"))
 	}

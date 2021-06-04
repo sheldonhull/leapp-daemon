@@ -28,7 +28,7 @@ func(awsCredentialsApplier *AwsCredentialsApplier) UpdatePlainAwsSessions(oldPla
           return err
         }
 
-        credentialsFilePath := homeDir + "/" + constant.CredentialsFilePath
+        credentialsFilePath := homeDir + "/" + constant.AwsCredentialsFilePath
         profileName := named_profile.GetNamedProfilesFacade().GetNamedProfileById(newSess.Account.NamedProfileId).Name
         region := newSess.Account.Region
 

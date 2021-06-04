@@ -1,6 +1,6 @@
 package region
 
-func GetRegionList() []string {
+func GetAwsRegionList() []string {
 	return []string {
 		"af-south-1",
 		"ap-east-1",
@@ -30,8 +30,8 @@ func GetRegionList() []string {
 	}
 }
 
-func IsRegionValid(region string) bool {
-	regions := GetRegionList()
+func IsAwsRegionValid(region string) bool {
+	regions := GetAwsRegionList()
 	for _, r := range regions {
 		if region == r {
 			return true

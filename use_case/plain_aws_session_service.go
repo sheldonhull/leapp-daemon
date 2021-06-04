@@ -1,246 +1,253 @@
 package use_case
 
 import (
-  "encoding/json"
-  "github.com/google/uuid"
-  "leapp_daemon/domain/named_profile"
-  "leapp_daemon/domain/session"
-  "leapp_daemon/infrastructure/aws/sts_client"
-  "leapp_daemon/infrastructure/http/http_error"
-  "strings"
-  "time"
+	"encoding/json"
+	"leapp_daemon/domain/named_profile"
+	"leapp_daemon/domain/session"
+	"leapp_daemon/infrastructure/aws/sts_client"
+	"leapp_daemon/infrastructure/http/http_error"
+	"strings"
+	"time"
+
+	"github.com/google/uuid"
 )
 
+type AwsKeychain interface {
+	DoesSecretExist(label string) (bool, error)
+	GetSecret(label string) (string, error)
+	SetSecret(secret string, label string) error
+}
+
 type PlainAwsSessionService struct {
-  Keychain Keychain
+	Keychain AwsKeychain
 }
 
-func(service *PlainAwsSessionService) Create(alias string, awsAccessKeyId string, awsSecretAccessKey string,
-  mfaDevice string, region string, profileName string) error {
+func (service *PlainAwsSessionService) Create(alias string, awsAccessKeyId string, awsSecretAccessKey string,
+	mfaDevice string, region string, profileName string) error {
 
-  namedProfile := named_profile.GetNamedProfilesFacade().GetNamedProfileByName(profileName)
+	namedProfile := named_profile.GetNamedProfilesFacade().GetNamedProfileByName(profileName)
 
-  if namedProfile == nil {
-    // TODO: extract UUID generation logic
-    uuidString := uuid.New().String()
-    uuidString = strings.Replace(uuidString, "-", "", -1)
+	if namedProfile == nil {
+		// TODO: extract UUID generation logic
+		uuidString := uuid.New().String()
+		uuidString = strings.Replace(uuidString, "-", "", -1)
 
-    namedProfile = &named_profile.NamedProfile{
-      Id:   uuidString,
-      Name: profileName,
-    }
+		namedProfile = &named_profile.NamedProfile{
+			Id:   uuidString,
+			Name: profileName,
+		}
 
-    err := named_profile.GetNamedProfilesFacade().AddNamedProfile(*namedProfile)
-    if err != nil {
-      return err
-    }
-  }
+		err := named_profile.GetNamedProfilesFacade().AddNamedProfile(*namedProfile)
+		if err != nil {
+			return err
+		}
+	}
 
-  plainAwsAccount := session.PlainAwsAccount{
-    MfaDevice: mfaDevice,
-    Region: region,
-    NamedProfileId: namedProfile.Id,
-    SessionTokenExpiration: "",
-  }
+	plainAwsAccount := session.PlainAwsAccount{
+		MfaDevice:              mfaDevice,
+		Region:                 region,
+		NamedProfileId:         namedProfile.Id,
+		SessionTokenExpiration: "",
+	}
 
-  // TODO: extract UUID generation logic
-  uuidString := uuid.New().String()
-  uuidString = strings.Replace(uuidString, "-", "", -1)
+	// TODO: extract UUID generation logic
+	uuidString := uuid.New().String()
+	uuidString = strings.Replace(uuidString, "-", "", -1)
 
-  sess := session.PlainAwsSession{
-    Id: uuidString,
-    Alias: alias,
-    Status: session.NotActive,
-    StartTime: "",
-    LastStopTime: "",
-    Account: &plainAwsAccount,
-  }
+	sess := session.PlainAwsSession{
+		Id:           uuidString,
+		Alias:        alias,
+		Status:       session.NotActive,
+		StartTime:    "",
+		LastStopTime: "",
+		Account:      &plainAwsAccount,
+	}
 
-  err := session.GetPlainAwsSessionsFacade().AddPlainAwsSession(sess)
-  if err != nil {
-    return err
-  }
+	err := session.GetPlainAwsSessionsFacade().AddPlainAwsSession(sess)
+	if err != nil {
+		return err
+	}
 
-  err = service.Keychain.SetSecret(awsAccessKeyId, sess.Id+"-plain-aws-session-access-key-id")
-  if err != nil {
-    return http_error.NewInternalServerError(err)
-  }
+	err = service.Keychain.SetSecret(awsAccessKeyId, sess.Id+"-plain-aws-session-access-key-id")
+	if err != nil {
+		return http_error.NewInternalServerError(err)
+	}
 
-  err = service.Keychain.SetSecret(awsSecretAccessKey, sess.Id+"-plain-aws-session-secret-access-key")
-  if err != nil {
-    return http_error.NewInternalServerError(err)
-  }
+	err = service.Keychain.SetSecret(awsSecretAccessKey, sess.Id+"-plain-aws-session-secret-access-key")
+	if err != nil {
+		return http_error.NewInternalServerError(err)
+	}
 
-  return nil
+	return nil
 }
 
-func(service *PlainAwsSessionService) GetPlainAwsSession(id string) (*session.PlainAwsSession, error) {
+func (service *PlainAwsSessionService) GetPlainAwsSession(id string) (*session.PlainAwsSession, error) {
 	var sess *session.PlainAwsSession
 	sess, err := session.GetPlainAwsSessionsFacade().GetPlainAwsSessionById(id)
-  return sess, err
+	return sess, err
 }
 
-func(service *PlainAwsSessionService) UpdatePlainAwsSession(sessionId string, name string, accountNumber string, region string, user string,
+func (service *PlainAwsSessionService) UpdatePlainAwsSession(sessionId string, name string, accountNumber string, region string, user string,
 	awsAccessKeyId string, awsSecretAccessKey string, mfaDevice string, profile string) error {
 
-  /*
-	config, err := configuration.ReadConfiguration()
-	if err != nil {
-		return err
-	}
+	/*
+		config, err := configuration.ReadConfiguration()
+		if err != nil {
+			return err
+		}
 
-	err = session.UpdatePlainAwsSession(config, sessionId, name, accountNumber, region, user, awsAccessKeyId, awsSecretAccessKey, mfaDevice, profile)
-	if err != nil {
-		return err
-	}
+		err = session.UpdatePlainAwsSession(config, sessionId, name, accountNumber, region, user, awsAccessKeyId, awsSecretAccessKey, mfaDevice, profile)
+		if err != nil {
+			return err
+		}
 
-	err = config.Update()
-	if err != nil {
-		return err
-	}
-   */
+		err = config.Update()
+		if err != nil {
+			return err
+		}
+	*/
 
 	return nil
 }
 
 func DeletePlainAwsSession(sessionId string) error {
-  /*
-	config, err := configuration.ReadConfiguration()
-	if err != nil {
-		return err
-	}
+	/*
+		config, err := configuration.ReadConfiguration()
+		if err != nil {
+			return err
+		}
 
-	err = session.DeletePlainAwsSession(config, sessionId)
-	if err != nil {
-		return err
-	}
+		err = session.DeletePlainAwsSession(config, sessionId)
+		if err != nil {
+			return err
+		}
 
-	err = config.Update()
-	if err != nil {
-		return err
-	}
-   */
+		err = config.Update()
+		if err != nil {
+			return err
+		}
+	*/
 
 	return nil
 }
 
-func(service *PlainAwsSessionService) StartPlainAwsSession(sessionId string) error {
-  plainAwsSession, err := session.GetPlainAwsSessionsFacade().GetPlainAwsSessionById(sessionId)
-  if err != nil {
-    return err
-  }
+func (service *PlainAwsSessionService) StartPlainAwsSession(sessionId string) error {
+	plainAwsSession, err := session.GetPlainAwsSessionsFacade().GetPlainAwsSessionById(sessionId)
+	if err != nil {
+		return err
+	}
 
-  doesSessionTokenExist, err := service.Keychain.DoesSecretExist(plainAwsSession.Id + "-plain-aws-session-session-token")
-  if err != nil {
-    return err
-  }
+	doesSessionTokenExist, err := service.Keychain.DoesSecretExist(plainAwsSession.Id + "-plain-aws-session-session-token")
+	if err != nil {
+		return err
+	}
 
-  if doesSessionTokenExist {
-    sessionTokenExpiration := plainAwsSession.Account.SessionTokenExpiration
+	if doesSessionTokenExist {
+		sessionTokenExpiration := plainAwsSession.Account.SessionTokenExpiration
 
-    if sessionTokenExpiration != "" {
-      currentTime := time.Now()
-      sessionTokenExpirationTime, err := time.Parse(time.RFC3339, sessionTokenExpiration)
-      if err != nil {
-        return err
-      }
+		if sessionTokenExpiration != "" {
+			currentTime := time.Now()
+			sessionTokenExpirationTime, err := time.Parse(time.RFC3339, sessionTokenExpiration)
+			if err != nil {
+				return err
+			}
 
-      if currentTime.After(sessionTokenExpirationTime) {
-        err = service.generateSessionToken(*plainAwsSession)
-        if err != nil {
-          return err
-        }
-      }
-    } else {
-      err = service.generateSessionToken(*plainAwsSession)
-      if err != nil {
-        return err
-      }
-    }
-  } else {
-    err = service.generateSessionToken(*plainAwsSession)
-    if err != nil {
-      return err
-    }
-  }
+			if currentTime.After(sessionTokenExpirationTime) {
+				err = service.generateSessionToken(*plainAwsSession)
+				if err != nil {
+					return err
+				}
+			}
+		} else {
+			err = service.generateSessionToken(*plainAwsSession)
+			if err != nil {
+				return err
+			}
+		}
+	} else {
+		err = service.generateSessionToken(*plainAwsSession)
+		if err != nil {
+			return err
+		}
+	}
 
-  err = session.GetPlainAwsSessionsFacade().SetPlainAwsSessionStatusToPending(sessionId)
-  if err != nil {
-    return err
-  }
+	err = session.GetPlainAwsSessionsFacade().SetPlainAwsSessionStatusToPending(sessionId)
+	if err != nil {
+		return err
+	}
 
-  err = session.GetPlainAwsSessionsFacade().SetPlainAwsSessionStatusToActive(sessionId)
-  if err != nil {
-    return err
-  }
+	err = session.GetPlainAwsSessionsFacade().SetPlainAwsSessionStatusToActive(sessionId)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
 
 func StopPlainAwsSession(sessionId string) error {
-  /*
-	config, err := configuration.ReadConfiguration()
-	if err != nil {
-		return err
-	}
+	/*
+			config, err := configuration.ReadConfiguration()
+			if err != nil {
+				return err
+			}
 
-	// Passing nil because, it will be the rotate method to check if we need the mfaToken or not
-	err = session.StopPlainAwsSession(config, sessionId)
-	if err != nil {
-		return err
-	}
+			// Passing nil because, it will be the rotate method to check if we need the mfaToken or not
+			err = session.StopPlainAwsSession(config, sessionId)
+			if err != nil {
+				return err
+			}
 
-	err = config.Update()
-	if err != nil {
-		return err
-	}
+			err = config.Update()
+			if err != nil {
+				return err
+			}
 
-  // sess, err := session.GetPlainAwsSession(config, sessionId)
-	err = session_token.RemoveFromIniFile("default")
-	if err != nil {
-		return err
-	}
-   */
+		  // sess, err := session.GetPlainAwsSession(config, sessionId)
+			err = session_token.RemoveFromIniFile("default")
+			if err != nil {
+				return err
+			}
+	*/
 
 	return nil
 }
 
-func(service *PlainAwsSessionService) generateSessionToken(plainAwsSession session.PlainAwsSession) error {
-  accessKeyIdSecretName := plainAwsSession.Id + "-plain-aws-session-access-key-id"
+func (service *PlainAwsSessionService) generateSessionToken(plainAwsSession session.PlainAwsSession) error {
+	accessKeyIdSecretName := plainAwsSession.Id + "-plain-aws-session-access-key-id"
 
-  accessKeyId, err := service.Keychain.GetSecret(accessKeyIdSecretName)
-  if err != nil {
-    return http_error.NewUnprocessableEntityError(err)
-  }
+	accessKeyId, err := service.Keychain.GetSecret(accessKeyIdSecretName)
+	if err != nil {
+		return http_error.NewUnprocessableEntityError(err)
+	}
 
-  secretAccessKeySecretName := plainAwsSession.Id + "-plain-aws-session-secret-access-key"
+	secretAccessKeySecretName := plainAwsSession.Id + "-plain-aws-session-secret-access-key"
 
-  secretAccessKey, err := service.Keychain.GetSecret(secretAccessKeySecretName)
-  if err != nil {
-    return http_error.NewUnprocessableEntityError(err)
-  }
+	secretAccessKey, err := service.Keychain.GetSecret(secretAccessKeySecretName)
+	if err != nil {
+		return http_error.NewUnprocessableEntityError(err)
+	}
 
-  credentials, err := sts_client.GenerateAccessToken(plainAwsSession.Account.Region,
-    plainAwsSession.Account.MfaDevice, nil, accessKeyId, secretAccessKey)
-  if err != nil {
-    return err
-  }
+	credentials, err := sts_client.GenerateAccessToken(plainAwsSession.Account.Region,
+		plainAwsSession.Account.MfaDevice, nil, accessKeyId, secretAccessKey)
+	if err != nil {
+		return err
+	}
 
-  credentialsJson, err := json.Marshal(credentials)
-  if err != nil {
-    return err
-  }
+	credentialsJson, err := json.Marshal(credentials)
+	if err != nil {
+		return err
+	}
 
-  err = service.Keychain.SetSecret(string(credentialsJson),
-    plainAwsSession.Id + "-plain-aws-session-session-token")
-  if err != nil {
-    return err
-  }
+	err = service.Keychain.SetSecret(string(credentialsJson),
+		plainAwsSession.Id+"-plain-aws-session-session-token")
+	if err != nil {
+		return err
+	}
 
-  err = session.GetPlainAwsSessionsFacade().SetPlainAwsSessionSessionTokenExpiration(plainAwsSession.Id, *credentials.Expiration)
-  if err != nil {
-    return err
-  }
+	err = session.GetPlainAwsSessionsFacade().SetPlainAwsSessionSessionTokenExpiration(plainAwsSession.Id, *credentials.Expiration)
+	if err != nil {
+		return err
+	}
 
-  return nil
+	return nil
 }

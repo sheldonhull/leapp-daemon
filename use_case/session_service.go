@@ -6,8 +6,10 @@ import (
 )
 
 func ListAllSessions(query string, listType string) (*map[string]interface{}, error) {
-	plainList := make([]*session2.PlainAwsSession, 0)
-	federatedList := make([]*session2.FederatedAwsSession, 0)
+	plainAwsList := make([]*session2.PlainAwsSession, 0)
+	federatedAwsList := make([]*session2.FederatedAwsSession, 0)
+
+	plainAlibabaList := make([]*session2.PlainAlibabaSession, 0)
 
 	/*
 	config, err := configuration.ReadConfiguration()
@@ -29,8 +31,9 @@ func ListAllSessions(query string, listType string) (*map[string]interface{}, er
 	 */
 
 	return &map[string]interface{} {
-		"PlainSessions": plainList,
-		"FederatedSessions": federatedList,
+		"PlainAwsSessions": plainAwsList,
+		"FederatedAwsSessions": federatedAwsList,
+		"PlainAlibabaSession": plainAlibabaList,
 	}, nil
 }
 

@@ -1,6 +1,7 @@
 package constant
 
-const CredentialsFilePath = `.aws/credentials`
+const AwsCredentialsFilePath = `.aws/credentials`
+const AlibabaCredentialsFilePath = `.aliyun/config.json`
 
 const SessionTypePlain = "PLAIN"
 const SessionTypeFederated = "FEDERATED"

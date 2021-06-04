@@ -20,3 +20,15 @@ func(sessionWriter *SessionsWriter) UpdatePlainAwsSessions(oldPlainAwsSessions [
 
   return err
 }
+
+func(sessionWriter *SessionsWriter) UpdatePlainAlibabaSessions(oldPlainAlibabaSessions []session.PlainAlibabaSession, newPlainAlibabaSessions []session.PlainAlibabaSession) error {
+  config, err := sessionWriter.ConfigurationRepository.GetConfiguration()
+  if err != nil {
+    return err
+  }
+
+  config.PlainAlibabaSessions = newPlainAlibabaSessions
+  err = sessionWriter.ConfigurationRepository.UpdateConfiguration(config)
+
+  return err
+}

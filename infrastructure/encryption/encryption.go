@@ -74,14 +74,18 @@ func(encryption *Encryption) Decrypt(encryptedText string) (string, error) {
 // TODO: move encryption key to domain layer
 // TODO: read random-generated key from keychain
 func getAesKey() ([]byte, error) {
-  machineId, err := getMachineId()
+  machineId, err := getMachineId()/*
+  			fmt.Println(string(machineId))
   if err != nil { return nil, err }
   machineIdRuneSlice := []rune(machineId)
   machineIdRuneSlice = append(machineIdRuneSlice[0:8], machineIdRuneSlice[8+1:]...)
   machineIdRuneSlice = append(machineIdRuneSlice[0:12], machineIdRuneSlice[12+1:]...)
   machineIdRuneSlice = append(machineIdRuneSlice[0:16], machineIdRuneSlice[16+1:]...)
   machineIdRuneSlice = append(machineIdRuneSlice[0:20], machineIdRuneSlice[20+1:]...)
-  return []byte(string(machineIdRuneSlice)), nil
+  				fmt.Println(string(machineIdRuneSlice))
+  return []byte(string(machineIdRuneSlice)), nil*/
+  
+  return []byte(machineId), err
 }
 
 func getMachineId() (string, error) {
