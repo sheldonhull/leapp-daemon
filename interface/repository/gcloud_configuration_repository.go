@@ -19,9 +19,15 @@ type GcloudEnvironment interface {
 	IsWindows() bool
 }
 
+type GcloudCredentialsDbTable interface {
+	WriteCredentials(sqlFilePath string, accountId string, value string) error
+	RemoveCredentials(sqlFilePath string, accountId string) error
+}
+
 type GcloudConfigurationRepository struct {
-	FileSystem  GcloudConfigFileSystem
-	Environment GcloudEnvironment
+	FileSystem         GcloudConfigFileSystem
+	Environment        GcloudEnvironment
+	CredentialsDbTable GcloudCredentialsDbTable
 }
 
 func (repo *GcloudConfigurationRepository) gcloudConfigDir() (string, error) {
@@ -56,13 +62,22 @@ func (repo *GcloudConfigurationRepository) getGcloudActiveConfigFilePath() (stri
 	return filepath.Join(configDir, "active_config"), nil
 }
 
-func (repo *GcloudConfigurationRepository) getGcloudDefaultCredentialFilePath() (string, error) {
+func (repo *GcloudConfigurationRepository) getGcloudDefaultCredentialsFilePath() (string, error) {
 	configDir, err := repo.gcloudConfigDir()
 	if err != nil {
 		return "", err
 	}
 
 	return filepath.Join(configDir, "application_default_credentials.json"), nil
+}
+
+func (repo *GcloudConfigurationRepository) getGcloudCredentialsDbFilePath() (string, error) {
+	configDir, err := repo.gcloudConfigDir()
+	if err != nil {
+		return "", err
+	}
+
+	return filepath.Join(configDir, "credentials.db"), nil
 }
 
 func (repo *GcloudConfigurationRepository) IsGcloudCliAvailable() bool {
@@ -133,13 +148,13 @@ func (repo *GcloudConfigurationRepository) DeactivateConfiguration() error {
 	return nil
 }
 
-func (repo *GcloudConfigurationRepository) WriteDefaultCredentials(accountId string, credentialJson string) error {
-	defaultCredentialFilePath, err := repo.getGcloudDefaultCredentialFilePath()
+func (repo *GcloudConfigurationRepository) WriteDefaultCredentials(credentialsJson string) error {
+	defaultCredentialsFilePath, err := repo.getGcloudDefaultCredentialsFilePath()
 	if err != nil {
 		return err
 	}
 
-	err = repo.FileSystem.WriteToFile(defaultCredentialFilePath, []byte(credentialJson))
+	err = repo.FileSystem.WriteToFile(defaultCredentialsFilePath, []byte(credentialsJson))
 	if err != nil {
 		return http_error.NewInternalServerError(err)
 	}
@@ -148,12 +163,51 @@ func (repo *GcloudConfigurationRepository) WriteDefaultCredentials(accountId str
 }
 
 func (repo *GcloudConfigurationRepository) RemoveDefaultCredentials() error {
-	defaultCredentialFilePath, err := repo.getGcloudDefaultCredentialFilePath()
+	defaultCredentialFilePath, err := repo.getGcloudDefaultCredentialsFilePath()
 	if err != nil {
 		return err
 	}
 
 	err = repo.FileSystem.RemoveFile(defaultCredentialFilePath)
+	if err != nil {
+		return http_error.NewInternalServerError(err)
+	}
+
+	return nil
+}
+
+func (repo *GcloudConfigurationRepository) WriteCredentialsToDb(accountId string, credentialsJson string) error {
+	credentialsDbFilePath, err := repo.getGcloudCredentialsDbFilePath()
+	if err != nil {
+		return err
+	}
+
+	if !repo.FileSystem.DoesFileExist(credentialsDbFilePath) {
+		err := repo.FileSystem.WriteToFile(credentialsDbFilePath, []byte{})
+		if err != nil {
+			return http_error.NewInternalServerError(err)
+		}
+	}
+
+	err = repo.CredentialsDbTable.WriteCredentials(credentialsDbFilePath, accountId, credentialsJson)
+	if err != nil {
+		return http_error.NewInternalServerError(err)
+	}
+
+	return nil
+}
+
+func (repo *GcloudConfigurationRepository) RemoveCredentialsFromDb(accountId string) error {
+	credentialsDbFilePath, err := repo.getGcloudCredentialsDbFilePath()
+	if err != nil {
+		return err
+	}
+
+	if !repo.FileSystem.DoesFileExist(credentialsDbFilePath) {
+		return nil
+	}
+
+	err = repo.CredentialsDbTable.RemoveCredentials(credentialsDbFilePath, accountId)
 	if err != nil {
 		return http_error.NewInternalServerError(err)
 	}
