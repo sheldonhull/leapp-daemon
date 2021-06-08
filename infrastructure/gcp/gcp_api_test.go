@@ -6,6 +6,7 @@ import (
 )
 
 func TestWorkingDefaultAuth(t *testing.T) {
+  t.SkipNow()
   if os.Getenv("GOOGLE_APPLICATION_CREDENTIALS") != "" {
     t.Fatalf("GOOGLE_APPLICATION_CREDENTIALS should not be set")
   }
@@ -18,12 +19,14 @@ func TestWorkingDefaultAuth(t *testing.T) {
 }
 
 func TestOAuthGetAuthUrl(t *testing.T) {
+  t.SkipNow()
   config := oauthGetConfig()
   url := oauthGetAuthorizationUrl(config)
   print(url)
 }
 
 func TestOAuthGetToken(t *testing.T) {
+  t.SkipNow()
   config := oauthGetConfig()
   authCode := ""
 

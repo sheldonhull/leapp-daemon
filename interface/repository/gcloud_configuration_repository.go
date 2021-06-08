@@ -182,13 +182,6 @@ func (repo *GcloudConfigurationRepository) WriteCredentialsToDb(accountId string
 		return err
 	}
 
-	if !repo.FileSystem.DoesFileExist(credentialsDbFilePath) {
-		err := repo.FileSystem.WriteToFile(credentialsDbFilePath, []byte{})
-		if err != nil {
-			return http_error.NewInternalServerError(err)
-		}
-	}
-
 	err = repo.CredentialsDbTable.WriteCredentials(credentialsDbFilePath, accountId, credentialsJson)
 	if err != nil {
 		return http_error.NewInternalServerError(err)
