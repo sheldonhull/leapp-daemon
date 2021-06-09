@@ -19,7 +19,7 @@ type Configuration struct {
 	PlainAwsSessions     []session.PlainAwsSession
 	FederatedAwsSessions []session.FederatedAwsSession
 	TrustedAwsSessions   []session.TrustedAwsSession
-	PlainGcpSessions     []session.PlainGcpSession
+	PlainGcpSessions     []session.GcpPlainSession
 	NamedProfiles        []named_profile.NamedProfile
 }
 
@@ -42,7 +42,7 @@ func GetDefaultConfiguration() Configuration {
 		},
 		FederatedAwsSessions: make([]session.FederatedAwsSession, 0),
 		PlainAwsSessions:     make([]session.PlainAwsSession, 0),
-		PlainGcpSessions:     make([]session.PlainGcpSession, 0),
+		PlainGcpSessions:     make([]session.GcpPlainSession, 0),
 	}
 }
 
