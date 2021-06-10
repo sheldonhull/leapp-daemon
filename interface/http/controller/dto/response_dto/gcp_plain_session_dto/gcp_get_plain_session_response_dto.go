@@ -1,4 +1,4 @@
-package response_dto
+package gcp_plain_session_dto
 
 import (
 	"github.com/gin-gonic/gin"

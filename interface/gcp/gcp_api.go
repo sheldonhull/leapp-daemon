@@ -23,10 +23,10 @@ var (
 		"https://www.googleapis.com/auth/accounts.reauth"}
 )
 
-type Api struct {
+type GcpApi struct {
 }
 
-func (api *Api) GetOauthUrl() (string, error) {
+func (api *GcpApi) GetOauthUrl() (string, error) {
 	config, err := getConfig()
 	if err != nil {
 		return "", err
@@ -34,7 +34,7 @@ func (api *Api) GetOauthUrl() (string, error) {
 	return config.AuthCodeURL("state-token", oauth2.AccessTypeOffline), nil
 }
 
-func (api *Api) GetOauthToken(authCode string) (*oauth2.Token, error) {
+func (api *GcpApi) GetOauthToken(authCode string) (*oauth2.Token, error) {
 	config, err := getConfig()
 	if err != nil {
 		return nil, err
@@ -45,11 +45,10 @@ func (api *Api) GetOauthToken(authCode string) (*oauth2.Token, error) {
 	if err != nil {
 		return nil, http_error.NewBadRequestError(err)
 	}
-
 	return token, nil
 }
 
-func (api *Api) GetCredentials(oauthToken *oauth2.Token) string {
+func (api *GcpApi) GetCredentials(oauthToken *oauth2.Token) string {
 	scopesList := ""
 	for _, appScope := range appScopes {
 		scopesList += fmt.Sprintf("\"%v\",", appScope)
