@@ -81,11 +81,11 @@ func initializeRoutes(ginEngine *gin.Engine) {
 		v1.GET("/named_profile/aws/list", controller.ListAwsNamedProfileController)
 
 		// GCP
-		v1.GET("gcp/session/plain/oauth/url", controller.GetGcpOauthUrl)
-		v1.POST("gcp/session/plain", controller.CreateGcpPlainSession)
-		v1.GET("gcp/session/plain/:id", controller.GetGcpPlainSession)
-    v1.POST("gcp/session/plain/:id/start", controller.StartGcpPlainSession)
-    //v1.POST("gcp/session/plain/:id/stop", controller.StopGcpPlainSession)
+		v1.GET("/gcp/oauth/url", controller.GetGcpOauthUrl)
+		v1.POST("/gcp/session/plain", controller.CreateGcpPlainSession)
+		v1.GET("/gcp/session/plain/:id", controller.GetGcpPlainSession)
+    v1.POST("/gcp/session/plain/:id/start", controller.StartGcpPlainSession)
+		v1.POST("/gcp/session/plain/:id/stop", controller.StopGcpPlainSession)
 
 		v1.GET("/ws", controller.WsController)
 	}

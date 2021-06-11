@@ -5,17 +5,17 @@ import (
   "leapp_daemon/domain/session"
 )
 
-type SessionsWriter struct {
+type AwsSessionsWriter struct {
   ConfigurationRepository configuration.Repository
 }
 
-func(sessionWriter *SessionsWriter) UpdatePlainAwsSessions(oldPlainAwsSessions []session.PlainAwsSession, newPlainAwsSessions []session.PlainAwsSession) error {
+func(sessionWriter *AwsSessionsWriter) UpdatePlainAwsSessions(oldSessions []session.PlainAwsSession, newSessions []session.PlainAwsSession) error {
   config, err := sessionWriter.ConfigurationRepository.GetConfiguration()
   if err != nil {
     return err
   }
 
-  config.PlainAwsSessions = newPlainAwsSessions
+  config.PlainAwsSessions = newSessions
   err = sessionWriter.ConfigurationRepository.UpdateConfiguration(config)
 
   return err

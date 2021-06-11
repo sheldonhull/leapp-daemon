@@ -14,7 +14,7 @@ import (
 )
 
 func GetGcpOauthUrl(context *gin.Context) {
-	// swagger:route GET /gcp/session/plain/oauth/url gcpPlainSession getGcpOauthUrl
+	// swagger:route GET /gcp/oauth/url gcpPlainSession getGcpOauthUrl
 	// Get the GCP OAuth url
 	//   Responses:
 	//     200: GcpOauthUrlResponse
@@ -98,7 +98,7 @@ func StartGcpPlainSession(context *gin.Context) {
   // swagger:route GET /gcp/session/plain/{id}/start gcpPlainSession startGcpPlainSession
   // Start a GCP Plain Session
   //   Responses:
-  //     200: GcpGetPlainSessionResponse
+  //     200: MessageResponse
 
   logging.SetContext(context)
 
@@ -110,17 +110,39 @@ func StartGcpPlainSession(context *gin.Context) {
   }
 
   actions := getActions()
-  gcpPlainSession, err := actions.GetSession(requestDto.Id)
+  err = actions.StartSession(requestDto.Id)
   if err != nil {
     _ = context.Error(err)
     return
   }
 
-  responseDto := gcp_plain_session_dto2.GcpGetPlainSessionResponse{
-    Message: "success",
-    Data:    gcpPlainSession,
+  responseDto := response_dto.MessageResponse{Message: "success"}
+  context.JSON(http.StatusOK, responseDto.ToMap())
+}
+
+func StopGcpPlainSession(context *gin.Context) {
+  // swagger:route GET /gcp/session/plain/{id}/stop gcpPlainSession stopGcpPlainSession
+  // Stop a GCP Plain Session
+  //   Responses:
+  //     200: MessageResponse
+
+  logging.SetContext(context)
+
+  requestDto := gcp_plain_session_dto.GcpStopPlainSessionRequestDto{}
+  err := (&requestDto).Build(context)
+  if err != nil {
+    _ = context.Error(err)
+    return
   }
 
+  actions := getActions()
+  err = actions.StopSession(requestDto.Id)
+  if err != nil {
+    _ = context.Error(err)
+    return
+  }
+
+  responseDto := response_dto.MessageResponse{Message: "success"}
   context.JSON(http.StatusOK, responseDto.ToMap())
 }
 

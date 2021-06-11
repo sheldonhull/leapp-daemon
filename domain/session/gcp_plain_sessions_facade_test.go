@@ -160,8 +160,7 @@ func TestSetSessionStatus_notFound(t *testing.T) {
 type FakeObserver struct {
 }
 
-func (observer FakeObserver) UpdateGcpPlainSessions(oldSessions []GcpPlainSession, newSessions []GcpPlainSession) error {
+func (observer FakeObserver) UpdateGcpPlainSessions(oldSessions []GcpPlainSession, newSessions []GcpPlainSession) {
   sessionsBeforeUpdate = oldSessions
   sessionsAfterUpdate = newSessions
-  return nil
 }

@@ -19,15 +19,15 @@ type GcloudEnvironment interface {
 	IsWindows() bool
 }
 
-type GcloudCredentialsDbTable interface {
+type GcloudCredentialsTable interface {
 	WriteCredentials(sqlFilePath string, accountId string, value string) error
 	RemoveCredentials(sqlFilePath string, accountId string) error
 }
 
 type GcloudConfigurationRepository struct {
-	FileSystem         GcloudConfigFileSystem
-	Environment        GcloudEnvironment
-	CredentialsDbTable GcloudCredentialsDbTable
+	FileSystem       GcloudConfigFileSystem
+	Environment      GcloudEnvironment
+	CredentialsTable GcloudCredentialsTable
 }
 
 func (repo *GcloudConfigurationRepository) gcloudConfigDir() (string, error) {
@@ -182,7 +182,7 @@ func (repo *GcloudConfigurationRepository) WriteCredentialsToDb(accountId string
 		return err
 	}
 
-	err = repo.CredentialsDbTable.WriteCredentials(credentialsDbFilePath, accountId, credentialsJson)
+	err = repo.CredentialsTable.WriteCredentials(credentialsDbFilePath, accountId, credentialsJson)
 	if err != nil {
 		return http_error.NewInternalServerError(err)
 	}
@@ -200,7 +200,7 @@ func (repo *GcloudConfigurationRepository) RemoveCredentialsFromDb(accountId str
 		return nil
 	}
 
-	err = repo.CredentialsDbTable.RemoveCredentials(credentialsDbFilePath, accountId)
+	err = repo.CredentialsTable.RemoveCredentials(credentialsDbFilePath, accountId)
 	if err != nil {
 		return http_error.NewInternalServerError(err)
 	}

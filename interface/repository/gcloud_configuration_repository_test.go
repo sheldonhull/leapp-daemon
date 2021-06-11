@@ -33,9 +33,9 @@ func setup() {
   dbTableMock = mock.NewGcpCredentialsDbTableMock()
 
   repo = &GcloudConfigurationRepository{
-    Environment:        &envMock,
-    FileSystem:         &fsMock,
-    CredentialsDbTable: &dbTableMock,
+    Environment:      &envMock,
+    FileSystem:       &fsMock,
+    CredentialsTable: &dbTableMock,
   }
 }
 

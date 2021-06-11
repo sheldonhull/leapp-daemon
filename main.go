@@ -5,10 +5,12 @@ import (
   "leapp_daemon/domain/named_profile"
   "leapp_daemon/domain/session"
   "leapp_daemon/infrastructure/encryption"
+  "leapp_daemon/infrastructure/environment"
   "leapp_daemon/infrastructure/file_system"
   "leapp_daemon/infrastructure/http/engine"
   "leapp_daemon/infrastructure/keychain"
   "leapp_daemon/infrastructure/logging"
+  "leapp_daemon/interface/gcp"
   "leapp_daemon/interface/repository"
   "leapp_daemon/use_case"
 )
@@ -16,8 +18,8 @@ import (
 func main() {
   // TODO: add logging state observers
 
-	defer logging.CloseLogFile()
-	//defer timer.Close()
+  defer logging.CloseLogFile()
+  //defer timer.Close()
 
   fileSystem := &file_system.FileSystem{}
 
@@ -41,6 +43,7 @@ func main() {
   configurationFileBackupPath := fmt.Sprintf("%s/%s", homeDir, ".Leapp/Leapp-lock.json")
   doesConfigurationFileExist := fileSystem.DoesFileExist(configurationFileBackupPath)
 
+  //AWS Stuff
   credentialsFilePath := fmt.Sprintf("%s/%s", homeDir, ".aws/credentials")
   doesCredentialsFileExist := fileSystem.DoesFileExist(credentialsFilePath)
 
@@ -55,27 +58,48 @@ func main() {
     }
   }
 
-  plainAwsSessions := config.PlainAwsSessions
-
-  logging.Info(fmt.Sprintf("%+v", plainAwsSessions))
-
+  // AWS PLAIN
   plainAwsSessionFacade := session.GetPlainAwsSessionsFacade()
+
+  plainAwsSessions := config.PlainAwsSessions
+  logging.Info(fmt.Sprintf("%+v", plainAwsSessions))
   plainAwsSessionFacade.SetPlainAwsSessions(plainAwsSessions)
 
-  plainAwsSessionFacade.Subscribe(&use_case.SessionsWriter{
+  plainAwsSessionFacade.Subscribe(&use_case.AwsSessionsWriter{
     ConfigurationRepository: &fileConfigurationRepository,
   })
 
+  keyChain := &keychain.Keychain{}
   plainAwsSessionFacade.Subscribe(&use_case.AwsCredentialsApplier{
     FileSystem: fileSystem,
-    Keychain:   &keychain.Keychain{},
+    Keychain:   keyChain,
   })
 
-  namedProfiles := config.NamedProfiles
+  // GCP PLAIN
+  gcpPlainSessionFacade := session.GetGcpPlainSessionFacade()
 
-  logging.Info(fmt.Sprintf("%+v", namedProfiles))
+  gcpPlainSessions := config.GcpPlainSessions
+  logging.Info(fmt.Sprintf("%+v", gcpPlainSessions))
+  gcpPlainSessionFacade.SetSessions(gcpPlainSessions)
 
+  gcpPlainSessionFacade.Subscribe(&use_case.GcpSessionsWriter{
+    ConfigurationRepository: &fileConfigurationRepository,
+  })
+
+  gcpPlainSessionFacade.Subscribe(&use_case.GcpCredentialsApplier{
+    Repository: repository.GcloudConfigurationRepository{
+      FileSystem:       fileSystem,
+      Environment:      &environment.Environment{},
+      CredentialsTable: &gcp.CredentialsTable{},
+    },
+    Keychain: keyChain,
+  })
+
+  // NAMED PROFILES
   namedProfilesFacade := named_profile.GetNamedProfilesFacade()
+
+  namedProfiles := config.NamedProfiles
+  logging.Info(fmt.Sprintf("%+v", namedProfiles))
   namedProfilesFacade.SetNamedProfiles(namedProfiles)
 
   namedProfilesFacade.Subscribe(&use_case.NamedProfilesWriter{

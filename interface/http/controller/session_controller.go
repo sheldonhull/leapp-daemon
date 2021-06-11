@@ -3,7 +3,6 @@ package controller
 import (
   "github.com/gin-gonic/gin"
   logging2 "leapp_daemon/infrastructure/logging"
-  request_dto2 "leapp_daemon/interface/http/controller/dto/request_dto"
   confirm_mfa_token_dto2 "leapp_daemon/interface/http/controller/dto/request_dto/confirm_mfa_token_dto"
   response_dto2 "leapp_daemon/interface/http/controller/dto/response_dto"
   "leapp_daemon/use_case"
@@ -13,7 +12,7 @@ import (
 func ListSessionController(context *gin.Context) {
 	logging2.SetContext(context)
 
-	requestDto := request_dto2.ListSessionRequestDto{}
+	/*requestDto := request_dto2.ListSessionRequestDto{}
 	err := (&requestDto).Build(context)
 	if err != nil {
 		_ = context.Error(err)
@@ -21,9 +20,9 @@ func ListSessionController(context *gin.Context) {
 	}
 
 	listType := requestDto.Type
-	query := requestDto.Query
+	query := requestDto.Query*/
 
-	sessionList, err := use_case.ListAllSessions(query, listType)
+	sessionList, err := use_case.ListAllSessions()
 	if err != nil {
 		_ = context.Error(err)
 		return

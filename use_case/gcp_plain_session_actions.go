@@ -49,16 +49,18 @@ func (actions *GcpPlainSessionActions) CreateSession(name string, accountId stri
 
   // TODO: move to external logic
   newSessionId := strings.Replace(uuid.New().String(), "-", "", -1)
+  credentialsLabel := newSessionId + "-gcp-plain-session-credentials"
 
   gcpSession := session.GcpPlainSession{
-    Id:             newSessionId,
-    Name:           name,
-    AccountId:      accountId,
-    ProjectName:    projectName,
-    NamedProfileId: namedProfile.Id,
-    Status:         session.NotActive,
-    StartTime:      "",
-    LastStopTime:   "",
+    Id:               newSessionId,
+    Name:             name,
+    AccountId:        accountId,
+    ProjectName:      projectName,
+    NamedProfileId:   namedProfile.Id,
+    CredentialsLabel: credentialsLabel,
+    Status:           session.NotActive,
+    StartTime:        "",
+    LastStopTime:     "",
   }
 
   token, err := actions.GcpApi.GetOauthToken(oauthCode)
@@ -69,7 +71,7 @@ func (actions *GcpPlainSessionActions) CreateSession(name string, accountId stri
   credentials := actions.GcpApi.GetCredentials(token)
 
   // TODO: Move to a dedicated GCP Keychain interface
-  err = actions.Keychain.SetSecret(credentials, newSessionId+"-gcp-plain-session-credentials")
+  err = actions.Keychain.SetSecret(credentials, credentialsLabel)
   if err != nil {
     return http_error.NewInternalServerError(err)
   }
@@ -79,6 +81,19 @@ func (actions *GcpPlainSessionActions) CreateSession(name string, accountId stri
 
 func (actions *GcpPlainSessionActions) StartSession(sessionId string) error {
 
-  session.GetGcpPlainSessionFacade().GetSessionById(sessionId)
-  return nil
+  facade := session.GetGcpPlainSessionFacade()
+  for _, currentSession := range facade.GetSessions() {
+    if currentSession.Status != session.NotActive && currentSession.Id != sessionId {
+      err := facade.SetSessionStatus(currentSession.Id, session.NotActive)
+      if err != nil {
+        return err
+      }
+    }
+  }
+  return facade.SetSessionStatus(sessionId, session.Active)
+}
+
+func (actions *GcpPlainSessionActions) StopSession(sessionId string) error {
+
+  return session.GetGcpPlainSessionFacade().SetSessionStatus(sessionId, session.NotActive)
 }
