@@ -22,3 +22,7 @@ type GcpApi interface {
 	GetOauthToken(authCode string) (*oauth2.Token, error)
 	GetCredentials(oauthToken *oauth2.Token) string
 }
+
+type Environment interface {
+	GenerateUuid() string
+}

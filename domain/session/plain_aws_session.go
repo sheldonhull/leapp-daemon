@@ -1,30 +1,30 @@
 package session
 
 import (
-  "leapp_daemon/domain/constant"
-  "time"
+	"leapp_daemon/domain/constant"
+	"time"
 )
 
 type PlainAwsSessionContainer interface {
-  AddPlainAwsSession(PlainAwsSession) error
-  GetAllPlainAwsSessions() ([]PlainAwsSession, error)
-  RemovePlainAwsSession(session PlainAwsSession) error
+	AddPlainAwsSession(PlainAwsSession) error
+	GetAllPlainAwsSessions() ([]PlainAwsSession, error)
+	RemovePlainAwsSession(session PlainAwsSession) error
 }
 
 type PlainAwsSession struct {
-	Id            string
-	Alias         string
-	Status        Status
-  StartTime     string
-	LastStopTime  string
-	Account       *PlainAwsAccount
+	Id           string
+	Alias        string
+	Status       Status
+	StartTime    string
+	LastStopTime string
+	Account      *PlainAwsAccount
 }
 
 type PlainAwsAccount struct {
-  MfaDevice               string
-  Region                  string
-  NamedProfileId          string
-  SessionTokenExpiration  string
+	MfaDevice              string
+	Region                 string
+	NamedProfileId         string
+	SessionTokenExpiration string
 }
 
 type AwsSessionToken struct {
@@ -33,11 +33,11 @@ type AwsSessionToken struct {
 	SessionToken    string
 }
 
-func(sess *PlainAwsSession) IsMfaRequired() (bool, error) {
+func (sess *PlainAwsSession) IsMfaRequired() (bool, error) {
 	return sess.Account.MfaDevice != "", nil
 }
 
-func(sess *PlainAwsSession) IsRotationIntervalExpired() (bool, error) {
+func (sess *PlainAwsSession) IsRotationIntervalExpired() (bool, error) {
 	startTime, _ := time.Parse(time.RFC3339, sess.StartTime)
 	secondsPassedFromStart := time.Now().Sub(startTime).Seconds()
 	return int64(secondsPassedFromStart) > constant.RotationIntervalInSeconds, nil
@@ -236,7 +236,7 @@ func CreatePlainAwsSession(sessionContainer Container, name string, accountNumbe
 		MfaDevice:     mfaDevice,
 	}
 
-	uuidString := uuid.New().String()
+	uuidString := uuid.New().String() //use Environment.GenerateUuid()
 	uuidString = strings.Replace(uuidString, "-", "", -1)
 
 	namedProfileId, err := named_profile.CreateNamedProfile(sessionContainer, profile)

@@ -1,15 +1,16 @@
 package controller
 
 import (
-  "github.com/gin-gonic/gin"
-  "leapp_daemon/domain/session"
-  "leapp_daemon/infrastructure/keychain"
-  "leapp_daemon/infrastructure/logging"
-  plain_aws_session_request_dto "leapp_daemon/interface/http/controller/dto/request_dto/plain_aws_session_dto"
-  "leapp_daemon/interface/http/controller/dto/response_dto"
-  plain_aws_session_response_dto "leapp_daemon/interface/http/controller/dto/response_dto/plain_aws_session_dto"
-  "leapp_daemon/use_case"
-  "net/http"
+	"github.com/gin-gonic/gin"
+	"leapp_daemon/domain/session"
+	"leapp_daemon/infrastructure/environment"
+	"leapp_daemon/infrastructure/keychain"
+	"leapp_daemon/infrastructure/logging"
+	plain_aws_session_request_dto "leapp_daemon/interface/http/controller/dto/request_dto/plain_aws_session_dto"
+	"leapp_daemon/interface/http/controller/dto/response_dto"
+	plain_aws_session_response_dto "leapp_daemon/interface/http/controller/dto/response_dto/plain_aws_session_dto"
+	"leapp_daemon/use_case"
+	"net/http"
 )
 
 func CreatePlainAwsSessionController(context *gin.Context) {
@@ -28,16 +29,17 @@ func CreatePlainAwsSessionController(context *gin.Context) {
 	}
 
 	plainAwsSessionService := use_case.PlainAwsSessionService{
-	  Keychain: &keychain.Keychain{},
-	  NamedProfilesActions: use_case.NamedProfilesActions{},
-  }
+		Keychain:             &keychain.Keychain{},
+		NamedProfilesActions: use_case.NamedProfilesActions{},
+		Environment:          &environment.Environment{},
+	}
 
 	err = plainAwsSessionService.Create(requestDto.Name, requestDto.AwsAccessKeyId, requestDto.AwsSecretAccessKey,
-	  requestDto.MfaDevice, requestDto.Region, requestDto.ProfileName)
+		requestDto.MfaDevice, requestDto.Region, requestDto.ProfileName)
 	if err != nil {
-    _ = context.Error(err)
-    return
-  }
+		_ = context.Error(err)
+		return
+	}
 
 	responseDto := response_dto.MessageResponse{Message: "success"}
 	context.JSON(http.StatusOK, responseDto.ToMap())
@@ -58,10 +60,11 @@ func GetPlainAwsSessionController(context *gin.Context) {
 		return
 	}
 
-  plainAwsSessionService := use_case.PlainAwsSessionService{
-    Keychain: &keychain.Keychain{},
-    NamedProfilesActions: use_case.NamedProfilesActions{},
-  }
+	plainAwsSessionService := use_case.PlainAwsSessionService{
+		Keychain:             &keychain.Keychain{},
+		NamedProfilesActions: use_case.NamedProfilesActions{},
+		Environment:          &environment.Environment{},
+	}
 
 	sess, err := plainAwsSessionService.GetPlainAwsSession(requestDto.Id)
 	if err != nil {
@@ -69,10 +72,10 @@ func GetPlainAwsSessionController(context *gin.Context) {
 		return
 	}
 
-  responseDto := plain_aws_session_response_dto.GetPlainAwsSessionResponse{
-    Message: "success",
-    Data: *sess,
-  }
+	responseDto := plain_aws_session_response_dto.GetPlainAwsSessionResponse{
+		Message: "success",
+		Data:    *sess,
+	}
 
 	context.JSON(http.StatusOK, responseDto.ToMap())
 }
@@ -99,10 +102,11 @@ func UpdatePlainAwsSessionController(context *gin.Context) {
 		return
 	}
 
-  plainAwsSessionService := use_case.PlainAwsSessionService{
-    Keychain: &keychain.Keychain{},
-    NamedProfilesActions: use_case.NamedProfilesActions{},
-  }
+	plainAwsSessionService := use_case.PlainAwsSessionService{
+		Keychain:             &keychain.Keychain{},
+		NamedProfilesActions: use_case.NamedProfilesActions{},
+		Environment:          &environment.Environment{},
+	}
 
 	err = plainAwsSessionService.UpdatePlainAwsSession(
 		requestUriDto.Id,
@@ -130,30 +134,30 @@ func DeletePlainAwsSessionController(context *gin.Context) {
 	//   Responses:
 	//     200: MessageResponse
 
-  logging.SetContext(context)
+	logging.SetContext(context)
 
-  requestDto := plain_aws_session_request_dto.DeletePlainAwsSessionRequest{}
-  err := (&requestDto).Build(context)
-  if err != nil {
-    _ = context.Error(err)
-    return
-  }
+	requestDto := plain_aws_session_request_dto.DeletePlainAwsSessionRequest{}
+	err := (&requestDto).Build(context)
+	if err != nil {
+		_ = context.Error(err)
+		return
+	}
 
-  err = session.GetPlainAwsSessionsFacade().RemovePlainAwsSession(requestDto.Id)
-  if err != nil {
-    _ = context.Error(err)
-    return
-  }
+	err = session.GetPlainAwsSessionsFacade().RemovePlainAwsSession(requestDto.Id)
+	if err != nil {
+		_ = context.Error(err)
+		return
+	}
 
-  responseDto := response_dto.MessageResponse{Message: "success"}
-  context.JSON(http.StatusOK, responseDto.ToMap())
+	responseDto := response_dto.MessageResponse{Message: "success"}
+	context.JSON(http.StatusOK, responseDto.ToMap())
 }
 
 func StartPlainAwsSessionController(context *gin.Context) {
-  // swagger:route POST /session/plain/{id}/start plainAwsSession startPlainAwsSession
-  // Start a Plain AWS Session
-  //   Responses:
-  //     200: MessageResponse
+	// swagger:route POST /session/plain/{id}/start plainAwsSession startPlainAwsSession
+	// Start a Plain AWS Session
+	//   Responses:
+	//     200: MessageResponse
 
 	logging.SetContext(context)
 
@@ -164,10 +168,11 @@ func StartPlainAwsSessionController(context *gin.Context) {
 		return
 	}
 
-  plainAwsSessionService := use_case.PlainAwsSessionService{
-    Keychain: &keychain.Keychain{},
-    NamedProfilesActions: use_case.NamedProfilesActions{},
-  }
+	plainAwsSessionService := use_case.PlainAwsSessionService{
+		Keychain:             &keychain.Keychain{},
+		NamedProfilesActions: use_case.NamedProfilesActions{},
+		Environment:          &environment.Environment{},
+	}
 
 	err = plainAwsSessionService.StartPlainAwsSession(requestDto.Id)
 

@@ -1,9 +1,11 @@
 package environment
 
 import (
+	"github.com/google/uuid"
 	"os"
 	"os/exec"
 	"runtime"
+	"strings"
 )
 
 type Environment struct {
@@ -24,4 +26,8 @@ func (env *Environment) GetOs() string {
 
 func (env *Environment) IsWindows() bool {
 	return env.GetOs() == "windows"
+}
+
+func (env *Environment) GenerateUuid() string {
+	return strings.Replace(uuid.New().String(), "-", "", -1)
 }

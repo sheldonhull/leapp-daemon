@@ -1,13 +1,13 @@
 package named_profile
 
 type NamedProfileContainer interface {
-  AddNamedProfile(namedProfile NamedProfile) error
-  DoesNamedProfileExist(name string) bool
-  FindNamedProfileByName(name string) (NamedProfile, error)
+	AddNamedProfile(namedProfile NamedProfile) error
+	DoesNamedProfileExist(name string) bool
+	FindNamedProfileByName(name string) (NamedProfile, error)
 }
 
 type NamedProfile struct {
-	Id string
+	Id   string
 	Name string
 }
 
@@ -29,7 +29,7 @@ func CreateNamedProfile(sessionContainer Container, name string) (string, error)
 		}
 	}
 
-	uuidString := uuid.New().String()
+	uuidString := uuid.New().String() //use Environment.GenerateUuid()
 	uuidString = strings.Replace(uuidString, "-", "", -1)
 
 	newNamedProfile := NamedProfile{

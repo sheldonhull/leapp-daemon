@@ -1,8 +1,8 @@
 package session
 
 import (
-  "leapp_daemon/domain/constant"
-  "time"
+	"leapp_daemon/domain/constant"
+	"time"
 )
 
 type FederatedAwsSession struct {
@@ -27,7 +27,7 @@ type FederatedAwsRole struct {
 	Arn  string
 }
 
-func(sess *FederatedAwsSession) IsRotationIntervalExpired() (bool, error) {
+func (sess *FederatedAwsSession) IsRotationIntervalExpired() (bool, error) {
 	startTime, _ := time.Parse(time.RFC3339, sess.StartTime)
 	secondsPassedFromStart := time.Now().Sub(startTime).Seconds()
 	return int64(secondsPassedFromStart) > constant.RotationIntervalInSeconds, nil
@@ -65,7 +65,7 @@ func CreateFederatedAwsSession(sessionContainer Container, name string, accountN
 		SsoUrl:        ssoUrl,
 	}
 
-	uuidString := uuid.New().String()
+	uuidString := uuid.New().String() //use Environment.GenerateUuid()
 	uuidString = strings.Replace(uuidString, "-", "", -1)
 
 	namedProfileId, err := named_profile.CreateNamedProfile(sessionContainer, profile)
@@ -223,4 +223,4 @@ func StopFederatedAwsSession(sessionContainer Container, id string) error {
 	sess.Status = NotActive
 	return nil
 }
- */
+*/

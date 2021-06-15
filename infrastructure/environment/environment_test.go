@@ -3,6 +3,7 @@ package environment
 import (
 	"os"
 	"runtime"
+	"strings"
 	"testing"
 )
 
@@ -72,5 +73,28 @@ func TestIsWindows(t *testing.T) {
 		t.Fatalf("Environment is Windows")
 	} else if runtime.GOOS != "windows" && env.IsWindows() {
 		t.Fatalf("Environment is not Windows")
+	}
+}
+
+func TestGenerateUuid_randomness(t *testing.T) {
+	env := Environment{}
+
+	previousUuid := env.GenerateUuid()
+	for i := 0; i < 100; i++ {
+		currentUuid := env.GenerateUuid()
+		if previousUuid == currentUuid {
+			t.Fatalf("expected different uuids")
+		}
+
+		previousUuid = currentUuid
+	}
+}
+
+func TestGenerateUuid_withoutDashes(t *testing.T) {
+	env := Environment{}
+
+	uuid := env.GenerateUuid()
+	if strings.Contains(uuid, "-") {
+		t.Fatalf("uuid should not contain dashes")
 	}
 }

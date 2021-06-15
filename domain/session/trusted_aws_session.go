@@ -4,15 +4,15 @@ type TrustedAwsSession struct {
 	Id        string
 	Status    Status
 	StartTime string
-  ParentId  string
+	ParentId  string
 	Account   *TrustedAwsAccount
 }
 
 type TrustedAwsAccount struct {
-	AccountNumber     string
-	Name              string
-	Role              *TrustedAwsRole
-	Region            string
+	AccountNumber string
+	Name          string
+	Role          *TrustedAwsRole
+	Region        string
 	// Type            string
 	// ParentSessionId string
 	// ParentRole      string
@@ -52,7 +52,7 @@ func CreateTrusterAwsSession(AccountName string, AccountNumber string, RoleName 
 
   }
 
-  uuidString := uuid.New().String()
+  uuidString := uuid.New().String() //use Environment.GenerateUuid()
   uuidString = strings.Replace(uuidString, "-", "", -1)
 
   namedProfileId, err := CreateNamedProfile(sessionContainer, profile)
