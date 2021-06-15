@@ -1,38 +1,38 @@
 package controller
 
 import (
-  "github.com/gin-gonic/gin"
-  logging2 "leapp_daemon/infrastructure/logging"
-  confirm_mfa_token_dto2 "leapp_daemon/interface/http/controller/dto/request_dto/confirm_mfa_token_dto"
-  response_dto2 "leapp_daemon/interface/http/controller/dto/response_dto"
-  "leapp_daemon/use_case"
-  "net/http"
+	"github.com/gin-gonic/gin"
+	logging2 "leapp_daemon/infrastructure/logging"
+	confirm_mfa_token_dto2 "leapp_daemon/interface/http/controller/dto/request_dto/confirm_mfa_token_dto"
+	response_dto2 "leapp_daemon/interface/http/controller/dto/response_dto"
+	"leapp_daemon/use_case"
+	"net/http"
 )
 
-func ListSessionController(context *gin.Context) {
+func (env *EngineEnvironment) ListSessionController(context *gin.Context) {
 	logging2.SetContext(context)
 
 	/*requestDto := request_dto2.ListSessionRequestDto{}
-	err := (&requestDto).Build(context)
+	  err := (&requestDto).Build(context)
+	  if err != nil {
+	  	_ = context.Error(err)
+	  	return
+	  }
+
+	  listType := requestDto.Type
+	  query := requestDto.Query*/
+
+	sessionList, err := use_case.ListAllSessions(env.Providers.GetGcpPlainSessionFacade())
 	if err != nil {
 		_ = context.Error(err)
 		return
 	}
 
-	listType := requestDto.Type
-	query := requestDto.Query*/
-
-	sessionList, err := use_case.ListAllSessions()
-	if err != nil {
-		_ = context.Error(err)
-		return
-	}
-
-	responseDto := response_dto2.MessageAndDataResponseDto{ Message: "success", Data: sessionList }
+	responseDto := response_dto2.MessageAndDataResponseDto{Message: "success", Data: sessionList}
 	context.JSON(http.StatusOK, responseDto.ToMap())
 }
 
-func ConfirmMfaTokenController(context *gin.Context) {
+func (env *EngineEnvironment) ConfirmMfaTokenController(context *gin.Context) {
 	logging2.SetContext(context)
 
 	requestDto := confirm_mfa_token_dto2.MfaTokenConfirmRequestDto{}
@@ -48,19 +48,19 @@ func ConfirmMfaTokenController(context *gin.Context) {
 		return
 	}
 
-	responseDto := response_dto2.MessageAndDataResponseDto{ Message: "success", Data: requestDto.SessionId }
+	responseDto := response_dto2.MessageAndDataResponseDto{Message: "success", Data: requestDto.SessionId}
 	context.JSON(http.StatusOK, responseDto.ToMap())
 }
 
-func ListAwsNamedProfileController(context *gin.Context) {
+func (env *EngineEnvironment) ListAwsNamedProfileController(context *gin.Context) {
 	logging2.SetContext(context)
 
-	namedProfiles, err := use_case.ListAllNamedProfiles()
+	namedProfiles, err := use_case.ListAllNamedProfiles(env.Providers.GetNamedProfilesFacade())
 	if err != nil {
 		_ = context.Error(err)
 		return
 	}
 
-	responseDto := response_dto2.MessageAndDataResponseDto{ Message: "success", Data: namedProfiles }
+	responseDto := response_dto2.MessageAndDataResponseDto{Message: "success", Data: namedProfiles}
 	context.JSON(http.StatusOK, responseDto.ToMap())
 }

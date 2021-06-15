@@ -5,11 +5,12 @@ import (
 )
 
 type NamedProfilesActions struct {
-	Environment Environment
+	Environment         Environment
+	NamedProfilesFacade NamedProfilesFacade
 }
 
 func (actions *NamedProfilesActions) GetNamedProfileById(profileId string) (named_profile.NamedProfile, error) {
-	return named_profile.GetNamedProfilesFacade().GetNamedProfileById(profileId)
+	return actions.NamedProfilesFacade.GetNamedProfileById(profileId)
 }
 
 func (actions *NamedProfilesActions) GetOrCreateNamedProfile(profileName string) (named_profile.NamedProfile, error) {
@@ -17,7 +18,7 @@ func (actions *NamedProfilesActions) GetOrCreateNamedProfile(profileName string)
 		profileName = "default"
 	}
 
-	facade := named_profile.GetNamedProfilesFacade()
+	facade := actions.NamedProfilesFacade
 	namedProfile, err := facade.GetNamedProfileByName(profileName)
 	if err != nil {
 		namedProfile = named_profile.NamedProfile{

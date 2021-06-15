@@ -1,116 +1,117 @@
 package main
 
 import (
-  "fmt"
-  "leapp_daemon/domain/named_profile"
-  "leapp_daemon/domain/session"
-  "leapp_daemon/infrastructure/encryption"
-  "leapp_daemon/infrastructure/environment"
-  "leapp_daemon/infrastructure/file_system"
-  "leapp_daemon/infrastructure/http/engine"
-  "leapp_daemon/infrastructure/keychain"
-  "leapp_daemon/infrastructure/logging"
-  "leapp_daemon/interface/gcp"
-  "leapp_daemon/interface/repository"
-  "leapp_daemon/use_case"
+	"fmt"
+	"leapp_daemon/domain/session"
+	"leapp_daemon/infrastructure/encryption"
+	"leapp_daemon/infrastructure/http/engine"
+	"leapp_daemon/infrastructure/logging"
+	"leapp_daemon/interface/gcp"
+	"leapp_daemon/interface/repository"
+	"leapp_daemon/providers"
+	"leapp_daemon/use_case"
 )
 
 func main() {
-  // TODO: add logging state observers
 
-  defer logging.CloseLogFile()
-  //defer timer.Close()
+	prov := providers.NewProviders()
 
-  fileSystem := &file_system.FileSystem{}
+	// TODO: add logging state observers
 
-  fileConfigurationRepository := repository.FileConfigurationRepository{
-    FileSystem: fileSystem,
-    Encryption: &encryption.Encryption{},
-  }
+	defer logging.CloseLogFile()
+	//defer timer.Close()
 
-  config, err := fileConfigurationRepository.GetConfiguration()
-  if err != nil {
-    logging.Entry().Error(err)
-    panic(err)
-  }
+	// TODO: create BootstrapActions calling Gcp/AWS-BootstrapActions
 
-  homeDir, err := fileSystem.GetHomeDir()
-  if err != nil {
-    logging.Entry().Error(err)
-    panic(err)
-  }
+	fileSystem := prov.GetFileSystem()
+	fileConfigurationRepository := repository.FileConfigurationRepository{
+		FileSystem: fileSystem,
+		Encryption: &encryption.Encryption{},
+	}
 
-  configurationFileBackupPath := fmt.Sprintf("%s/%s", homeDir, ".Leapp/Leapp-lock.json")
-  doesConfigurationFileExist := fileSystem.DoesFileExist(configurationFileBackupPath)
+	config, err := fileConfigurationRepository.GetConfiguration()
+	if err != nil {
+		logging.Entry().Error(err)
+		panic(err)
+	}
 
-  //AWS Stuff
-  credentialsFilePath := fmt.Sprintf("%s/%s", homeDir, ".aws/credentials")
-  doesCredentialsFileExist := fileSystem.DoesFileExist(credentialsFilePath)
+	homeDir, err := fileSystem.GetHomeDir()
+	if err != nil {
+		logging.Entry().Error(err)
+		panic(err)
+	}
 
-  credentialsFileBackupPath := fmt.Sprintf("%s/%s", homeDir, ".aws/credentials.leapp.bkp")
-  doesCredentialsFileBackupExist := fileSystem.DoesFileExist(credentialsFileBackupPath)
+	configurationFileBackupPath := fmt.Sprintf("%s/%s", homeDir, ".Leapp/Leapp-lock.json")
+	doesConfigurationFileExist := fileSystem.DoesFileExist(configurationFileBackupPath)
 
-  if !doesConfigurationFileExist && doesCredentialsFileExist && !doesCredentialsFileBackupExist {
-    err = fileSystem.RenameFile(credentialsFilePath, credentialsFileBackupPath)
-    if err != nil {
-      logging.Entry().Error(err)
-      panic(err)
-    }
-  }
+	//AWS Stuff
+	credentialsFilePath := fmt.Sprintf("%s/%s", homeDir, ".aws/credentials")
+	doesCredentialsFileExist := fileSystem.DoesFileExist(credentialsFilePath)
 
-  // AWS PLAIN
-  plainAwsSessionFacade := session.GetPlainAwsSessionsFacade()
+	credentialsFileBackupPath := fmt.Sprintf("%s/%s", homeDir, ".aws/credentials.leapp.bkp")
+	doesCredentialsFileBackupExist := fileSystem.DoesFileExist(credentialsFileBackupPath)
 
-  plainAwsSessions := config.PlainAwsSessions
-  logging.Info(fmt.Sprintf("%+v", plainAwsSessions))
-  plainAwsSessionFacade.SetPlainAwsSessions(plainAwsSessions)
+	if !doesConfigurationFileExist && doesCredentialsFileExist && !doesCredentialsFileBackupExist {
+		err = fileSystem.RenameFile(credentialsFilePath, credentialsFileBackupPath)
+		if err != nil {
+			logging.Entry().Error(err)
+			panic(err)
+		}
+	}
 
-  plainAwsSessionFacade.Subscribe(&use_case.AwsSessionsWriter{
-    ConfigurationRepository: &fileConfigurationRepository,
-  })
+	// AWS PLAIN
+	plainAwsSessionFacade := session.GetPlainAwsSessionsFacade()
 
-  keyChain := &keychain.Keychain{}
-  plainAwsSessionFacade.Subscribe(&use_case.AwsCredentialsApplier{
-    FileSystem: fileSystem,
-    Keychain:   keyChain,
-  })
+	plainAwsSessions := config.PlainAwsSessions
+	logging.Info(fmt.Sprintf("%+v", plainAwsSessions))
+	plainAwsSessionFacade.SetPlainAwsSessions(plainAwsSessions)
 
-  // GCP PLAIN
-  gcpPlainSessionFacade := session.GetGcpPlainSessionFacade()
+	plainAwsSessionFacade.Subscribe(&use_case.AwsSessionsWriter{
+		ConfigurationRepository: &fileConfigurationRepository,
+	})
 
-  gcpPlainSessions := config.GcpPlainSessions
-  logging.Info(fmt.Sprintf("%+v", gcpPlainSessions))
-  gcpPlainSessionFacade.SetSessions(gcpPlainSessions)
+	plainAwsSessionFacade.Subscribe(&use_case.AwsCredentialsApplier{
+		FileSystem:          fileSystem,
+		Keychain:            prov.GetKeychain(),
+		NamedProfilesFacade: prov.GetNamedProfilesFacade(),
+	})
 
-  gcpPlainSessionFacade.Subscribe(&use_case.GcpSessionsWriter{
-    ConfigurationRepository: &fileConfigurationRepository,
-  })
+	// GCP PLAIN
+	gcpPlainSessionFacade := prov.GetGcpPlainSessionFacade()
 
-  gcpPlainSessionFacade.Subscribe(&use_case.GcpCredentialsApplier{
-    Repository: repository.GcloudConfigurationRepository{
-      FileSystem:        fileSystem,
-      Environment:       &environment.Environment{},
-      CredentialsTable:  &gcp.CredentialsTable{},
-      AccessTokensTable: &gcp.AccessTokensTable{},
-    },
-    Keychain: keyChain,
-  })
+	gcpPlainSessions := config.GcpPlainSessions
+	logging.Info(fmt.Sprintf("%+v", gcpPlainSessions))
+	gcpPlainSessionFacade.SetSessions(gcpPlainSessions)
 
-  // NAMED PROFILES
-  namedProfilesFacade := named_profile.GetNamedProfilesFacade()
+	gcpPlainSessionFacade.Subscribe(&use_case.GcpSessionsWriter{
+		ConfigurationRepository: &fileConfigurationRepository,
+	})
 
-  namedProfiles := config.NamedProfiles
-  logging.Info(fmt.Sprintf("%+v", namedProfiles))
-  namedProfilesFacade.SetNamedProfiles(namedProfiles)
+	gcpPlainSessionFacade.Subscribe(&use_case.GcpCredentialsApplier{
+		Repository: &repository.GcloudConfigurationRepository{
+			FileSystem:        fileSystem,
+			Environment:       prov.GetEnvironment(),
+			CredentialsTable:  &gcp.CredentialsTable{},
+			AccessTokensTable: &gcp.AccessTokensTable{},
+		},
+		Keychain: prov.GetKeychain(),
+	})
 
-  namedProfilesFacade.Subscribe(&use_case.NamedProfilesWriter{
-    ConfigurationRepository: &fileConfigurationRepository,
-  })
+	// NAMED PROFILES
+	namedProfilesFacade := prov.GetNamedProfilesFacade()
 
-  // TODO: subscribe observer that reads session token from keychain and writes it down into credentials file
+	namedProfiles := config.NamedProfiles
+	logging.Info(fmt.Sprintf("%+v", namedProfiles))
+	namedProfilesFacade.SetNamedProfiles(namedProfiles)
 
-  //timer.Initialize(1, use_case.RotateAllSessionsCredentials)
-  //go websocket.Hub.Run()
-  eng := engine.Engine()
-  eng.Serve(8080)
+	namedProfilesFacade.Subscribe(&use_case.NamedProfilesWriter{
+		ConfigurationRepository: &fileConfigurationRepository,
+	})
+
+	// TODO: subscribe observer that reads session token from keychain and writes it down into credentials file
+
+	//timer.Initialize(1, use_case.RotateAllSessionsCredentials)
+	//go websocket.Hub.Run()
+	eng := engine.Engine(prov)
+	eng.Serve(8080)
 }

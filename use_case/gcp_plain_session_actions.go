@@ -6,14 +6,15 @@ import (
 )
 
 type GcpPlainSessionActions struct {
-	Keychain             Keychain
-	GcpApi               GcpApi
-	NamedProfilesActions NamedProfilesActions
-	Environment          Environment
+	GcpApi                GcpApi
+	Environment           Environment
+	Keychain              Keychain
+	GcpPlainSessionFacade GcpPlainSessionsFacade
+	NamedProfilesActions  NamedProfilesActionsInterface
 }
 
 func (actions *GcpPlainSessionActions) GetSession(sessionId string) (session.GcpPlainSession, error) {
-	return session.GetGcpPlainSessionFacade().GetSessionById(sessionId)
+	return actions.GcpPlainSessionFacade.GetSessionById(sessionId)
 }
 
 func (actions *GcpPlainSessionActions) GetOAuthUrl() (string, error) {
@@ -50,18 +51,17 @@ func (actions *GcpPlainSessionActions) CreateSession(name string, accountId stri
 
 	credentials := actions.GcpApi.GetCredentials(token)
 
-	// TODO: Move to a dedicated GCP Keychain interface
 	err = actions.Keychain.SetSecret(credentials, credentialsLabel)
 	if err != nil {
 		return http_error.NewInternalServerError(err)
 	}
 
-	return session.GetGcpPlainSessionFacade().AddSession(gcpSession)
+	return actions.GcpPlainSessionFacade.AddSession(gcpSession)
 }
 
 func (actions *GcpPlainSessionActions) StartSession(sessionId string) error {
 
-	facade := session.GetGcpPlainSessionFacade()
+	facade := actions.GcpPlainSessionFacade
 	for _, currentSession := range facade.GetSessions() {
 		if currentSession.Status != session.NotActive && currentSession.Id != sessionId {
 			err := facade.SetSessionStatus(currentSession.Id, session.NotActive)
@@ -75,11 +75,11 @@ func (actions *GcpPlainSessionActions) StartSession(sessionId string) error {
 
 func (actions *GcpPlainSessionActions) StopSession(sessionId string) error {
 
-	return session.GetGcpPlainSessionFacade().SetSessionStatus(sessionId, session.NotActive)
+	return actions.GcpPlainSessionFacade.SetSessionStatus(sessionId, session.NotActive)
 }
 
 func (actions *GcpPlainSessionActions) DeleteSession(sessionId string) error {
-	facade := session.GetGcpPlainSessionFacade()
+	facade := actions.GcpPlainSessionFacade
 
 	sessionToDelete, err := facade.GetSessionById(sessionId)
 	if err != nil {
@@ -91,7 +91,7 @@ func (actions *GcpPlainSessionActions) DeleteSession(sessionId string) error {
 }
 
 func (actions *GcpPlainSessionActions) EditSession(sessionId string, name string, projectName string, profileName string) error {
-	sessionsFacade := session.GetGcpPlainSessionFacade()
+	sessionsFacade := actions.GcpPlainSessionFacade
 
 	namedProfile, err := actions.NamedProfilesActions.GetOrCreateNamedProfile(profileName)
 	if err != nil {

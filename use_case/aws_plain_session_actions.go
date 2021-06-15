@@ -8,16 +8,16 @@ import (
 	"time"
 )
 
-type PlainAwsSessionService struct {
-	Keychain             Keychain
-	NamedProfilesActions NamedProfilesActions
+type AwsPlainSessionActions struct {
 	Environment          Environment
+	Keychain             Keychain
+	NamedProfilesActions NamedProfilesActionsInterface
 }
 
-func (service *PlainAwsSessionService) Create(alias string, awsAccessKeyId string, awsSecretAccessKey string,
+func (actions *AwsPlainSessionActions) Create(alias string, awsAccessKeyId string, awsSecretAccessKey string,
 	mfaDevice string, region string, profileName string) error {
 
-	namedProfile, err := service.NamedProfilesActions.GetOrCreateNamedProfile(profileName)
+	namedProfile, err := actions.NamedProfilesActions.GetOrCreateNamedProfile(profileName)
 	if err != nil {
 		return err
 	}
@@ -30,7 +30,7 @@ func (service *PlainAwsSessionService) Create(alias string, awsAccessKeyId strin
 	}
 
 	sess := session.PlainAwsSession{
-		Id:           service.Environment.GenerateUuid(),
+		Id:           actions.Environment.GenerateUuid(),
 		Alias:        alias,
 		Status:       session.NotActive,
 		StartTime:    "",
@@ -44,12 +44,12 @@ func (service *PlainAwsSessionService) Create(alias string, awsAccessKeyId strin
 	}
 
 	// TODO: use access keys repository instead of direct keychain abstraction
-	err = service.Keychain.SetSecret(awsAccessKeyId, sess.Id+"-plain-aws-session-access-key-id")
+	err = actions.Keychain.SetSecret(awsAccessKeyId, sess.Id+"-plain-aws-session-access-key-id")
 	if err != nil {
 		return http_error.NewInternalServerError(err)
 	}
 
-	err = service.Keychain.SetSecret(awsSecretAccessKey, sess.Id+"-plain-aws-session-secret-access-key")
+	err = actions.Keychain.SetSecret(awsSecretAccessKey, sess.Id+"-plain-aws-session-secret-access-key")
 	if err != nil {
 		return http_error.NewInternalServerError(err)
 	}
@@ -57,13 +57,13 @@ func (service *PlainAwsSessionService) Create(alias string, awsAccessKeyId strin
 	return nil
 }
 
-func (service *PlainAwsSessionService) GetPlainAwsSession(id string) (*session.PlainAwsSession, error) {
+func (actions *AwsPlainSessionActions) GetPlainAwsSession(id string) (*session.PlainAwsSession, error) {
 	var sess *session.PlainAwsSession
 	sess, err := session.GetPlainAwsSessionsFacade().GetPlainAwsSessionById(id)
 	return sess, err
 }
 
-func (service *PlainAwsSessionService) UpdatePlainAwsSession(sessionId string, name string, accountNumber string, region string, user string,
+func (actions *AwsPlainSessionActions) UpdatePlainAwsSession(sessionId string, name string, accountNumber string, region string, user string,
 	awsAccessKeyId string, awsSecretAccessKey string, mfaDevice string, profile string) error {
 
 	/*
@@ -107,13 +107,13 @@ func DeletePlainAwsSession(sessionId string) error {
 	return nil
 }
 
-func (service *PlainAwsSessionService) StartPlainAwsSession(sessionId string) error {
+func (actions *AwsPlainSessionActions) StartPlainAwsSession(sessionId string) error {
 	plainAwsSession, err := session.GetPlainAwsSessionsFacade().GetPlainAwsSessionById(sessionId)
 	if err != nil {
 		return err
 	}
 
-	doesSessionTokenExist, err := service.Keychain.DoesSecretExist(plainAwsSession.Id + "-plain-aws-session-session-token")
+	doesSessionTokenExist, err := actions.Keychain.DoesSecretExist(plainAwsSession.Id + "-plain-aws-session-session-token")
 	if err != nil {
 		return err
 	}
@@ -129,19 +129,19 @@ func (service *PlainAwsSessionService) StartPlainAwsSession(sessionId string) er
 			}
 
 			if currentTime.After(sessionTokenExpirationTime) {
-				err = service.generateSessionToken(*plainAwsSession)
+				err = actions.generateSessionToken(*plainAwsSession)
 				if err != nil {
 					return err
 				}
 			}
 		} else {
-			err = service.generateSessionToken(*plainAwsSession)
+			err = actions.generateSessionToken(*plainAwsSession)
 			if err != nil {
 				return err
 			}
 		}
 	} else {
-		err = service.generateSessionToken(*plainAwsSession)
+		err = actions.generateSessionToken(*plainAwsSession)
 		if err != nil {
 			return err
 		}
@@ -189,17 +189,17 @@ func StopPlainAwsSession(sessionId string) error {
 }
 
 // TODO: encapsulate this logic inside a session token generation interface
-func (service *PlainAwsSessionService) generateSessionToken(plainAwsSession session.PlainAwsSession) error {
+func (actions *AwsPlainSessionActions) generateSessionToken(plainAwsSession session.PlainAwsSession) error {
 	accessKeyIdSecretName := plainAwsSession.Id + "-plain-aws-session-access-key-id"
 
-	accessKeyId, err := service.Keychain.GetSecret(accessKeyIdSecretName)
+	accessKeyId, err := actions.Keychain.GetSecret(accessKeyIdSecretName)
 	if err != nil {
 		return http_error.NewUnprocessableEntityError(err)
 	}
 
 	secretAccessKeySecretName := plainAwsSession.Id + "-plain-aws-session-secret-access-key"
 
-	secretAccessKey, err := service.Keychain.GetSecret(secretAccessKeySecretName)
+	secretAccessKey, err := actions.Keychain.GetSecret(secretAccessKeySecretName)
 	if err != nil {
 		return http_error.NewUnprocessableEntityError(err)
 	}
@@ -215,7 +215,7 @@ func (service *PlainAwsSessionService) generateSessionToken(plainAwsSession sess
 		return err
 	}
 
-	err = service.Keychain.SetSecret(string(credentialsJson),
+	err = actions.Keychain.SetSecret(string(credentialsJson),
 		plainAwsSession.Id+"-plain-aws-session-session-token")
 	if err != nil {
 		return err

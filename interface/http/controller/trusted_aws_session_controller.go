@@ -21,7 +21,7 @@ type getTrustedAwsSessionResponse struct {
 	Data    session.TrustedAwsSession
 }
 
-func CreateTrustedAwsSessionController(context *gin.Context) {
+func (env *EngineEnvironment) CreateTrustedAwsSessionController(context *gin.Context) {
 	// swagger:route POST /session/trusted session-trusted-aws createTrustedAwsSession
 	// Create a new trusted aws session
 	//   Responses:
@@ -46,7 +46,7 @@ func CreateTrustedAwsSessionController(context *gin.Context) {
 	context.JSON(http.StatusOK, responseDto.ToMap())
 }
 
-func GetTrustedAwsSessionController(context *gin.Context) {
+func (env *EngineEnvironment) GetTrustedAwsSessionController(context *gin.Context) {
 	// swagger:route GET /session/trusted/{id} session-trusted-aws getTrustedAwsSession
 	// Get a Trusted AWS Session
 	//   Responses:
@@ -71,7 +71,7 @@ func GetTrustedAwsSessionController(context *gin.Context) {
 	context.JSON(http.StatusOK, responseDto.ToMap())
 }
 
-func EditTrustedAwsSessionController(context *gin.Context) {
+func (env *EngineEnvironment) EditTrustedAwsSessionController(context *gin.Context) {
 	// swagger:route PUT /session/trusted/{id} session-trusted-aws editTrustedAwsSession
 	// Edit a Trusted AWS Session
 	//   Responses:
@@ -110,7 +110,7 @@ func EditTrustedAwsSessionController(context *gin.Context) {
 	context.JSON(http.StatusOK, responseDto.ToMap())
 }
 
-func DeleteTrustedAwsSessionController(context *gin.Context) {
+func (env *EngineEnvironment) DeleteTrustedAwsSessionController(context *gin.Context) {
 	// swagger:route DELETE /session/trusted/{id} session-trusted-aws deleteTrustedAwsSession
 	// Delete a Trusted AWS Session
 	//   Responses:

@@ -1,6 +1,10 @@
 package use_case
 
-import "golang.org/x/oauth2"
+import (
+	"golang.org/x/oauth2"
+	"leapp_daemon/domain/named_profile"
+	"leapp_daemon/domain/session"
+)
 
 type FileSystem interface {
 	DoesFileExist(path string) bool
@@ -8,6 +12,10 @@ type FileSystem interface {
 	ReadFile(path string) ([]byte, error)
 	RemoveFile(path string) error
 	WriteToFile(path string, data []byte) error
+}
+
+type Environment interface {
+	GenerateUuid() string
 }
 
 type Keychain interface {
@@ -23,6 +31,22 @@ type GcpApi interface {
 	GetCredentials(oauthToken *oauth2.Token) string
 }
 
-type Environment interface {
-	GenerateUuid() string
+type NamedProfilesFacade interface {
+	GetNamedProfiles() []named_profile.NamedProfile
+	GetNamedProfileById(id string) (named_profile.NamedProfile, error)
+	GetNamedProfileByName(name string) (named_profile.NamedProfile, error)
+	AddNamedProfile(namedProfile named_profile.NamedProfile) error
+}
+
+type NamedProfilesActionsInterface interface {
+	GetOrCreateNamedProfile(profileName string) (named_profile.NamedProfile, error)
+}
+
+type GcpPlainSessionsFacade interface {
+	GetSessions() []session.GcpPlainSession
+	GetSessionById(id string) (session.GcpPlainSession, error)
+	AddSession(session session.GcpPlainSession) error
+	SetSessionStatus(sessionId string, status session.Status) error
+	RemoveSession(id string) error
+	EditSession(sessionId string, name string, projectName string, profileId string) error
 }

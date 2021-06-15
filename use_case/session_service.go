@@ -1,19 +1,18 @@
 package use_case
 
 import (
-  "leapp_daemon/domain/named_profile"
-  "leapp_daemon/domain/session"
+	"leapp_daemon/domain/named_profile"
 )
 
-func ListAllSessions() (*map[string]interface{}, error) {
+func ListAllSessions(plainSessionFacade GcpPlainSessionsFacade) (*map[string]interface{}, error) {
 
-  sessions := session.GetGcpPlainSessionFacade().GetSessions()
+	sessions := plainSessionFacade.GetSessions()
 
-	return &map[string]interface{} {
+	return &map[string]interface{}{
 		"GcpSessions": sessions,
 	}, nil
 }
 
-func ListAllNamedProfiles() ([]named_profile.NamedProfile, error) {
-  return named_profile.GetNamedProfilesFacade().GetNamedProfiles(), nil
+func ListAllNamedProfiles(namedProfileFacade NamedProfilesFacade) ([]named_profile.NamedProfile, error) {
+	return namedProfileFacade.GetNamedProfiles(), nil
 }
