@@ -88,5 +88,12 @@ func initializeRoutes(ginEngine *gin.Engine) {
 		v1.DELETE("/plain/alibaba/session/:id", controller.DeletePlainAlibabaSessionController)
 		v1.POST("/plain/alibaba/session/:id/start", controller.StartPlainAlibabaSessionController)
 		v1.POST("/plain/alibaba/session/:id/stop", controller.StopPlainAlibabaSessionController)
+
+		v1.GET("/federated/alibaba/session/:id", controller.GetFederatedAlibabaSessionController)
+		v1.POST("/federated/alibaba/session/", controller.CreateFederatedAlibabaSessionController)
+		v1.PUT("/federated/alibaba/session/:id", controller.EditFederatedAlibabaSessionController)
+		v1.DELETE("/federated/alibaba/session/:id", controller.DeleteFederatedAlibabaSessionController)
+		v1.POST("/federated/alibaba/session/:id/start", controller.StartFederatedAlibabaSessionController)
+		v1.POST("/federated/alibaba/session/:id/stop", controller.StopFederatedAlibabaSessionController)
 	}
 }

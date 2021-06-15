@@ -9,9 +9,6 @@ import (
 	"leapp_daemon/infrastructure/http/http_error"
 )
 
-// temporaneamente forzo ad AK
-const mode string = "AK"
-
 type CredentialsFile struct {
 	Current   string                `json:"current"`
 	Profiles  []NamedProfileSection `json:"profiles"`
@@ -46,6 +43,8 @@ type AlibabaCredentialsApplier struct {
 	Keychain   Keychain
 }
 
+//TODO: refactoring needed
+
 func (alibabaCredentialsApplier *AlibabaCredentialsApplier) UpdatePlainAlibabaSessions(oldPlainAlibabaSessions []session.PlainAlibabaSession, newPlainAlibabaSessions []session.PlainAlibabaSession) error {
 	for i, oldSess := range oldPlainAlibabaSessions {
 		if i < len(newPlainAlibabaSessions) {
@@ -62,12 +61,12 @@ func (alibabaCredentialsApplier *AlibabaCredentialsApplier) UpdatePlainAlibabaSe
 				profileName := named_profile.GetNamedProfilesFacade().GetNamedProfileById(newSess.Account.NamedProfileId).Name
 				region := newSess.Account.Region
 
-				accessKeyId, secretAccessKey, err := alibabaCredentialsApplier.getAccessKeys(newSess.Id)
+				accessKeyId, secretAccessKey, err := alibabaCredentialsApplier.getPlainCreds(newSess.Id)
 				if err != nil {
 					return err
 				}
 
-				namedProfileSection := NamedProfileSection{Name: profileName, Mode: mode, Access_key_id: accessKeyId, Access_key_secret: secretAccessKey, Region_id: region, Output_format: "json", Language: "en"}
+				namedProfileSection := NamedProfileSection{Name: profileName, Mode: "AK", Access_key_id: accessKeyId, Access_key_secret: secretAccessKey, Region_id: region, Output_format: "json", Language: "en"}
 				profiles := []NamedProfileSection{namedProfileSection}
 				config := CredentialsFile{Current: namedProfileSection.Name, Profiles: profiles}
 				out, _ := json.MarshalIndent(config, "", "  ")
@@ -79,12 +78,44 @@ func (alibabaCredentialsApplier *AlibabaCredentialsApplier) UpdatePlainAlibabaSe
 	return nil
 }
 
-func (alibabaCredentialsApplier *AlibabaCredentialsApplier) getAccessKeys(sessionId string) (accessKeyId string, secretAccessKey string, error error) {
+func (alibabaCredentialsApplier *AlibabaCredentialsApplier) UpdateFederatedAlibabaSessions(oldFederatedAlibabaSessions []session.FederatedAlibabaSession, newFederatedAlibabaSessions []session.FederatedAlibabaSession) error {
+	for i, oldSess := range oldFederatedAlibabaSessions {
+		if i < len(newFederatedAlibabaSessions) {
+			newSess := newFederatedAlibabaSessions[i]
+
+			if oldSess.Status == session.NotActive && newSess.Status == session.Pending {
+
+				homeDir, err := alibabaCredentialsApplier.FileSystem.GetHomeDir()
+				if err != nil {
+					return err
+				}
+
+				credentialsFilePath := homeDir + "/" + constant.AlibabaCredentialsFilePath
+				profileName := named_profile.GetNamedProfilesFacade().GetNamedProfileById(newSess.Account.NamedProfileId).Name
+				region := newSess.Account.Region
+
+				accessKeyId, secretAccessKey, stsToken, err := alibabaCredentialsApplier.getFederatedCreds(newSess.Id)
+				if err != nil {
+					return err
+				}
+
+				namedProfileSection := NamedProfileSection{Name: profileName, Mode: "StsToken", Access_key_id: accessKeyId, Access_key_secret: secretAccessKey, Sts_token: stsToken, Region_id: region, Output_format: "json", Language: "en"}
+				profiles := []NamedProfileSection{namedProfileSection}
+				config := CredentialsFile{Current: namedProfileSection.Name, Profiles: profiles}
+				out, _ := json.MarshalIndent(config, "", "  ")
+				alibabaCredentialsApplier.overwriteFile(out, credentialsFilePath)
+			}
+		}
+	}
+	return nil
+}
+
+func (alibabaCredentialsApplier *AlibabaCredentialsApplier) getPlainCreds(sessionId string) (accessKeyId string, secretAccessKey string, err error) {
 	accessKeyId = ""
 	secretAccessKey = ""
 
 	accessKeyIdSecretName := sessionId + "-plain-alibaba-session-access-key-id"
-	accessKeyId, err := alibabaCredentialsApplier.Keychain.GetSecret(accessKeyIdSecretName)
+	accessKeyId, err = alibabaCredentialsApplier.Keychain.GetSecret(accessKeyIdSecretName)
 	if err != nil {
 		return accessKeyId, secretAccessKey, http_error.NewUnprocessableEntityError(err)
 	}
@@ -98,7 +129,33 @@ func (alibabaCredentialsApplier *AlibabaCredentialsApplier) getAccessKeys(sessio
 	return accessKeyId, secretAccessKey, nil
 }
 
+func (alibabaCredentialsApplier *AlibabaCredentialsApplier) getFederatedCreds(sessionId string) (accessKeyId string, secretAccessKey string, stsToken string, err error) {
+	accessKeyId = ""
+	secretAccessKey = ""
+
+	accessKeyIdSecretName := sessionId + "-federated-alibaba-session-access-key-id"
+	accessKeyId, err = alibabaCredentialsApplier.Keychain.GetSecret(accessKeyIdSecretName)
+	if err != nil {
+		return accessKeyId, secretAccessKey, stsToken, http_error.NewUnprocessableEntityError(err)
+	}
+
+	secretAccessKeySecretName := sessionId + "-federated-alibaba-session-secret-access-key"
+	secretAccessKey, err = alibabaCredentialsApplier.Keychain.GetSecret(secretAccessKeySecretName)
+	if err != nil {
+		return accessKeyId, secretAccessKey, stsToken, http_error.NewUnprocessableEntityError(err)
+	}
+
+	stsTokenName := sessionId + "-federated-alibaba-session-sts-token"
+	stsToken, err = alibabaCredentialsApplier.Keychain.GetSecret(stsTokenName)
+	if err != nil {
+		return accessKeyId, secretAccessKey, stsToken, http_error.NewUnprocessableEntityError(err)
+	}
+
+	return accessKeyId, secretAccessKey, stsToken, nil
+}
+
 func (alibabaCredentialsApplier *AlibabaCredentialsApplier) overwriteFile(content []byte, path string) error {
+
 	err := ioutil.WriteFile(path, content, 0644)
 	if err != nil {
 		return http_error.NewUnprocessableEntityError(err)

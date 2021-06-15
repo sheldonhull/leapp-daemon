@@ -85,35 +85,26 @@ func main() {
 
 	// TODO: subscribe observer that reads session token from keychain and writes it down into credentials file
 
-	alibabaConfigurationFileBackupPath := fmt.Sprintf("%s/%s", homeDir, ".Leapp/Leapp-lock.json")
-	doesAlibabaConfigurationFileExist := fileSystem.DoesFileExist(alibabaConfigurationFileBackupPath)
-
-	alibabaCredentialsFilePath := fmt.Sprintf("%s/%s", homeDir, constant.AlibabaCredentialsFilePath)
-	doesAlibabaCredentialsFileExist := fileSystem.DoesFileExist(alibabaCredentialsFilePath)
-
-	alibabaCredentialsFileBackupPath := fmt.Sprintf("%s/%s", homeDir, constant.AlibabaCredentialsFilePath+".leapp.bkp")
-	doesAlibabaCredentialsFileBackupExist := fileSystem.DoesFileExist(alibabaCredentialsFileBackupPath)
-
-	if !doesAlibabaConfigurationFileExist && doesAlibabaCredentialsFileExist && !doesAlibabaCredentialsFileBackupExist {
-		err = fileSystem.RenameFile(credentialsFilePath, credentialsFileBackupPath)
-		if err != nil {
-			logging.Entry().Error(err)
-			panic(err)
-		}
-	}
-
 	plainAlibabaSessions := config.PlainAlibabaSessions
-
 	logging.Info(fmt.Sprintf("%+v", plainAlibabaSessions))
-
 	plainAlibabaSessionFacade := session.GetPlainAlibabaSessionsFacade()
 	plainAlibabaSessionFacade.SetPlainAlibabaSessions(plainAlibabaSessions)
-
 	plainAlibabaSessionFacade.Subscribe(&use_case.SessionsWriter{
 		ConfigurationRepository: &fileConfigurationRepository,
 	})
-
 	plainAlibabaSessionFacade.Subscribe(&use_case.AlibabaCredentialsApplier{
+		FileSystem: fileSystem,
+		Keychain:   &keychain.Keychain{},
+	})
+
+	federatedAlibabaSessions := config.FederatedAlibabaSessions
+	logging.Info(fmt.Sprintf("%+v", federatedAlibabaSessions))
+	federatedAlibabaSessionFacade := session.GetFederatedAlibabaSessionsFacade()
+	federatedAlibabaSessionFacade.SetFederatedAlibabaSessions(federatedAlibabaSessions)
+	federatedAlibabaSessionFacade.Subscribe(&use_case.SessionsWriter{
+		ConfigurationRepository: &fileConfigurationRepository,
+	})
+	federatedAlibabaSessionFacade.Subscribe(&use_case.AlibabaCredentialsApplier{
 		FileSystem: fileSystem,
 		Keychain:   &keychain.Keychain{},
 	})

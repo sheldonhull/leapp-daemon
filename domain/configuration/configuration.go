@@ -15,12 +15,13 @@ type Repository interface {
 }
 
 type Configuration struct {
-	ProxyConfiguration   ProxyConfiguration
-	PlainAwsSessions     []session.PlainAwsSession
-	FederatedAwsSessions []session.FederatedAwsSession
-	TrustedAwsSessions   []session.TrustedAwsSession
-	PlainAlibabaSessions []session.PlainAlibabaSession
-	NamedProfiles        []named_profile.NamedProfile
+	ProxyConfiguration       ProxyConfiguration
+	PlainAwsSessions         []session.PlainAwsSession
+	FederatedAwsSessions     []session.FederatedAwsSession
+	TrustedAwsSessions       []session.TrustedAwsSession
+	PlainAlibabaSessions     []session.PlainAlibabaSession
+	FederatedAlibabaSessions []session.FederatedAlibabaSession
+	NamedProfiles            []named_profile.NamedProfile
 }
 
 type ProxyConfiguration struct {
