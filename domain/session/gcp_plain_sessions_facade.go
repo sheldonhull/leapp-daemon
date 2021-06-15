@@ -99,25 +99,45 @@ func (facade *gcpPlainSessionsFacade) RemoveSession(id string) error {
   return nil
 }
 
-func (facade *gcpPlainSessionsFacade) SetSessionStatus(id string, status Status) error {
+func (facade *gcpPlainSessionsFacade) SetSessionStatus(sessionId string, status Status) error {
   sessionsLock.Lock()
   defer sessionsLock.Unlock()
 
-  currentSessions := facade.GetSessions()
+  sessionToUpdate, err := facade.GetSessionById(sessionId)
+  if err != nil {
+    return err
+  }
+
+  sessionToUpdate.Status = status
+  return facade.replaceSession(sessionId, sessionToUpdate)
+}
+
+func (facade *gcpPlainSessionsFacade) EditSession(sessionId string, name string, projectName string, profileId string) error {
+  sessionsLock.Lock()
+  defer sessionsLock.Unlock()
+
+  sessionToEdit, err := facade.GetSessionById(sessionId)
+  if err != nil {
+    return err
+  }
+
+  sessionToEdit.Name = name
+  sessionToEdit.ProjectName = projectName
+  sessionToEdit.NamedProfileId = profileId
+
+  return facade.replaceSession(sessionId, sessionToEdit)
+}
+
+func (facade *gcpPlainSessionsFacade) replaceSession(sessionId string, newSession GcpPlainSession) error {
   newSessions := make([]GcpPlainSession, 0)
-
-  sessionFound := false
-  for _, session := range currentSessions {
-    if session.Id == id {
-      session.Status = status
-      sessionFound = true
+  for _, session := range facade.GetSessions() {
+    if session.Id == sessionId {
+      newSessions = append(newSessions, newSession)
+    } else {
+      newSessions = append(newSessions, session)
     }
-    newSessions = append(newSessions, session)
   }
 
-  if !sessionFound {
-    return http_error.NewNotFoundError(fmt.Errorf("plain gcp session with id %s not found", id))
-  }
   facade.updateState(newSessions)
   return nil
 }

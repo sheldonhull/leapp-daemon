@@ -88,9 +88,10 @@ func main() {
 
   gcpPlainSessionFacade.Subscribe(&use_case.GcpCredentialsApplier{
     Repository: repository.GcloudConfigurationRepository{
-      FileSystem:       fileSystem,
-      Environment:      &environment.Environment{},
-      CredentialsTable: &gcp.CredentialsTable{},
+      FileSystem:        fileSystem,
+      Environment:       &environment.Environment{},
+      CredentialsTable:  &gcp.CredentialsTable{},
+      AccessTokensTable: &gcp.AccessTokensTable{},
     },
     Keychain: keyChain,
   })

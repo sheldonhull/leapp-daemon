@@ -4,6 +4,7 @@ import (
   "leapp_daemon/domain/session"
   "leapp_daemon/infrastructure/logging"
   "leapp_daemon/interface/repository"
+  "reflect"
 )
 
 type GcpCredentialsApplier struct {
@@ -20,6 +21,10 @@ func (applier *GcpCredentialsApplier) UpdateGcpPlainSessions(oldSessions []sessi
     } else if oldActiveSession.Id != newActiveSession.Id {
       applier.deactivateSession(oldActiveSession)
       applier.activateSession(newActiveSession)
+    } else {
+      if !reflect.DeepEqual(oldActiveSession, newActiveSession) {
+        applier.activateSession(newActiveSession)
+      }
     }
   } else {
     if newActiveSession != nil {
@@ -92,6 +97,12 @@ func (applier *GcpCredentialsApplier) deactivateSession(session *session.GcpPlai
   }
 
   err = applier.Repository.RemoveCredentialsFromDb(session.AccountId)
+  if err != nil {
+    logging.Entry().Error(err)
+    return
+  }
+
+  err = applier.Repository.RemoveAccessTokensFromDb(session.AccountId)
   if err != nil {
     logging.Entry().Error(err)
     return

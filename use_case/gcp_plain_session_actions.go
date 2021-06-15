@@ -97,3 +97,43 @@ func (actions *GcpPlainSessionActions) StopSession(sessionId string) error {
 
   return session.GetGcpPlainSessionFacade().SetSessionStatus(sessionId, session.NotActive)
 }
+
+func (actions *GcpPlainSessionActions) DeleteSession(sessionId string) error {
+  facade := session.GetGcpPlainSessionFacade()
+
+  sessionToDelete, err := facade.GetSessionById(sessionId)
+  if err != nil {
+    return err
+  }
+
+  _ = actions.Keychain.DeleteSecret(sessionToDelete.CredentialsLabel)
+  return facade.RemoveSession(sessionId)
+}
+
+func (actions *GcpPlainSessionActions) EditSession(sessionId string, name string, projectName string, profileName string) error {
+  sessionsFacade := session.GetGcpPlainSessionFacade()
+
+  if profileName == "" {
+    profileName = "default"
+  }
+
+  namedProfile := named_profile.GetNamedProfilesFacade().GetNamedProfileByName(profileName)
+
+  // TODO: move to named_profiles_actions
+  if namedProfile == nil {
+    uuidString := uuid.New().String()
+    uuidString = strings.Replace(uuidString, "-", "", -1)
+
+    namedProfile = &named_profile.NamedProfile{
+      Id:   uuidString,
+      Name: profileName,
+    }
+
+    err := named_profile.GetNamedProfilesFacade().AddNamedProfile(*namedProfile)
+    if err != nil {
+      return err
+    }
+  }
+
+  return sessionsFacade.EditSession(sessionId, name, projectName, namedProfile.Id)
+}

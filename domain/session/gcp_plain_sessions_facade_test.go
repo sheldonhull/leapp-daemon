@@ -150,7 +150,7 @@ func TestSetSessionStatus_notFound(t *testing.T) {
   facade.Subscribe(FakeObserver{})
 
   err := facade.SetSessionStatus("ID", Pending)
-  test.ExpectHttpError(t, err, http.StatusNotFound, "plain gcp session with id ID not found")
+  test.ExpectHttpError(t, err, http.StatusNotFound, "gcp plain session with id ID not found")
 
   if len(sessionsBeforeUpdate) > 0 || len(sessionsAfterUpdate) > 0 {
     t.Errorf("sessions was unexpectedly changed")

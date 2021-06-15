@@ -7,13 +7,13 @@ import (
   "leapp_daemon/infrastructure/http/http_error"
 )
 
-var TableName = "credentials"
+var credentialsTableName = "credentials"
 
 type CredentialsTable struct {
 }
 
 func (table *CredentialsTable) WriteCredentials(sqlFilePath string, accountId string, value string) error {
-	database, err := getDatabase(sqlFilePath)
+	database, err := getSqliteDatabase(sqlFilePath)
 	if err != nil {
 		return err
 	}
@@ -33,16 +33,11 @@ func (table *CredentialsTable) WriteCredentials(sqlFilePath string, accountId st
 }
 
 func (table *CredentialsTable) RemoveCredentials(sqlFilePath string, accountId string) error {
-	database, err := getDatabase(sqlFilePath)
+	database, err := getSqliteDatabase(sqlFilePath)
 	if err != nil {
 		return err
 	}
 	defer database.Close()
-
-	err = table.createTable(database)
-	if err != nil {
-		return err
-	}
 
 	err = table.deleteQuery(database, accountId)
 	if err != nil {
@@ -57,7 +52,7 @@ func (table *CredentialsTable) createTable(database *sql.DB) error {
 	  "account_id"	TEXT,
 	  "value"	BLOB,
 	  PRIMARY KEY("account_id")
-  );`, TableName)
+  );`, credentialsTableName)
 
 	statement, err := database.Prepare(createTableQuery)
 	if err != nil {
@@ -73,7 +68,7 @@ func (table *CredentialsTable) createTable(database *sql.DB) error {
 }
 
 func (table *CredentialsTable) insertQuery(database *sql.DB, accountId string, value string) error {
-	insertQuery := fmt.Sprintf("INSERT INTO %v (account_id, value) VALUES(?, ?) ON CONFLICT(account_id) DO UPDATE SET value=excluded.value", TableName)
+	insertQuery := fmt.Sprintf("INSERT INTO %v (account_id, value) VALUES(?, ?) ON CONFLICT(account_id) DO UPDATE SET value=excluded.value", credentialsTableName)
 	statement, err := database.Prepare(insertQuery)
 	if err != nil {
 		return http_error.NewBadRequestError(err)
@@ -88,7 +83,7 @@ func (table *CredentialsTable) insertQuery(database *sql.DB, accountId string, v
 }
 
 func (table *CredentialsTable) deleteQuery(database *sql.DB, accountId string) error {
-	deleteQuery := fmt.Sprintf("DELETE FROM %v WHERE account_id=?", TableName)
+	deleteQuery := fmt.Sprintf("DELETE FROM %v WHERE account_id=?", credentialsTableName)
 	statement, err := database.Prepare(deleteQuery)
 	if err != nil {
 		return http_error.NewBadRequestError(err)
@@ -100,13 +95,4 @@ func (table *CredentialsTable) deleteQuery(database *sql.DB, accountId string) e
 	}
 
 	return nil
-}
-
-func getDatabase(sqlFilePath string) (*sql.DB, error) {
-  database, err := sql.Open("sqlite3", sqlFilePath)
-  if err != nil {
-    return nil, http_error.NewNotFoundError(err)
-  }
-
-  return database, nil
 }

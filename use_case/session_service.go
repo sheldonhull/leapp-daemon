@@ -14,16 +14,6 @@ func ListAllSessions() (*map[string]interface{}, error) {
 	}, nil
 }
 
-func ListAllNamedProfiles() ([]*named_profile.NamedProfile, error) {
-	var namedProfiles []*named_profile.NamedProfile
-
-	/*
-	config, err := configuration.ReadConfiguration()
-	if err != nil {
-		return namedProfiles, err
-	}
-
-	namedProfiles = config.NamedProfiles
-	 */
-	return namedProfiles, nil
+func ListAllNamedProfiles() ([]named_profile.NamedProfile, error) {
+  return named_profile.GetNamedProfilesFacade().GetNamedProfiles(), nil
 }

@@ -233,7 +233,8 @@ func TestActivateConfiguration(t *testing.T) {
     t.Fatalf("unexpected error %v", err)
   }
 
-  expectedFile := fmt.Sprintf("WriteToFile(%v, %v)", expectedActiveConfigFilePath, []byte(activeConfigurationName))
+  fullActiveConfigurationName := fmt.Sprintf("config_leapp_%v", activeConfigurationName)
+  expectedFile := fmt.Sprintf("WriteToFile(%v, %v)", expectedActiveConfigFilePath, []byte(fullActiveConfigurationName))
   verifyExpectedCalls(t, []string{"IsWindows()", "GetEnvironmentVariable(APPDATA)"}, []string{expectedFile}, []string{})
 }
 

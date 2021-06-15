@@ -84,6 +84,8 @@ func initializeRoutes(ginEngine *gin.Engine) {
 		v1.GET("/gcp/oauth/url", controller.GetGcpOauthUrl)
 		v1.POST("/gcp/session/plain", controller.CreateGcpPlainSession)
 		v1.GET("/gcp/session/plain/:id", controller.GetGcpPlainSession)
+		v1.PUT("/gcp/session/plain/:id", controller.EditGcpPlainSession)
+		v1.DELETE("/gcp/session/plain/:id", controller.DeleteGcpPlainSession)
     v1.POST("/gcp/session/plain/:id/start", controller.StartGcpPlainSession)
 		v1.POST("/gcp/session/plain/:id/stop", controller.StopGcpPlainSession)
 

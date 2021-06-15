@@ -146,6 +146,65 @@ func StopGcpPlainSession(context *gin.Context) {
   context.JSON(http.StatusOK, responseDto.ToMap())
 }
 
+func DeleteGcpPlainSession(context *gin.Context){
+  // swagger:route DELETE /gcp/session/plain/{id} gcpPlainSession deleteGcpPlainSession
+  // Delete a GCP Plain Session
+  //   Responses:
+  //     200: MessageResponse
+
+  logging.SetContext(context)
+
+  requestDto := gcp_plain_session_dto.GcpDeletePlainSessionRequestDto{}
+  err := (&requestDto).Build(context)
+  if err != nil {
+    _ = context.Error(err)
+    return
+  }
+
+  actions := getActions()
+  err = actions.DeleteSession(requestDto.Id)
+  if err != nil {
+    _ = context.Error(err)
+    return
+  }
+
+  responseDto := response_dto.MessageResponse{Message: "success"}
+  context.JSON(http.StatusOK, responseDto.ToMap())
+}
+
+func EditGcpPlainSession(context *gin.Context){
+  // swagger:route PUT /gcp/session/plain/{id} gcpPlainSession editGcpPlainSession
+  // Edit a GCP Plain Session
+  //   Responses:
+  //     200: MessageResponse
+
+  logging.SetContext(context)
+
+  requestUriDto := gcp_plain_session_dto.GcpEditPlainSessionUriRequest{}
+  err := (&requestUriDto).Build(context)
+  if err != nil {
+    _ = context.Error(err)
+    return
+  }
+
+  requestDto := gcp_plain_session_dto.GcpEditPlainSessionRequest{}
+  err = (&requestDto).Build(context)
+  if err != nil {
+    _ = context.Error(err)
+    return
+  }
+
+  actions := getActions()
+  err = actions.EditSession(requestUriDto.Id, requestDto.Name, requestDto.ProjectName, requestDto.ProfileName)
+  if err != nil {
+    _ = context.Error(err)
+    return
+  }
+
+  responseDto := response_dto.MessageResponse{Message: "success"}
+  context.JSON(http.StatusOK, responseDto.ToMap())
+}
+
 var actionsSingleton *use_case.GcpPlainSessionActions
 var actionsMutex sync.Mutex
 

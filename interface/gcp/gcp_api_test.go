@@ -64,7 +64,7 @@ func TestGetCredentials(t *testing.T) {
     "  \"revoke_uri\": \"https://accounts.google.com/o/oauth2/revoke\",\n" +
     "  \"appScopes\": [\"openid\",\"https://www.googleapis.com/auth/userinfo.email\"," +
     "\"https://www.googleapis.com/auth/cloud-platform\",\"https://www.googleapis.com/auth/appengine.admin\"," +
-    "\"https://www.googleapis.com/auth/compute\",\"https://www.googleapis.com/auth/accounts.reauth\",],\n" +
+    "\"https://www.googleapis.com/auth/compute\",\"https://www.googleapis.com/auth/accounts.reauth\"],\n" +
     "  \"type\": \"authorized_user\"\n}"
 
   if credentials != expectedCredentials {
