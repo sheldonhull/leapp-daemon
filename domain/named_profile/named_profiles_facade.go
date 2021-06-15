@@ -32,19 +32,19 @@ func GetNamedProfilesFacade() *namedProfilesFacade {
   return namedProfilesFacadeSingleton
 }
 
-func(fac *namedProfilesFacade) Subscribe(observer NamedProfilesObserver) {
+func (fac *namedProfilesFacade) Subscribe(observer NamedProfilesObserver) {
   fac.observers = append(fac.observers, observer)
 }
 
-func(fac *namedProfilesFacade) GetNamedProfiles() []NamedProfile {
+func (fac *namedProfilesFacade) GetNamedProfiles() []NamedProfile {
   return fac.namedProfiles
 }
 
-func(fac *namedProfilesFacade) SetNamedProfiles(namedProfiles []NamedProfile) {
+func (fac *namedProfilesFacade) SetNamedProfiles(namedProfiles []NamedProfile) {
   fac.namedProfiles = namedProfiles
 }
 
-func(fac *namedProfilesFacade) AddNamedProfile(namedProfile NamedProfile) error {
+func (fac *namedProfilesFacade) AddNamedProfile(namedProfile NamedProfile) error {
   namedProfilesLock.Lock()
   defer namedProfilesLock.Unlock()
 
@@ -71,25 +71,25 @@ func(fac *namedProfilesFacade) AddNamedProfile(namedProfile NamedProfile) error 
   return nil
 }
 
-func(fac *namedProfilesFacade) GetNamedProfileByName(name string) *NamedProfile {
-  for _, np := range fac.namedProfiles {
-    if np.Name == name {
-      return &np
+func (fac *namedProfilesFacade) GetNamedProfileByName(name string) (NamedProfile, error) {
+  for _, namedProfile := range fac.namedProfiles {
+    if namedProfile.Name == name {
+      return namedProfile, nil
     }
   }
-  return nil
+  return NamedProfile{}, http_error.NewNotFoundError(fmt.Errorf("named profile with name %v not found", name))
 }
 
-func(fac *namedProfilesFacade) GetNamedProfileById(id string) *NamedProfile {
-  for _, np := range fac.namedProfiles {
-    if np.Id == id {
-      return &np
+func (fac *namedProfilesFacade) GetNamedProfileById(id string) (NamedProfile, error) {
+  for _, namedProfile := range fac.namedProfiles {
+    if namedProfile.Id == id {
+      return namedProfile, nil
     }
   }
-  return nil
+  return NamedProfile{}, http_error.NewNotFoundError(fmt.Errorf("named profile with id %v not found", id))
 }
 
-func(fac *namedProfilesFacade) updateState(newState []NamedProfile) error {
+func (fac *namedProfilesFacade) updateState(newState []NamedProfile) error {
   oldNamedProfiles := fac.GetNamedProfiles()
   fac.SetNamedProfiles(newState)
 

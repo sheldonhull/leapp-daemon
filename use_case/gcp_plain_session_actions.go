@@ -2,15 +2,15 @@ package use_case
 
 import (
   "github.com/google/uuid"
-  "leapp_daemon/domain/named_profile"
   "leapp_daemon/domain/session"
   "leapp_daemon/infrastructure/http/http_error"
   "strings"
 )
 
 type GcpPlainSessionActions struct {
-  Keychain Keychain
-  GcpApi   GcpApi
+  Keychain             Keychain
+  GcpApi               GcpApi
+  NamedProfilesActions NamedProfilesActions
 }
 
 func (actions *GcpPlainSessionActions) GetSession(sessionId string) (session.GcpPlainSession, error) {
@@ -24,27 +24,9 @@ func (actions *GcpPlainSessionActions) GetOAuthUrl() (string, error) {
 func (actions *GcpPlainSessionActions) CreateSession(name string, accountId string, projectName string, profileName string,
   oauthCode string) error {
 
-  // TODO: check this logic
-  if profileName == "" {
-    profileName = "default"
-  }
-
-  namedProfile := named_profile.GetNamedProfilesFacade().GetNamedProfileByName(profileName)
-
-  // TODO: move to named_profiles_actions
-  if namedProfile == nil {
-    uuidString := uuid.New().String()
-    uuidString = strings.Replace(uuidString, "-", "", -1)
-
-    namedProfile = &named_profile.NamedProfile{
-      Id:   uuidString,
-      Name: profileName,
-    }
-
-    err := named_profile.GetNamedProfilesFacade().AddNamedProfile(*namedProfile)
-    if err != nil {
-      return err
-    }
+  namedProfile, err := actions.NamedProfilesActions.GetOrCreateNamedProfile(profileName)
+  if err != nil {
+    return err
   }
 
   // TODO: move to external logic
@@ -113,26 +95,9 @@ func (actions *GcpPlainSessionActions) DeleteSession(sessionId string) error {
 func (actions *GcpPlainSessionActions) EditSession(sessionId string, name string, projectName string, profileName string) error {
   sessionsFacade := session.GetGcpPlainSessionFacade()
 
-  if profileName == "" {
-    profileName = "default"
-  }
-
-  namedProfile := named_profile.GetNamedProfilesFacade().GetNamedProfileByName(profileName)
-
-  // TODO: move to named_profiles_actions
-  if namedProfile == nil {
-    uuidString := uuid.New().String()
-    uuidString = strings.Replace(uuidString, "-", "", -1)
-
-    namedProfile = &named_profile.NamedProfile{
-      Id:   uuidString,
-      Name: profileName,
-    }
-
-    err := named_profile.GetNamedProfilesFacade().AddNamedProfile(*namedProfile)
-    if err != nil {
-      return err
-    }
+  namedProfile, err := actions.NamedProfilesActions.GetOrCreateNamedProfile(profileName)
+  if err != nil {
+    return err
   }
 
   return sessionsFacade.EditSession(sessionId, name, projectName, namedProfile.Id)

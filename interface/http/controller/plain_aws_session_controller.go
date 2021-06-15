@@ -29,6 +29,7 @@ func CreatePlainAwsSessionController(context *gin.Context) {
 
 	plainAwsSessionService := use_case.PlainAwsSessionService{
 	  Keychain: &keychain.Keychain{},
+	  NamedProfilesActions: use_case.NamedProfilesActions{},
   }
 
 	err = plainAwsSessionService.Create(requestDto.Name, requestDto.AwsAccessKeyId, requestDto.AwsSecretAccessKey,
@@ -59,6 +60,7 @@ func GetPlainAwsSessionController(context *gin.Context) {
 
   plainAwsSessionService := use_case.PlainAwsSessionService{
     Keychain: &keychain.Keychain{},
+    NamedProfilesActions: use_case.NamedProfilesActions{},
   }
 
 	sess, err := plainAwsSessionService.GetPlainAwsSession(requestDto.Id)
@@ -99,6 +101,7 @@ func UpdatePlainAwsSessionController(context *gin.Context) {
 
   plainAwsSessionService := use_case.PlainAwsSessionService{
     Keychain: &keychain.Keychain{},
+    NamedProfilesActions: use_case.NamedProfilesActions{},
   }
 
 	err = plainAwsSessionService.UpdatePlainAwsSession(
@@ -163,6 +166,7 @@ func StartPlainAwsSessionController(context *gin.Context) {
 
   plainAwsSessionService := use_case.PlainAwsSessionService{
     Keychain: &keychain.Keychain{},
+    NamedProfilesActions: use_case.NamedProfilesActions{},
   }
 
 	err = plainAwsSessionService.StartPlainAwsSession(requestDto.Id)

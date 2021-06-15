@@ -13,10 +13,10 @@ import (
 
 type AwsCredentialsApplier struct {
   FileSystem FileSystem
-  Keychain Keychain
+  Keychain   Keychain
 }
 
-func(awsCredentialsApplier *AwsCredentialsApplier) UpdatePlainAwsSessions(oldPlainAwsSessions []session.PlainAwsSession, newPlainAwsSessions []session.PlainAwsSession) error {
+func (awsCredentialsApplier *AwsCredentialsApplier) UpdatePlainAwsSessions(oldPlainAwsSessions []session.PlainAwsSession, newPlainAwsSessions []session.PlainAwsSession) error {
   for i, oldSess := range oldPlainAwsSessions {
     if i < len(newPlainAwsSessions) {
       newSess := newPlainAwsSessions[i]
@@ -29,7 +29,12 @@ func(awsCredentialsApplier *AwsCredentialsApplier) UpdatePlainAwsSessions(oldPla
         }
 
         credentialsFilePath := homeDir + "/" + constant.CredentialsFilePath
-        profileName := named_profile.GetNamedProfilesFacade().GetNamedProfileById(newSess.Account.NamedProfileId).Name
+        namedProfile, err := named_profile.GetNamedProfilesFacade().GetNamedProfileById(newSess.Account.NamedProfileId)
+        if err != nil {
+          return err
+        }
+
+        profileName := namedProfile.Name
         region := newSess.Account.Region
 
         accessKeyId, secretAccessKey, err := awsCredentialsApplier.getAccessKeys(newSess.Id)
@@ -49,7 +54,7 @@ func(awsCredentialsApplier *AwsCredentialsApplier) UpdatePlainAwsSessions(oldPla
           }
 
           section, err := credentialsFile.GetSection(profileName)
-          if err != nil && err.Error() != fmt.Sprintf("section %q does not exist", profileName){
+          if err != nil && err.Error() != fmt.Sprintf("section %q does not exist", profileName) {
             return err
           }
 
@@ -99,7 +104,7 @@ func(awsCredentialsApplier *AwsCredentialsApplier) UpdatePlainAwsSessions(oldPla
   return nil
 }
 
-func(awsCredentialsApplier *AwsCredentialsApplier) getAccessKeys(sessionId string) (accessKeyId string, secretAccessKey string, error error) {
+func (awsCredentialsApplier *AwsCredentialsApplier) getAccessKeys(sessionId string) (accessKeyId string, secretAccessKey string, error error) {
   accessKeyId = ""
   secretAccessKey = ""
 
@@ -118,7 +123,7 @@ func(awsCredentialsApplier *AwsCredentialsApplier) getAccessKeys(sessionId strin
   return accessKeyId, secretAccessKey, nil
 }
 
-func(awsCredentialsApplier *AwsCredentialsApplier) getSessionToken(sessionId string) (sessionToken string, error error) {
+func (awsCredentialsApplier *AwsCredentialsApplier) getSessionToken(sessionId string) (sessionToken string, error error) {
   sessionToken = ""
 
   sessionTokenSecretName := sessionId + "-plain-aws-session-session-token"
@@ -130,7 +135,7 @@ func(awsCredentialsApplier *AwsCredentialsApplier) getSessionToken(sessionId str
   return sessionToken, nil
 }
 
-func(awsCredentialsApplier *AwsCredentialsApplier) createNamedProfileSection(credentialsFile *ini.File, profileName string, accessKeyId string,
+func (awsCredentialsApplier *AwsCredentialsApplier) createNamedProfileSection(credentialsFile *ini.File, profileName string, accessKeyId string,
   secretAccessKey string, sessionToken string, region string) (*ini.Section, error) {
 
   section, err := credentialsFile.NewSection(profileName)
@@ -163,7 +168,7 @@ func(awsCredentialsApplier *AwsCredentialsApplier) createNamedProfileSection(cre
   return section, nil
 }
 
-func(awsCredentialsApplier *AwsCredentialsApplier) appendToFile(file *ini.File, path string) error {
+func (awsCredentialsApplier *AwsCredentialsApplier) appendToFile(file *ini.File, path string) error {
   f, err := os.OpenFile(path, os.O_RDWR|os.O_APPEND, 0600)
   if err != nil {
     return http_error.NewNotFoundError(err)
@@ -177,7 +182,7 @@ func(awsCredentialsApplier *AwsCredentialsApplier) appendToFile(file *ini.File, 
   return nil
 }
 
-func(awsCredentialsApplier *AwsCredentialsApplier) overwriteFile(file *ini.File, path string) error {
+func (awsCredentialsApplier *AwsCredentialsApplier) overwriteFile(file *ini.File, path string) error {
   logging.Entry().Error("flag 3")
 
   f, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
