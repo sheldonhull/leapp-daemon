@@ -122,31 +122,40 @@ func (service *FederatedAlibabaSessionService) Create(name string, accountNumber
 }
 
 func (service *FederatedAlibabaSessionService) Get(id string) (*session.FederatedAlibabaSession, error) {
-	var sess *session.FederatedAlibabaSession
-	sess, err := session.GetFederatedAlibabaSessionsFacade().GetFederatedAlibabaSessionById(id)
-	return sess, err
+	return session.GetFederatedAlibabaSessionsFacade().GetFederatedAlibabaSessionById(id)
 }
 
 func (service *FederatedAlibabaSessionService) Update(sessionId string, name string, accountNumber string, roleName string, roleArn string,
-	idpArn string, region string, ssoUrl string, profile string) error {
+	idpArn string, regionName string, ssoUrl string, profileName string) error {
 
-	/*
-		config, err := configuration.ReadConfiguration()
-		if err != nil {
-			return err
-		}
+	isRegionValid := region.IsAlibabaRegionValid(regionName)
+	if !isRegionValid {
+		return http_error.NewUnprocessableEntityError(fmt.Errorf("Region " + regionName + " not valid"))
+	}
 
-		err = session2.UpdateFederatedAlibabaSession(config, sessionId, name, accountNumber, roleName, roleArn, idpArn, region, ssoUrl, profile)
-		if err != nil {
-			return err
-		}
+	federatedAlibabaRole := session.FederatedAlibabaRole{
+		Name: roleName,
+		Arn:  roleArn,
+	}
 
-		err = config.Update()
-		if err != nil {
-			return err
-		}
-	*/
+	federatedAlibabaAccount := session.FederatedAlibabaAccount{
+		AccountNumber: accountNumber,
+		Name:          name,
+		Role:          &federatedAlibabaRole,
+		IdpArn:        idpArn,
+		Region:        regionName,
+		/*SsoUrl:        ssoUrl,*/
+		NamedProfileId: profileName,
+	}
 
+	sess := session.FederatedAlibabaSession{
+		Id:      sessionId,
+		Status:  session.NotActive,
+		Account: &federatedAlibabaAccount,
+		Profile: profileName,
+	}
+
+	session.GetFederatedAlibabaSessionsFacade().SetFederatedAlibabaSessionById(sess)
 	return nil
 }
 
