@@ -9,7 +9,7 @@ import (
 	"net/http"
 )
 
-func (env *EngineEnvironment) ListSessionController(context *gin.Context) {
+func (controller *EngineController) ListSession(context *gin.Context) {
 	logging2.SetContext(context)
 
 	/*requestDto := request_dto2.ListSessionRequestDto{}
@@ -22,7 +22,7 @@ func (env *EngineEnvironment) ListSessionController(context *gin.Context) {
 	  listType := requestDto.Type
 	  query := requestDto.Query*/
 
-	sessionList, err := use_case.ListAllSessions(env.Providers.GetGcpPlainSessionFacade())
+	sessionList, err := use_case.ListAllSessions(controller.Providers.GetGcpPlainSessionFacade())
 	if err != nil {
 		_ = context.Error(err)
 		return
@@ -32,7 +32,7 @@ func (env *EngineEnvironment) ListSessionController(context *gin.Context) {
 	context.JSON(http.StatusOK, responseDto.ToMap())
 }
 
-func (env *EngineEnvironment) ConfirmMfaTokenController(context *gin.Context) {
+func (controller *EngineController) ConfirmMfaToken(context *gin.Context) {
 	logging2.SetContext(context)
 
 	requestDto := confirm_mfa_token_dto2.MfaTokenConfirmRequestDto{}
@@ -52,10 +52,10 @@ func (env *EngineEnvironment) ConfirmMfaTokenController(context *gin.Context) {
 	context.JSON(http.StatusOK, responseDto.ToMap())
 }
 
-func (env *EngineEnvironment) ListAwsNamedProfileController(context *gin.Context) {
+func (controller *EngineController) ListNamedProfiles(context *gin.Context) {
 	logging2.SetContext(context)
 
-	namedProfiles, err := use_case.ListAllNamedProfiles(env.Providers.GetNamedProfilesFacade())
+	namedProfiles, err := use_case.ListAllNamedProfiles(controller.Providers.GetNamedProfilesFacade())
 	if err != nil {
 		_ = context.Error(err)
 		return

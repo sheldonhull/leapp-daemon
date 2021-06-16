@@ -1,24 +1,24 @@
 package session
 
-type TrustedAwsSession struct {
+type AwsTrustedSession struct {
 	Id        string
 	Status    Status
 	StartTime string
 	ParentId  string
-	Account   *TrustedAwsAccount
+	Account   *AwsTrustedAccount
 }
 
-type TrustedAwsAccount struct {
+type AwsTrustedAccount struct {
 	AccountNumber string
 	Name          string
-	Role          *TrustedAwsRole
+	Role          *AwsTrustedRole
 	Region        string
 	// Type            string
 	// ParentSessionId string
 	// ParentRole      string
 }
 
-type TrustedAwsRole struct {
+type AwsTrustedRole struct {
 	Name string
 	Arn  string
 	// Parent string

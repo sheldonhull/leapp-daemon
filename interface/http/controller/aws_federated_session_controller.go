@@ -3,23 +3,23 @@ package controller
 import (
 	"github.com/gin-gonic/gin"
 	"leapp_daemon/infrastructure/logging"
-	"leapp_daemon/interface/http/controller/dto/request_dto/federated_aws_session_dto"
+	"leapp_daemon/interface/http/controller/dto/request_dto/aws_federated_session_dto"
 	"leapp_daemon/interface/http/controller/dto/response_dto"
 	"leapp_daemon/use_case"
 	"net/http"
 )
 
-func (env *EngineEnvironment) GetFederatedAwsSessionController(context *gin.Context) {
+func (controller *EngineController) GetAwsFederatedSession(context *gin.Context) {
 	logging.SetContext(context)
 
-	requestDto := federated_aws_session_dto.GetFederatedAwsSessionRequestDto{}
+	requestDto := aws_federated_session_dto.AwsGetFederatedSessionRequestDto{}
 	err := (&requestDto).Build(context)
 	if err != nil {
 		_ = context.Error(err)
 		return
 	}
 
-	sess, err := use_case.GetFederatedAwsSession(requestDto.Id)
+	sess, err := use_case.GetAwsFederatedSession(requestDto.Id)
 	if err != nil {
 		_ = context.Error(err)
 		return
@@ -29,17 +29,17 @@ func (env *EngineEnvironment) GetFederatedAwsSessionController(context *gin.Cont
 	context.JSON(http.StatusOK, responseDto.ToMap())
 }
 
-func (env *EngineEnvironment) CreateFederatedAwsSessionController(context *gin.Context) {
+func (controller *EngineController) CreateAwsFederatedSession(context *gin.Context) {
 	logging.SetContext(context)
 
-	requestDto := federated_aws_session_dto.CreateFederatedAwsSessionRequestDto{}
+	requestDto := aws_federated_session_dto.AwsCreateFederatedSessionRequestDto{}
 	err := (&requestDto).Build(context)
 	if err != nil {
 		_ = context.Error(err)
 		return
 	}
 
-	err = use_case.CreateFederatedAwsSession(requestDto.Name, requestDto.AccountNumber, requestDto.RoleName,
+	err = use_case.CreateAwsFederatedSession(requestDto.Name, requestDto.AccountNumber, requestDto.RoleName,
 		requestDto.RoleArn, requestDto.IdpArn, requestDto.Region, requestDto.SsoUrl,
 		requestDto.ProfileName)
 	if err != nil {
@@ -51,24 +51,24 @@ func (env *EngineEnvironment) CreateFederatedAwsSessionController(context *gin.C
 	context.JSON(http.StatusOK, responseDto.ToMap())
 }
 
-func (env *EngineEnvironment) EditFederatedAwsSessionController(context *gin.Context) {
+func (controller *EngineController) EditAwsFederatedSession(context *gin.Context) {
 	logging.SetContext(context)
 
-	requestUriDto := federated_aws_session_dto.EditFederatedAwsSessionUriRequestDto{}
+	requestUriDto := aws_federated_session_dto.AwsEditFederatedSessionUriRequestDto{}
 	err := (&requestUriDto).Build(context)
 	if err != nil {
 		_ = context.Error(err)
 		return
 	}
 
-	requestDto := federated_aws_session_dto.EditFederatedAwsSessionRequestDto{}
+	requestDto := aws_federated_session_dto.AwsEditFederatedSessionRequestDto{}
 	err = (&requestDto).Build(context)
 	if err != nil {
 		_ = context.Error(err)
 		return
 	}
 
-	err = use_case.UpdateFederatedAwsSession(
+	err = use_case.UpdateAwsFederatedSession(
 		requestUriDto.Id,
 		requestDto.Name,
 		requestDto.AccountNumber,
@@ -88,17 +88,17 @@ func (env *EngineEnvironment) EditFederatedAwsSessionController(context *gin.Con
 	context.JSON(http.StatusOK, responseDto.ToMap())
 }
 
-func (env *EngineEnvironment) DeleteFederatedAwsSessionController(context *gin.Context) {
+func (controller *EngineController) DeleteAwsFederatedSession(context *gin.Context) {
 	logging.SetContext(context)
 
-	requestDto := federated_aws_session_dto.DeleteFederatedAwsSessionRequestDto{}
+	requestDto := aws_federated_session_dto.AwsDeleteFederatedSessionRequestDto{}
 	err := (&requestDto).Build(context)
 	if err != nil {
 		_ = context.Error(err)
 		return
 	}
 
-	err = use_case.DeleteFederatedAwsSession(requestDto.Id)
+	err = use_case.DeleteAwsFederatedSession(requestDto.Id)
 
 	if err != nil {
 		_ = context.Error(err)
@@ -109,17 +109,17 @@ func (env *EngineEnvironment) DeleteFederatedAwsSessionController(context *gin.C
 	context.JSON(http.StatusOK, responseDto.ToMap())
 }
 
-func (env *EngineEnvironment) StartFederatedAwsSessionController(context *gin.Context) {
+func (controller *EngineController) StartAwsFederatedSession(context *gin.Context) {
 	logging.SetContext(context)
 
-	requestDto := federated_aws_session_dto.StartFederatedAwsSessionRequestDto{}
+	requestDto := aws_federated_session_dto.AwsStartFederatedSessionRequestDto{}
 	err := (&requestDto).Build(context)
 	if err != nil {
 		_ = context.Error(err)
 		return
 	}
 
-	err = use_case.StartFederatedAwsSession(requestDto.Id)
+	err = use_case.StartAwsFederatedSession(requestDto.Id)
 
 	if err != nil {
 		_ = context.Error(err)
@@ -130,17 +130,17 @@ func (env *EngineEnvironment) StartFederatedAwsSessionController(context *gin.Co
 	context.JSON(http.StatusOK, responseDto.ToMap())
 }
 
-func (env *EngineEnvironment) StopFederatedAwsSessionController(context *gin.Context) {
+func (controller *EngineController) StopAwsFederatedSession(context *gin.Context) {
 	logging.SetContext(context)
 
-	requestDto := federated_aws_session_dto.StopFederatedAwsSessionRequestDto{}
+	requestDto := aws_federated_session_dto.AwsStopFederatedSessionRequestDto{}
 	err := (&requestDto).Build(context)
 	if err != nil {
 		_ = context.Error(err)
 		return
 	}
 
-	err = use_case.StopFederatedAwsSession(requestDto.Id)
+	err = use_case.StopAwsFederatedSession(requestDto.Id)
 
 	if err != nil {
 		_ = context.Error(err)

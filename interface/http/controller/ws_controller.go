@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-func (env *EngineEnvironment) WsController(context *gin.Context) {
+func (controller *EngineController) GetWs(context *gin.Context) {
 	logging.SetContext(context)
 	serveWs(context.Writer, context.Request)
 }

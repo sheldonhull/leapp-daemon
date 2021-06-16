@@ -10,14 +10,14 @@ import (
 	"net/http"
 )
 
-func (env *EngineEnvironment) GetAwsRegionListController(context *gin.Context) {
+func (controller *EngineController) GetAwsRegionList(context *gin.Context) {
 	logging2.SetContext(context)
 
 	responseDto := response_dto2.MessageAndDataResponseDto{Message: "success", Data: region.GetRegionList()}
 	context.JSON(http.StatusOK, responseDto.ToMap())
 }
 
-func (env *EngineEnvironment) EditAwsRegionController(context *gin.Context) {
+func (controller *EngineController) EditAwsRegion(context *gin.Context) {
 	logging2.SetContext(context)
 
 	requestDto := aws_region_dto2.AwsRegionRequestDto{}

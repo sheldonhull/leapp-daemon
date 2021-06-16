@@ -1,19 +1,19 @@
-package trusted_aws_session_dto
+package aws_trusted_session_dto
 
 import (
 	"github.com/gin-gonic/gin"
 	"leapp_daemon/infrastructure/http/http_error"
 )
 
-// swagger:parameters deleteTrustedAwsSession
-type DeleteTrustedAwsSessionRequestDto struct {
-	// the id of the trusted aws session
+// swagger:parameters deleteAwsTrustedSession
+type AwsDeleteTrustedSessionRequestDto struct {
+	// the id of the aws trusted session
 	// in: path
 	// required: true
 	Id string `uri:"id" binding:"required"`
 }
 
-func (requestDto *DeleteTrustedAwsSessionRequestDto) Build(context *gin.Context) error {
+func (requestDto *AwsDeleteTrustedSessionRequestDto) Build(context *gin.Context) error {
 	err := context.ShouldBindUri(requestDto)
 	if err != nil {
 		return http_error.NewBadRequestError(err)

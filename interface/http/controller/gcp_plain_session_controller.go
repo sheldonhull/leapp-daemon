@@ -9,7 +9,7 @@ import (
 	"net/http"
 )
 
-func (env *EngineEnvironment) GetGcpOauthUrl(context *gin.Context) {
+func (controller *EngineController) GetGcpOauthUrl(context *gin.Context) {
 	// swagger:route GET /gcp/oauth/url gcpPlainSession getGcpOauthUrl
 	// Get the GCP OAuth url
 	//   Responses:
@@ -17,7 +17,7 @@ func (env *EngineEnvironment) GetGcpOauthUrl(context *gin.Context) {
 
 	logging.SetContext(context)
 
-	actions := env.Providers.GetGcpPlainSessionActions()
+	actions := controller.Providers.GetGcpPlainSessionActions()
 
 	url, err := actions.GetOAuthUrl()
 	if err != nil {
@@ -32,7 +32,7 @@ func (env *EngineEnvironment) GetGcpOauthUrl(context *gin.Context) {
 	context.JSON(http.StatusOK, responseDto.ToMap())
 }
 
-func (env *EngineEnvironment) CreateGcpPlainSession(context *gin.Context) {
+func (controller *EngineController) CreateGcpPlainSession(context *gin.Context) {
 	// swagger:route POST /gcp/session/plain gcpPlainSession createGcpPlainSession
 	// Create a new GCP Plain Session
 	//   Responses:
@@ -47,7 +47,7 @@ func (env *EngineEnvironment) CreateGcpPlainSession(context *gin.Context) {
 		return
 	}
 
-	actions := env.Providers.GetGcpPlainSessionActions()
+	actions := controller.Providers.GetGcpPlainSessionActions()
 
 	err = actions.CreateSession(requestDto.Name, requestDto.AccountId, requestDto.ProjectName,
 		requestDto.ProfileName, requestDto.OauthCode)
@@ -60,7 +60,7 @@ func (env *EngineEnvironment) CreateGcpPlainSession(context *gin.Context) {
 	context.JSON(http.StatusOK, responseDto.ToMap())
 }
 
-func (env *EngineEnvironment) GetGcpPlainSession(context *gin.Context) {
+func (controller *EngineController) GetGcpPlainSession(context *gin.Context) {
 	// swagger:route GET /gcp/session/plain/{id} gcpPlainSession gcpGetPlainSession
 	// Get a GCP Plain Session
 	//   Responses:
@@ -75,7 +75,7 @@ func (env *EngineEnvironment) GetGcpPlainSession(context *gin.Context) {
 		return
 	}
 
-	actions := env.Providers.GetGcpPlainSessionActions()
+	actions := controller.Providers.GetGcpPlainSessionActions()
 	gcpPlainSession, err := actions.GetSession(requestDto.Id)
 	if err != nil {
 		_ = context.Error(err)
@@ -90,7 +90,7 @@ func (env *EngineEnvironment) GetGcpPlainSession(context *gin.Context) {
 	context.JSON(http.StatusOK, responseDto.ToMap())
 }
 
-func (env *EngineEnvironment) StartGcpPlainSession(context *gin.Context) {
+func (controller *EngineController) StartGcpPlainSession(context *gin.Context) {
 	// swagger:route GET /gcp/session/plain/{id}/start gcpPlainSession startGcpPlainSession
 	// Start a GCP Plain Session
 	//   Responses:
@@ -105,7 +105,7 @@ func (env *EngineEnvironment) StartGcpPlainSession(context *gin.Context) {
 		return
 	}
 
-	actions := env.Providers.GetGcpPlainSessionActions()
+	actions := controller.Providers.GetGcpPlainSessionActions()
 	err = actions.StartSession(requestDto.Id)
 	if err != nil {
 		_ = context.Error(err)
@@ -116,7 +116,7 @@ func (env *EngineEnvironment) StartGcpPlainSession(context *gin.Context) {
 	context.JSON(http.StatusOK, responseDto.ToMap())
 }
 
-func (env *EngineEnvironment) StopGcpPlainSession(context *gin.Context) {
+func (controller *EngineController) StopGcpPlainSession(context *gin.Context) {
 	// swagger:route GET /gcp/session/plain/{id}/stop gcpPlainSession stopGcpPlainSession
 	// Stop a GCP Plain Session
 	//   Responses:
@@ -131,7 +131,7 @@ func (env *EngineEnvironment) StopGcpPlainSession(context *gin.Context) {
 		return
 	}
 
-	actions := env.Providers.GetGcpPlainSessionActions()
+	actions := controller.Providers.GetGcpPlainSessionActions()
 	err = actions.StopSession(requestDto.Id)
 	if err != nil {
 		_ = context.Error(err)
@@ -142,7 +142,7 @@ func (env *EngineEnvironment) StopGcpPlainSession(context *gin.Context) {
 	context.JSON(http.StatusOK, responseDto.ToMap())
 }
 
-func (env *EngineEnvironment) DeleteGcpPlainSession(context *gin.Context) {
+func (controller *EngineController) DeleteGcpPlainSession(context *gin.Context) {
 	// swagger:route DELETE /gcp/session/plain/{id} gcpPlainSession deleteGcpPlainSession
 	// Delete a GCP Plain Session
 	//   Responses:
@@ -157,7 +157,7 @@ func (env *EngineEnvironment) DeleteGcpPlainSession(context *gin.Context) {
 		return
 	}
 
-	actions := env.Providers.GetGcpPlainSessionActions()
+	actions := controller.Providers.GetGcpPlainSessionActions()
 	err = actions.DeleteSession(requestDto.Id)
 	if err != nil {
 		_ = context.Error(err)
@@ -168,7 +168,7 @@ func (env *EngineEnvironment) DeleteGcpPlainSession(context *gin.Context) {
 	context.JSON(http.StatusOK, responseDto.ToMap())
 }
 
-func (env *EngineEnvironment) EditGcpPlainSession(context *gin.Context) {
+func (controller *EngineController) EditGcpPlainSession(context *gin.Context) {
 	// swagger:route PUT /gcp/session/plain/{id} gcpPlainSession editGcpPlainSession
 	// Edit a GCP Plain Session
 	//   Responses:
@@ -190,7 +190,7 @@ func (env *EngineEnvironment) EditGcpPlainSession(context *gin.Context) {
 		return
 	}
 
-	actions := env.Providers.GetGcpPlainSessionActions()
+	actions := controller.Providers.GetGcpPlainSessionActions()
 	err = actions.EditSession(requestUriDto.Id, requestDto.Name, requestDto.ProjectName, requestDto.ProfileName)
 	if err != nil {
 		_ = context.Error(err)

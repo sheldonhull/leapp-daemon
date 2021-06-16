@@ -5,6 +5,7 @@ import (
 	"leapp_daemon/domain/configuration"
 	"leapp_daemon/domain/named_profile"
 	"leapp_daemon/domain/session"
+	"time"
 )
 
 type FileSystem interface {
@@ -57,6 +58,18 @@ type NamedProfilesFacade interface {
 
 type NamedProfilesActionsInterface interface {
 	GetOrCreateNamedProfile(profileName string) (named_profile.NamedProfile, error)
+}
+
+type AwsPlainSessionsFacade interface {
+	Subscribe(observer session.AwsPlainSessionsObserver)
+	GetSessions() []session.AwsPlainSession
+	SetSessions(sessions []session.AwsPlainSession)
+	AddSession(session session.AwsPlainSession) error
+	RemoveSession(id string) error
+	GetSessionById(id string) (*session.AwsPlainSession, error)
+	SetSessionStatusToPending(id string) error
+	SetSessionStatusToActive(id string) error
+	SetSessionTokenExpiration(sessionId string, sessionTokenExpiration time.Time) error
 }
 
 type GcpPlainSessionsFacade interface {

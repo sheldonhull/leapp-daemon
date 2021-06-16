@@ -1,18 +1,18 @@
-package trusted_aws_session_dto
+package aws_trusted_session_dto
 
 import (
 	"github.com/gin-gonic/gin"
 	"leapp_daemon/infrastructure/http/http_error"
 )
 
-// swagger:parameters createTrustedAwsSession
-type CreateTrustedAwsSessionParamsWrapper struct {
+// swagger:parameters createAwsTrustedSession
+type AwsCreateTrustedSessionParamsWrapper struct {
 	// This text will appear as description of your request body.
 	// in:body
-	Body CreateTrustedAwsSessionRequestDto
+	Body AwsCreateTrustedSessionRequestDto
 }
 
-type CreateTrustedAwsSessionRequestDto struct {
+type AwsCreateTrustedSessionRequestDto struct {
 	// the parent session id, can be an aws plain or federated session
 	// it's generated with an uuid v4
 	// required: true
@@ -34,7 +34,7 @@ type CreateTrustedAwsSessionRequestDto struct {
 	Region string `json:"region" binding:"awsregion"`
 }
 
-func (requestDto *CreateTrustedAwsSessionRequestDto) Build(context *gin.Context) error {
+func (requestDto *AwsCreateTrustedSessionRequestDto) Build(context *gin.Context) error {
 	err := context.ShouldBindJSON(requestDto)
 	if err != nil {
 		return http_error.NewBadRequestError(err)

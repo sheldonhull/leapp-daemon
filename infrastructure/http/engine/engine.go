@@ -53,47 +53,47 @@ func (engineWrapper *engineWrapper) Serve(port int) {
 }
 
 func initializeRoutes(ginEngine *gin.Engine, providers *providers2.Providers) {
-	engineEnvironment := controller.EngineEnvironment{Providers: providers}
+	controller := controller.EngineController{Providers: providers}
 
 	v1 := ginEngine.Group("/api/v1")
 	{
-		v1.GET("/session/list", engineEnvironment.ListSessionController)
-		v1.POST("/session/mfa/token/confirm", engineEnvironment.ConfirmMfaTokenController)
+		v1.GET("/session/list", controller.ListSession)
+		v1.POST("/session/mfa/token/confirm", controller.ConfirmMfaToken)
 
 		// AWS
-		v1.GET("/session/plain/:id", engineEnvironment.GetPlainAwsSessionController)
-		v1.POST("/session/plain", engineEnvironment.CreateAwsPlainSessionController)
-		v1.PUT("/session/plain/:id", engineEnvironment.UpdatePlainAwsSessionController)
-		v1.DELETE("/session/plain/:id", engineEnvironment.DeletePlainAwsSessionController)
-		v1.POST("/session/plain/:id/start", engineEnvironment.StartPlainAwsSessionController)
-		v1.POST("/session/plain/:id/stop", engineEnvironment.StopPlainAwsSessionController)
+		v1.GET("/session/plain/:id", controller.GetAwsPlainSession)
+		v1.POST("/session/plain", controller.CreateAwsPlainSession)
+		v1.PUT("/session/plain/:id", controller.UpdateAwsPlainSession)
+		v1.DELETE("/session/plain/:id", controller.DeleteAwsPlainSession)
+		v1.POST("/session/plain/:id/start", controller.StartAwsPlainSession)
+		v1.POST("/session/plain/:id/stop", controller.StopAwsPlainSession)
 
-		v1.GET("/session/federated/:id", engineEnvironment.GetFederatedAwsSessionController)
-		v1.POST("/session/federated", engineEnvironment.CreateFederatedAwsSessionController)
-		v1.PUT("/session/federated/:id", engineEnvironment.EditFederatedAwsSessionController)
-		v1.DELETE("/session/federated/:id", engineEnvironment.DeleteFederatedAwsSessionController)
-		v1.POST("/session/federated/:id/start", engineEnvironment.StartFederatedAwsSessionController)
-		v1.POST("/session/federated/:id/stop", engineEnvironment.StopFederatedAwsSessionController)
+		v1.GET("/session/federated/:id", controller.GetAwsFederatedSession)
+		v1.POST("/session/federated", controller.CreateAwsFederatedSession)
+		v1.PUT("/session/federated/:id", controller.EditAwsFederatedSession)
+		v1.DELETE("/session/federated/:id", controller.DeleteAwsFederatedSession)
+		v1.POST("/session/federated/:id/start", controller.StartAwsFederatedSession)
+		v1.POST("/session/federated/:id/stop", controller.StopAwsFederatedSession)
 
-		v1.GET("/session/trusted/:id", engineEnvironment.GetTrustedAwsSessionController)
-		v1.POST("/session/trusted", engineEnvironment.CreateTrustedAwsSessionController)
-		v1.PUT("/session/trusted/:id", engineEnvironment.EditTrustedAwsSessionController)
-		v1.DELETE("/session/trusted/:id", engineEnvironment.DeleteTrustedAwsSessionController)
+		v1.GET("/session/trusted/:id", controller.GetAwsTrustedSession)
+		v1.POST("/session/trusted", controller.CreateAwsTrustedSession)
+		v1.PUT("/session/trusted/:id", controller.EditAwsTrustedSession)
+		v1.DELETE("/session/trusted/:id", controller.DeleteAwsTrustedSession)
 
-		v1.GET("/region/aws/list", engineEnvironment.GetAwsRegionListController)
-		v1.PUT("/region/aws/", engineEnvironment.EditAwsRegionController)
+		v1.GET("/region/aws/list", controller.GetAwsRegionList)
+		v1.PUT("/region/aws/", controller.EditAwsRegion)
 
-		v1.GET("/named_profile/aws/list", engineEnvironment.ListAwsNamedProfileController)
+		v1.GET("/named_profile/aws/list", controller.ListNamedProfiles)
 
 		// GCP
-		v1.GET("/gcp/oauth/url", engineEnvironment.GetGcpOauthUrl)
-		v1.POST("/gcp/session/plain", engineEnvironment.CreateGcpPlainSession)
-		v1.GET("/gcp/session/plain/:id", engineEnvironment.GetGcpPlainSession)
-		v1.PUT("/gcp/session/plain/:id", engineEnvironment.EditGcpPlainSession)
-		v1.DELETE("/gcp/session/plain/:id", engineEnvironment.DeleteGcpPlainSession)
-		v1.POST("/gcp/session/plain/:id/start", engineEnvironment.StartGcpPlainSession)
-		v1.POST("/gcp/session/plain/:id/stop", engineEnvironment.StopGcpPlainSession)
+		v1.GET("/gcp/oauth/url", controller.GetGcpOauthUrl)
+		v1.POST("/gcp/session/plain", controller.CreateGcpPlainSession)
+		v1.GET("/gcp/session/plain/:id", controller.GetGcpPlainSession)
+		v1.PUT("/gcp/session/plain/:id", controller.EditGcpPlainSession)
+		v1.DELETE("/gcp/session/plain/:id", controller.DeleteGcpPlainSession)
+		v1.POST("/gcp/session/plain/:id/start", controller.StartGcpPlainSession)
+		v1.POST("/gcp/session/plain/:id/stop", controller.StopGcpPlainSession)
 
-		v1.GET("/ws", engineEnvironment.WsController)
+		v1.GET("/ws", controller.GetWs)
 	}
 }

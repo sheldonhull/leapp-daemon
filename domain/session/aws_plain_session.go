@@ -260,7 +260,7 @@ func CreatePlainAwsSession(sessionContainer Container, name string, accountNumbe
 	return nil
 }
 
-func GetPlainAwsSession(sessionContainer Container, id string) (*AwsPlainSession, error) {
+func GetAwsPlainSession(sessionContainer Container, id string) (*AwsPlainSession, error) {
 	sess, err := getById(sessionContainer, id)
 	if err != nil {
 		return sess, err
@@ -295,7 +295,7 @@ func ListPlainAwsSession(sessionContainer Container, query string) ([]*AwsPlainS
 	}
 }
 
-func UpdatePlainAwsSession(sessionContainer Container, id string, name string, accountNumber string, region string,
+func UpdateAwsPlainSession(sessionContainer Container, id string, name string, accountNumber string, region string,
 	user string, awsAccessKeyId string, awsSecretAccessKey string, mfaDevice string, profile string) error {
 
 	sessions, err := sessionContainer.GetSessions()
@@ -370,7 +370,7 @@ func IsMfaRequiredForPlainAwsSession(sessionContainer Container, id string) (boo
 	return sess.IsMfaRequired()
 }
 
-func StartPlainAwsSession(sessionContainer Container, id string, mfaToken *string) error {
+func StartAwsPlainSession(sessionContainer Container, id string, mfaToken *string) error {
 	sess, err := getById(sessionContainer, id)
 	if err != nil {
 		return err
@@ -383,7 +383,7 @@ func StartPlainAwsSession(sessionContainer Container, id string, mfaToken *strin
 }
 
 func StopPlainAwsSession(sessionContainer Container, id string) error {
-	sess, err := GetPlainAwsSession(sessionContainer, id)
+	sess, err := GetAwsPlainSession(sessionContainer, id)
 	if err != nil {
 		return err
 	}

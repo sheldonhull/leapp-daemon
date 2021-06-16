@@ -14,9 +14,10 @@ func (prov *Providers) GetAwsPlainSessionActions() *use_case.AwsPlainSessionActi
 
 	if awsPlainSessionActionsSingleton == nil {
 		awsPlainSessionActionsSingleton = &use_case.AwsPlainSessionActions{
-			NamedProfilesActions: prov.GetNamedProfilesActions(),
-			Environment:          prov.GetEnvironment(),
-			Keychain:             prov.GetKeychain(),
+			NamedProfilesActions:   prov.GetNamedProfilesActions(),
+			Environment:            prov.GetEnvironment(),
+			Keychain:               prov.GetKeychain(),
+			AwsPlainSessionsFacade: prov.GetAwsPlainSessionFacade(),
 		}
 	}
 	return awsPlainSessionActionsSingleton

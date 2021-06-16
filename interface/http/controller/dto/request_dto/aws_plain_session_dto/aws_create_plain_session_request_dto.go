@@ -1,18 +1,18 @@
-package plain_aws_session_dto
+package aws_plain_session_dto
 
 import (
-  "github.com/gin-gonic/gin"
-  "leapp_daemon/infrastructure/http/http_error"
+	"github.com/gin-gonic/gin"
+	"leapp_daemon/infrastructure/http/http_error"
 )
 
-// swagger:parameters createPlainAwsSession
-type CreatePlainAwsSessionRequestWrapper struct {
-	// plain aws session create body
+// swagger:parameters createAwsPlainSession
+type AwsCreatePlainSessionRequestWrapper struct {
+	// aws plain session create body
 	// in:body
-	Body CreatePlainAwsSessionRequest
+	Body AwsCreatePlainSessionRequest
 }
 
-type CreatePlainAwsSessionRequest struct {
+type AwsCreatePlainSessionRequest struct {
 	// the name which will be displayed
 	// required: true
 	Name string `json:"name" binding:"required"`
@@ -32,7 +32,7 @@ type CreatePlainAwsSessionRequest struct {
 	ProfileName        string `json:"profileName"`
 }
 
-func (requestDto *CreatePlainAwsSessionRequest) Build(context *gin.Context) error {
+func (requestDto *AwsCreatePlainSessionRequest) Build(context *gin.Context) error {
 	err := context.ShouldBindJSON(requestDto)
 	if err != nil {
 		return http_error.NewBadRequestError(err)

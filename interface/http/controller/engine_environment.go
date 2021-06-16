@@ -4,6 +4,6 @@ import (
 	providers2 "leapp_daemon/providers"
 )
 
-type EngineEnvironment struct {
+type EngineController struct {
 	Providers *providers2.Providers
 }

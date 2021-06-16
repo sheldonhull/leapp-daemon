@@ -7,7 +7,7 @@ import (
 	http_error2 "leapp_daemon/infrastructure/http/http_error"
 )
 
-func CreateTrustedAwsSession(parentId string, accountName string, accountNumber string, roleName string, region string) error {
+func CreateAwsTrustedSession(parentId string, accountName string, accountNumber string, roleName string, region string) error {
 	/*
 		config, err := configuration.ReadConfiguration()
 		if err != nil {
@@ -32,10 +32,10 @@ func CreateTrustedAwsSession(parentId string, accountName string, accountNumber 
 			}
 		}
 
-		trustedAwsAccount := session2.TrustedAwsAccount{
+		trustedAwsAccount := session2.AwsTrustedAccount{
 			AccountNumber: accountNumber,
 			Name:          accountName,
-			Role: &session2.TrustedAwsRole{
+			Role: &session2.AwsTrustedRole{
 				Name: roleName,
 				Arn:  fmt.Sprintf("arn:aws:iam::%s:role/%s", accountNumber, roleName),
 			},
@@ -46,7 +46,7 @@ func CreateTrustedAwsSession(parentId string, accountName string, accountNumber 
 		uuidString := uuid.New().String() //use Environment.GenerateUuid()
 		uuidString = strings.Replace(uuidString, "-", "", -1)
 
-		sess := session2.TrustedAwsSession{
+		sess := session2.AwsTrustedSession{
 			Id:        uuidString,
 			Status:    session2.NotActive,
 			StartTime: "",
@@ -68,9 +68,9 @@ func CreateTrustedAwsSession(parentId string, accountName string, accountNumber 
 	return nil
 }
 
-func GetTrustedAwsSession(id string) (*session2.TrustedAwsSession, error) {
+func GetAwsTrustedSession(id string) (*session2.AwsTrustedSession, error) {
 	/*
-		var sess *session2.TrustedAwsSession
+		var sess *session2.AwsTrustedSession
 
 		config, err := configuration.ReadConfiguration()
 		if err != nil {
@@ -92,7 +92,7 @@ func GetTrustedAwsSession(id string) (*session2.TrustedAwsSession, error) {
 	return nil, http_error2.NewNotFoundError(fmt.Errorf("no session found with id %s", id))
 }
 
-func UpdateTrustedAwsSession(id string, parentId string, accountName string, accountNumber string, roleName string, region string) error {
+func UpdateAwsTrustedSession(id string, parentId string, accountName string, accountNumber string, roleName string, region string) error {
 	/*
 		config, err := configuration.ReadConfiguration()
 		if err != nil {
@@ -152,7 +152,7 @@ func UpdateTrustedAwsSession(id string, parentId string, accountName string, acc
 	return nil
 }
 
-func DeleteTrustedAwsSession(id string) error {
+func DeleteAwsTrustedSession(id string) error {
 	/*
 		config, err := configuration.ReadConfiguration()
 		if err != nil {

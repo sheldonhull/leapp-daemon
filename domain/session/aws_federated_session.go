@@ -5,29 +5,29 @@ import (
 	"time"
 )
 
-type FederatedAwsSession struct {
+type AwsFederatedSession struct {
 	Id        string
 	Status    Status
 	StartTime string
-	Account   *FederatedAwsAccount
+	Account   *AwsFederatedAccount
 	Profile   string
 }
 
-type FederatedAwsAccount struct {
+type AwsFederatedAccount struct {
 	AccountNumber string
 	Name          string
-	Role          *FederatedAwsRole
+	Role          *AwsFederatedRole
 	IdpArn        string
 	Region        string
 	SsoUrl        string
 }
 
-type FederatedAwsRole struct {
+type AwsFederatedRole struct {
 	Name string
 	Arn  string
 }
 
-func (sess *FederatedAwsSession) IsRotationIntervalExpired() (bool, error) {
+func (sess *AwsFederatedSession) IsRotationIntervalExpired() (bool, error) {
 	startTime, _ := time.Parse(time.RFC3339, sess.StartTime)
 	secondsPassedFromStart := time.Now().Sub(startTime).Seconds()
 	return int64(secondsPassedFromStart) > constant.RotationIntervalInSeconds, nil
@@ -51,12 +51,12 @@ func CreateFederatedAwsSession(sessionContainer Container, name string, accountN
 		}
 	}
 
-	role := FederatedAwsRole{
+	role := AwsFederatedRole{
 		Name: roleName,
 		Arn:  roleArn,
 	}
 
-	federatedAwsAccount := FederatedAwsAccount{
+	federatedAwsAccount := AwsFederatedAccount{
 		AccountNumber: accountNumber,
 		Name:          name,
 		Role:          &role,
@@ -73,7 +73,7 @@ func CreateFederatedAwsSession(sessionContainer Container, name string, accountN
 		return err
 	}
 
-	session := FederatedAwsSession{
+	session := AwsFederatedSession{
 		Id:        uuidString,
 		Status:    NotActive,
 		StartTime: "",
@@ -87,7 +87,7 @@ func CreateFederatedAwsSession(sessionContainer Container, name string, accountN
 	return nil
 }
 
-func GetFederatedAwsSession(sessionContainer Container, id string) (*FederatedAwsSession, error) {
+func GetFederatedAwsSession(sessionContainer Container, id string) (*AwsFederatedSession, error) {
 	sessions, err := sessionContainer.GetFederatedAwsSessions()
 	if err != nil {
 		return nil, err
@@ -102,13 +102,13 @@ func GetFederatedAwsSession(sessionContainer Container, id string) (*FederatedAw
 	return nil, http_error2.NewNotFoundError(fmt.Errorf("No session found with id:" + id))
 }
 
-func ListFederatedAwsSession(sessionContainer Container, query string) ([]*FederatedAwsSession, error) {
+func ListFederatedAwsSession(sessionContainer Container, query string) ([]*AwsFederatedSession, error) {
 	sessions, err := sessionContainer.GetFederatedAwsSessions()
 	if err != nil {
 		return nil, err
 	}
 
-	filteredList := make([]*FederatedAwsSession, 0)
+	filteredList := make([]*AwsFederatedSession, 0)
 
 	if query == "" {
 		return append(filteredList, sessions...), nil
@@ -145,7 +145,7 @@ func UpdateFederatedAwsSession(sessionContainer Container, id string, name strin
 			if err != nil { return err }
 
 			sessions[index].Profile = namedProfileId
-			sessions[index].Account = &FederatedAwsAccount{
+			sessions[index].Account = &AwsFederatedAccount{
 				AccountNumber: accountNumber,
 				Name:          name,
 				Region:        region,
@@ -153,7 +153,7 @@ func UpdateFederatedAwsSession(sessionContainer Container, id string, name strin
 				SsoUrl:        ssoUrl,
 			}
 
-			sessions[index].Account.Role = &FederatedAwsRole{
+			sessions[index].Account.Role = &AwsFederatedRole{
 				Name: roleName,
 				Arn:  roleArn,
 			}

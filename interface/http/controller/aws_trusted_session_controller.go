@@ -4,39 +4,39 @@ import (
 	"github.com/gin-gonic/gin"
 	"leapp_daemon/domain/session"
 	"leapp_daemon/infrastructure/logging"
-	"leapp_daemon/interface/http/controller/dto/request_dto/trusted_aws_session_dto"
+	"leapp_daemon/interface/http/controller/dto/request_dto/aws_trusted_session_dto"
 	"leapp_daemon/interface/http/controller/dto/response_dto"
 	"leapp_daemon/use_case"
 	"net/http"
 )
 
-// swagger:response getTrustedAwsSessionResponse
-type getTrustedAwsSessionResponseWrapper struct {
+// swagger:response getAwsTrustedSessionResponse
+type getAwsTrustedSessionResponseWrapper struct {
 	// in: body
-	Body getTrustedAwsSessionResponse
+	Body getAwsTrustedSessionResponse
 }
 
-type getTrustedAwsSessionResponse struct {
+type getAwsTrustedSessionResponse struct {
 	Message string
-	Data    session.TrustedAwsSession
+	Data    session.AwsTrustedSession
 }
 
-func (env *EngineEnvironment) CreateTrustedAwsSessionController(context *gin.Context) {
-	// swagger:route POST /session/trusted session-trusted-aws createTrustedAwsSession
-	// Create a new trusted aws session
+func (controller *EngineController) CreateAwsTrustedSession(context *gin.Context) {
+	// swagger:route POST /session/trusted session-trusted-aws createAwsTrustedSession
+	// Create a new aws trusted session
 	//   Responses:
 	//     200: messageResponse
 
 	logging.SetContext(context)
 
-	requestDto := trusted_aws_session_dto.CreateTrustedAwsSessionRequestDto{}
+	requestDto := aws_trusted_session_dto.AwsCreateTrustedSessionRequestDto{}
 	err := (&requestDto).Build(context)
 	if err != nil {
 		_ = context.Error(err)
 		return
 	}
 
-	err = use_case.CreateTrustedAwsSession(requestDto.ParentId, requestDto.AccountName, requestDto.AccountNumber, requestDto.RoleName, requestDto.Region)
+	err = use_case.CreateAwsTrustedSession(requestDto.ParentId, requestDto.AccountName, requestDto.AccountNumber, requestDto.RoleName, requestDto.Region)
 	if err != nil {
 		_ = context.Error(err)
 		return
@@ -46,22 +46,22 @@ func (env *EngineEnvironment) CreateTrustedAwsSessionController(context *gin.Con
 	context.JSON(http.StatusOK, responseDto.ToMap())
 }
 
-func (env *EngineEnvironment) GetTrustedAwsSessionController(context *gin.Context) {
-	// swagger:route GET /session/trusted/{id} session-trusted-aws getTrustedAwsSession
-	// Get a Trusted AWS Session
+func (controller *EngineController) GetAwsTrustedSession(context *gin.Context) {
+	// swagger:route GET /session/trusted/{id} session-trusted-aws getAwsTrustedSession
+	// Get a AWS Trusted Session
 	//   Responses:
-	//     200: getTrustedAwsSessionResponse
+	//     200: getAwsTrustedSessionResponse
 
 	logging.SetContext(context)
 
-	requestDto := trusted_aws_session_dto.GetTrustedAwsSessionRequestDto{}
+	requestDto := aws_trusted_session_dto.AwsGetTrustedSessionRequestDto{}
 	err := (&requestDto).Build(context)
 	if err != nil {
 		_ = context.Error(err)
 		return
 	}
 
-	sess, err := use_case.GetTrustedAwsSession(requestDto.Id)
+	sess, err := use_case.GetAwsTrustedSession(requestDto.Id)
 	if err != nil {
 		_ = context.Error(err)
 		return
@@ -71,29 +71,29 @@ func (env *EngineEnvironment) GetTrustedAwsSessionController(context *gin.Contex
 	context.JSON(http.StatusOK, responseDto.ToMap())
 }
 
-func (env *EngineEnvironment) EditTrustedAwsSessionController(context *gin.Context) {
-	// swagger:route PUT /session/trusted/{id} session-trusted-aws editTrustedAwsSession
-	// Edit a Trusted AWS Session
+func (controller *EngineController) EditAwsTrustedSession(context *gin.Context) {
+	// swagger:route PUT /session/trusted/{id} session-trusted-aws editAwsTrustedSession
+	// Edit a AWS Trusted Session
 	//   Responses:
 	//     200: messageResponse
 
 	logging.SetContext(context)
 
-	requestUriDto := trusted_aws_session_dto.EditTrustedAwsSessionUriRequestDto{}
+	requestUriDto := aws_trusted_session_dto.AwsEditTrustedSessionUriRequestDto{}
 	err := (&requestUriDto).Build(context)
 	if err != nil {
 		_ = context.Error(err)
 		return
 	}
 
-	requestDto := trusted_aws_session_dto.EditTrustedAwsSessionRequestDto{}
+	requestDto := aws_trusted_session_dto.AwsEditTrustedSessionRequestDto{}
 	err = (&requestDto).Build(context)
 	if err != nil {
 		_ = context.Error(err)
 		return
 	}
 
-	err = use_case.UpdateTrustedAwsSession(
+	err = use_case.UpdateAwsTrustedSession(
 		requestUriDto.Id,
 		requestDto.ParentId,
 		requestDto.AccountName,
@@ -110,22 +110,22 @@ func (env *EngineEnvironment) EditTrustedAwsSessionController(context *gin.Conte
 	context.JSON(http.StatusOK, responseDto.ToMap())
 }
 
-func (env *EngineEnvironment) DeleteTrustedAwsSessionController(context *gin.Context) {
-	// swagger:route DELETE /session/trusted/{id} session-trusted-aws deleteTrustedAwsSession
-	// Delete a Trusted AWS Session
+func (controller *EngineController) DeleteAwsTrustedSession(context *gin.Context) {
+	// swagger:route DELETE /session/trusted/{id} session-trusted-aws deleteAwsTrustedSession
+	// Delete a AWS Trusted Session
 	//   Responses:
 	//     200: messageResponse
 
 	logging.SetContext(context)
 
-	requestDto := trusted_aws_session_dto.DeleteTrustedAwsSessionRequestDto{}
+	requestDto := aws_trusted_session_dto.AwsDeleteTrustedSessionRequestDto{}
 	err := (&requestDto).Build(context)
 	if err != nil {
 		_ = context.Error(err)
 		return
 	}
 
-	err = use_case.DeleteTrustedAwsSession(requestDto.Id)
+	err = use_case.DeleteAwsTrustedSession(requestDto.Id)
 
 	if err != nil {
 		_ = context.Error(err)

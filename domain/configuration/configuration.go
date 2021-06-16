@@ -10,9 +10,9 @@ import (
 
 type Configuration struct {
 	ProxyConfiguration   ProxyConfiguration
-	PlainAwsSessions     []session.AwsPlainSession
-	FederatedAwsSessions []session.FederatedAwsSession
-	TrustedAwsSessions   []session.TrustedAwsSession
+	PlainAwsSessions     []session.AwsPlainSession     // TODO: migrate to AwsPlainSessions
+	FederatedAwsSessions []session.AwsFederatedSession // TODO: migrate to AwsFederatedSessions
+	TrustedAwsSessions   []session.AwsTrustedSession   // TODO: migrate to AwsTrustedSessions
 	GcpPlainSessions     []session.GcpPlainSession
 	NamedProfiles        []named_profile.NamedProfile
 }
@@ -34,7 +34,7 @@ func GetDefaultConfiguration() Configuration {
 			Username:      "",
 			Password:      "",
 		},
-		FederatedAwsSessions: make([]session.FederatedAwsSession, 0),
+		FederatedAwsSessions: make([]session.AwsFederatedSession, 0),
 		PlainAwsSessions:     make([]session.AwsPlainSession, 0),
 		GcpPlainSessions:     make([]session.GcpPlainSession, 0),
 	}
@@ -46,20 +46,20 @@ func FromJson(configurationJson string) Configuration {
 	return config
 }
 
-func (config *Configuration) AddAwsPlainSession(plainAwsSession session.AwsPlainSession) error {
+func (config *Configuration) AddAwsPlainSession(awsPlainSession session.AwsPlainSession) error {
 	sessions, err := config.GetAllAwsPlainSessions()
 	if err != nil {
 		return err
 	}
 
 	for _, sess := range sessions {
-		if plainAwsSession.Id == sess.Id {
-			return http_error.NewConflictError(fmt.Errorf("a AwsPlainSession with id " + plainAwsSession.Id +
+		if awsPlainSession.Id == sess.Id {
+			return http_error.NewConflictError(fmt.Errorf("a AwsPlainSession with id " + awsPlainSession.Id +
 				" is already present"))
 		}
 	}
 
-	sessions = append(sessions, plainAwsSession)
+	sessions = append(sessions, awsPlainSession)
 	config.PlainAwsSessions = sessions
 
 	return nil
@@ -69,20 +69,20 @@ func (config *Configuration) GetAllAwsPlainSessions() ([]session.AwsPlainSession
 	return config.PlainAwsSessions, nil
 }
 
-func (config *Configuration) RemoveAwsPlainSession(plainAwsSession session.AwsPlainSession) error {
+func (config *Configuration) RemoveAwsPlainSession(awsPlainSession session.AwsPlainSession) error {
 	sessions, err := config.GetAllAwsPlainSessions()
 	if err != nil {
 		return err
 	}
 
 	for i, sess := range sessions {
-		if plainAwsSession.Id == sess.Id {
+		if awsPlainSession.Id == sess.Id {
 			config.PlainAwsSessions = append(config.PlainAwsSessions[:i], config.PlainAwsSessions[i+1:]...)
 			return nil
 		}
 	}
 
-	return http_error.NewNotFoundError(fmt.Errorf("AwsPlainSession with id " + plainAwsSession.Id +
+	return http_error.NewNotFoundError(fmt.Errorf("AwsPlainSession with id " + awsPlainSession.Id +
 		" not found"))
 }
 
@@ -184,20 +184,20 @@ func (config *Configuration) Update() error {
   return nil
 }
 
-func (config *Configuration) GetFederatedAwsSessions() ([]*session.FederatedAwsSession, error) {
+func (config *Configuration) GetFederatedAwsSessions() ([]*session.AwsFederatedSession, error) {
 	return config.FederatedAwsSessions, nil
 }
 
-func (config *Configuration) SetFederatedAwsSessions(federatedAwsSessions []*session.FederatedAwsSession) error {
+func (config *Configuration) SetFederatedAwsSessions(federatedAwsSessions []*session.AwsFederatedSession) error {
 	config.FederatedAwsSessions = federatedAwsSessions
 	return nil
 }
 
-func (config *Configuration) GetTrustedAwsSessions() ([]*session.TrustedAwsSession, error) {
+func (config *Configuration) GetTrustedAwsSessions() ([]*session.AwsTrustedSession, error) {
   return config.TrustedAwsSessions, nil
 }
 
-func (config *Configuration) SetTrustedAwsSessions(trustedAwsSessions []*session.TrustedAwsSession) error {
+func (config *Configuration) SetTrustedAwsSessions(trustedAwsSessions []*session.AwsTrustedSession) error {
   config.TrustedAwsSessions = trustedAwsSessions
   return nil
 }

@@ -16,10 +16,10 @@ type AwsCredentialsApplier struct {
 	NamedProfilesFacade NamedProfilesFacade
 }
 
-func (applier *AwsCredentialsApplier) UpdateAwsPlainSessions(oldPlainAwsSessions []session.AwsPlainSession, newPlainAwsSessions []session.AwsPlainSession) error {
-	for i, oldSess := range oldPlainAwsSessions {
-		if i < len(newPlainAwsSessions) {
-			newSess := newPlainAwsSessions[i]
+func (applier *AwsCredentialsApplier) UpdateAwsPlainSessions(oldSessions []session.AwsPlainSession, newSessions []session.AwsPlainSession) error {
+	for i, oldSess := range oldSessions {
+		if i < len(newSessions) {
+			newSess := newSessions[i]
 
 			if oldSess.Status == session.NotActive && newSess.Status == session.Pending {
 
