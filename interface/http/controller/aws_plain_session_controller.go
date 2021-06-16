@@ -4,9 +4,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"leapp_daemon/domain/session"
 	"leapp_daemon/infrastructure/logging"
-	plain_aws_session_request_dto "leapp_daemon/interface/http/controller/dto/request_dto/aws_plain_session_dto"
+	aws_plain_session_request_dto "leapp_daemon/interface/http/controller/dto/request_dto/aws_plain_session_dto"
 	"leapp_daemon/interface/http/controller/dto/response_dto"
-	plain_aws_session_response_dto "leapp_daemon/interface/http/controller/dto/response_dto/aws_plain_session_dto"
+	aws_plain_session_response_dto "leapp_daemon/interface/http/controller/dto/response_dto/aws_plain_session_dto"
 	"leapp_daemon/use_case"
 	"net/http"
 )
@@ -19,7 +19,7 @@ func (controller *EngineController) CreateAwsPlainSession(context *gin.Context) 
 
 	logging.SetContext(context)
 
-	requestDto := plain_aws_session_request_dto.AwsCreatePlainSessionRequest{}
+	requestDto := aws_plain_session_request_dto.AwsCreatePlainSessionRequest{}
 	err := (&requestDto).Build(context)
 	if err != nil {
 		_ = context.Error(err)
@@ -47,7 +47,7 @@ func (controller *EngineController) GetAwsPlainSession(context *gin.Context) {
 
 	logging.SetContext(context)
 
-	requestDto := plain_aws_session_request_dto.AwsGetPlainSessionRequestDto{}
+	requestDto := aws_plain_session_request_dto.AwsGetPlainSessionRequestDto{}
 	err := (&requestDto).Build(context)
 	if err != nil {
 		_ = context.Error(err)
@@ -62,7 +62,7 @@ func (controller *EngineController) GetAwsPlainSession(context *gin.Context) {
 		return
 	}
 
-	responseDto := plain_aws_session_response_dto.AwsGetPlainSessionResponse{
+	responseDto := aws_plain_session_response_dto.AwsGetPlainSessionResponse{
 		Message: "success",
 		Data:    *sess,
 	}
@@ -78,14 +78,14 @@ func (controller *EngineController) UpdateAwsPlainSession(context *gin.Context) 
 
 	logging.SetContext(context)
 
-	requestUriDto := plain_aws_session_request_dto.AwsUpdatePlainSessionUriRequest{}
+	requestUriDto := aws_plain_session_request_dto.AwsUpdatePlainSessionUriRequest{}
 	err := (&requestUriDto).Build(context)
 	if err != nil {
 		_ = context.Error(err)
 		return
 	}
 
-	requestDto := plain_aws_session_request_dto.AwsUpdatePlainSessionRequest{}
+	requestDto := aws_plain_session_request_dto.AwsUpdatePlainSessionRequest{}
 	err = (&requestDto).Build(context)
 	if err != nil {
 		_ = context.Error(err)
@@ -122,7 +122,7 @@ func (controller *EngineController) DeleteAwsPlainSession(context *gin.Context) 
 
 	logging.SetContext(context)
 
-	requestDto := plain_aws_session_request_dto.AwsDeletePlainSessionRequest{}
+	requestDto := aws_plain_session_request_dto.AwsDeletePlainSessionRequest{}
 	err := (&requestDto).Build(context)
 	if err != nil {
 		_ = context.Error(err)
@@ -147,7 +147,7 @@ func (controller *EngineController) StartAwsPlainSession(context *gin.Context) {
 
 	logging.SetContext(context)
 
-	requestDto := plain_aws_session_request_dto.AwsStartPlainSessionRequest{}
+	requestDto := aws_plain_session_request_dto.AwsStartPlainSessionRequest{}
 	err := (&requestDto).Build(context)
 	if err != nil {
 		_ = context.Error(err)
@@ -170,7 +170,7 @@ func (controller *EngineController) StartAwsPlainSession(context *gin.Context) {
 func (controller *EngineController) StopAwsPlainSession(context *gin.Context) {
 	logging.SetContext(context)
 
-	requestDto := plain_aws_session_request_dto.AwsStopPlainSessionRequestDto{}
+	requestDto := aws_plain_session_request_dto.AwsStopPlainSessionRequestDto{}
 	err := (&requestDto).Build(context)
 	if err != nil {
 		_ = context.Error(err)
