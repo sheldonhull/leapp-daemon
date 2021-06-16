@@ -11,7 +11,7 @@ import (
 	"net/http"
 )
 
-func (env *EngineEnvironment) CreatePlainAwsSessionController(context *gin.Context) {
+func (env *EngineEnvironment) CreateAwsPlainSessionController(context *gin.Context) {
 	// swagger:route POST /session/plain plainAwsSession createPlainAwsSession
 	// Create a new Plain AWS Session
 	//   Responses:
@@ -129,7 +129,7 @@ func (env *EngineEnvironment) DeletePlainAwsSessionController(context *gin.Conte
 		return
 	}
 
-	err = session.GetPlainAwsSessionsFacade().RemovePlainAwsSession(requestDto.Id)
+	err = session.NewAwsPlainSessionsFacade().RemoveSession(requestDto.Id)
 	if err != nil {
 		_ = context.Error(err)
 		return

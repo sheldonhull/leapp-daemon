@@ -8,15 +8,9 @@ import (
 	"leapp_daemon/infrastructure/http/http_error"
 )
 
-type Repository interface {
-	CreateConfiguration(Configuration) error
-	GetConfiguration() (Configuration, error)
-	UpdateConfiguration(Configuration) error
-}
-
 type Configuration struct {
 	ProxyConfiguration   ProxyConfiguration
-	PlainAwsSessions     []session.PlainAwsSession
+	PlainAwsSessions     []session.AwsPlainSession
 	FederatedAwsSessions []session.FederatedAwsSession
 	TrustedAwsSessions   []session.TrustedAwsSession
 	GcpPlainSessions     []session.GcpPlainSession
@@ -41,7 +35,7 @@ func GetDefaultConfiguration() Configuration {
 			Password:      "",
 		},
 		FederatedAwsSessions: make([]session.FederatedAwsSession, 0),
-		PlainAwsSessions:     make([]session.PlainAwsSession, 0),
+		PlainAwsSessions:     make([]session.AwsPlainSession, 0),
 		GcpPlainSessions:     make([]session.GcpPlainSession, 0),
 	}
 }
@@ -52,15 +46,15 @@ func FromJson(configurationJson string) Configuration {
 	return config
 }
 
-func (config *Configuration) AddPlainAwsSession(plainAwsSession session.PlainAwsSession) error {
-	sessions, err := config.GetAllPlainAwsSessions()
+func (config *Configuration) AddAwsPlainSession(plainAwsSession session.AwsPlainSession) error {
+	sessions, err := config.GetAllAwsPlainSessions()
 	if err != nil {
 		return err
 	}
 
 	for _, sess := range sessions {
 		if plainAwsSession.Id == sess.Id {
-			return http_error.NewConflictError(fmt.Errorf("a PlainAwsSession with id " + plainAwsSession.Id +
+			return http_error.NewConflictError(fmt.Errorf("a AwsPlainSession with id " + plainAwsSession.Id +
 				" is already present"))
 		}
 	}
@@ -71,12 +65,12 @@ func (config *Configuration) AddPlainAwsSession(plainAwsSession session.PlainAws
 	return nil
 }
 
-func (config *Configuration) GetAllPlainAwsSessions() ([]session.PlainAwsSession, error) {
+func (config *Configuration) GetAllAwsPlainSessions() ([]session.AwsPlainSession, error) {
 	return config.PlainAwsSessions, nil
 }
 
-func (config *Configuration) RemovePlainAwsSession(plainAwsSession session.PlainAwsSession) error {
-	sessions, err := config.GetAllPlainAwsSessions()
+func (config *Configuration) RemoveAwsPlainSession(plainAwsSession session.AwsPlainSession) error {
+	sessions, err := config.GetAllAwsPlainSessions()
 	if err != nil {
 		return err
 	}
@@ -88,7 +82,7 @@ func (config *Configuration) RemovePlainAwsSession(plainAwsSession session.Plain
 		}
 	}
 
-	return http_error.NewNotFoundError(fmt.Errorf("PlainAwsSession with id " + plainAwsSession.Id +
+	return http_error.NewNotFoundError(fmt.Errorf("AwsPlainSession with id " + plainAwsSession.Id +
 		" not found"))
 }
 

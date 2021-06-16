@@ -2,21 +2,14 @@ package main
 
 import (
 	"fmt"
-	"leapp_daemon/domain/session"
-	"leapp_daemon/infrastructure/encryption"
 	"leapp_daemon/infrastructure/http/engine"
 	"leapp_daemon/infrastructure/logging"
-	"leapp_daemon/interface/gcp"
-	"leapp_daemon/interface/repository"
 	"leapp_daemon/providers"
-	"leapp_daemon/use_case"
 )
 
 func main() {
 
 	prov := providers.NewProviders()
-
-	// TODO: add logging state observers
 
 	defer logging.CloseLogFile()
 	//defer timer.Close()
@@ -24,10 +17,7 @@ func main() {
 	// TODO: create BootstrapActions calling Gcp/AWS-BootstrapActions
 
 	fileSystem := prov.GetFileSystem()
-	fileConfigurationRepository := repository.FileConfigurationRepository{
-		FileSystem: fileSystem,
-		Encryption: &encryption.Encryption{},
-	}
+	fileConfigurationRepository := prov.GetFileConfigurationRepository()
 
 	config, err := fileConfigurationRepository.GetConfiguration()
 	if err != nil {
@@ -60,55 +50,27 @@ func main() {
 	}
 
 	// AWS PLAIN
-	plainAwsSessionFacade := session.GetPlainAwsSessionsFacade()
-
-	plainAwsSessions := config.PlainAwsSessions
-	logging.Info(fmt.Sprintf("%+v", plainAwsSessions))
-	plainAwsSessionFacade.SetPlainAwsSessions(plainAwsSessions)
-
-	plainAwsSessionFacade.Subscribe(&use_case.AwsSessionsWriter{
-		ConfigurationRepository: &fileConfigurationRepository,
-	})
-
-	plainAwsSessionFacade.Subscribe(&use_case.AwsCredentialsApplier{
-		FileSystem:          fileSystem,
-		Keychain:            prov.GetKeychain(),
-		NamedProfilesFacade: prov.GetNamedProfilesFacade(),
-	})
+	awsPlainSessionFacade := prov.GetAwsPlainSessionFacade()
+	awsPlainSessions := config.PlainAwsSessions
+	awsPlainSessionFacade.SetSessions(awsPlainSessions)
+	awsPlainSessionFacade.Subscribe(prov.GetAwsSessionWriter())
+	awsPlainSessionFacade.Subscribe(prov.GetAwsCredentialsApplier())
+	logging.Info(fmt.Sprintf("%+v", awsPlainSessions))
 
 	// GCP PLAIN
 	gcpPlainSessionFacade := prov.GetGcpPlainSessionFacade()
-
 	gcpPlainSessions := config.GcpPlainSessions
-	logging.Info(fmt.Sprintf("%+v", gcpPlainSessions))
 	gcpPlainSessionFacade.SetSessions(gcpPlainSessions)
-
-	gcpPlainSessionFacade.Subscribe(&use_case.GcpSessionsWriter{
-		ConfigurationRepository: &fileConfigurationRepository,
-	})
-
-	gcpPlainSessionFacade.Subscribe(&use_case.GcpCredentialsApplier{
-		Repository: &repository.GcloudConfigurationRepository{
-			FileSystem:        fileSystem,
-			Environment:       prov.GetEnvironment(),
-			CredentialsTable:  &gcp.CredentialsTable{},
-			AccessTokensTable: &gcp.AccessTokensTable{},
-		},
-		Keychain: prov.GetKeychain(),
-	})
+	gcpPlainSessionFacade.Subscribe(prov.GetGcpSessionWriter())
+	gcpPlainSessionFacade.Subscribe(prov.GetGcpCredentialsApplier())
+	logging.Info(fmt.Sprintf("%+v", gcpPlainSessions))
 
 	// NAMED PROFILES
 	namedProfilesFacade := prov.GetNamedProfilesFacade()
-
 	namedProfiles := config.NamedProfiles
-	logging.Info(fmt.Sprintf("%+v", namedProfiles))
 	namedProfilesFacade.SetNamedProfiles(namedProfiles)
-
-	namedProfilesFacade.Subscribe(&use_case.NamedProfilesWriter{
-		ConfigurationRepository: &fileConfigurationRepository,
-	})
-
-	// TODO: subscribe observer that reads session token from keychain and writes it down into credentials file
+	namedProfilesFacade.Subscribe(prov.GetNamedProfilesWriter())
+	logging.Info(fmt.Sprintf("%+v", namedProfiles))
 
 	//timer.Initialize(1, use_case.RotateAllSessionsCredentials)
 	//go websocket.Hub.Run()

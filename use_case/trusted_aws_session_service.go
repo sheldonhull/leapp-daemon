@@ -195,7 +195,7 @@ func DeleteTrustedAwsSession(id string) error {
 func CheckParentExist(parentId string, config *configuration.Configuration) error {
 	/*
 		foundId := false
-		plains, err := config.GetPlainAwsSessions()
+		plains, err := config.GetSessions()
 		if err != nil {
 			return err
 		}

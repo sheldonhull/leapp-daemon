@@ -1,18 +1,18 @@
 package gcp
 
 import (
-  "database/sql"
-  "fmt"
-  _ "github.com/mattn/go-sqlite3"
-  "leapp_daemon/infrastructure/http/http_error"
+	"database/sql"
+	"fmt"
+	_ "github.com/mattn/go-sqlite3"
+	"leapp_daemon/infrastructure/http/http_error"
 )
 
 var accessTokensTableName = "access_tokens"
 
-type AccessTokensTable struct {
+type GcpAccessTokensTable struct {
 }
 
-func (table *AccessTokensTable) RemoveAccessToken(sqlFilePath string, accountId string) error {
+func (table *GcpAccessTokensTable) RemoveAccessToken(sqlFilePath string, accountId string) error {
 	database, err := getSqliteDatabase(sqlFilePath)
 	if err != nil {
 		return err
@@ -27,7 +27,7 @@ func (table *AccessTokensTable) RemoveAccessToken(sqlFilePath string, accountId 
 	return nil
 }
 
-func (table *AccessTokensTable) deleteQuery(database *sql.DB, accountId string) error {
+func (table *GcpAccessTokensTable) deleteQuery(database *sql.DB, accountId string) error {
 	deleteQuery := fmt.Sprintf("DELETE FROM %v WHERE account_id=?", accessTokensTableName)
 	statement, err := database.Prepare(deleteQuery)
 	if err != nil {

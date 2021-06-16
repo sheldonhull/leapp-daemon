@@ -5,22 +5,22 @@ import (
 	"time"
 )
 
-type PlainAwsSessionContainer interface {
-	AddPlainAwsSession(PlainAwsSession) error
-	GetAllPlainAwsSessions() ([]PlainAwsSession, error)
-	RemovePlainAwsSession(session PlainAwsSession) error
+type AwsPlainSessionContainer interface {
+	AddAwsPlainSession(AwsPlainSession) error
+	GetAllAwsPlainSessions() ([]AwsPlainSession, error)
+	RemoveAwsPlainSession(session AwsPlainSession) error
 }
 
-type PlainAwsSession struct {
+type AwsPlainSession struct {
 	Id           string
 	Alias        string
 	Status       Status
 	StartTime    string
 	LastStopTime string
-	Account      *PlainAwsAccount
+	Account      *AwsPlainAccount
 }
 
-type PlainAwsAccount struct {
+type AwsPlainAccount struct {
 	MfaDevice              string
 	Region                 string
 	NamedProfileId         string
@@ -33,18 +33,18 @@ type AwsSessionToken struct {
 	SessionToken    string
 }
 
-func (sess *PlainAwsSession) IsMfaRequired() (bool, error) {
+func (sess *AwsPlainSession) IsMfaRequired() (bool, error) {
 	return sess.Account.MfaDevice != "", nil
 }
 
-func (sess *PlainAwsSession) IsRotationIntervalExpired() (bool, error) {
+func (sess *AwsPlainSession) IsRotationIntervalExpired() (bool, error) {
 	startTime, _ := time.Parse(time.RFC3339, sess.StartTime)
 	secondsPassedFromStart := time.Now().Sub(startTime).Seconds()
 	return int64(secondsPassedFromStart) > constant.RotationIntervalInSeconds, nil
 }
 
 /*
-func(sess *PlainAwsSession) Rotate(rotateConfiguration *RotateConfiguration) error {
+func(sess *AwsPlainSession) Rotate(rotateConfiguration *RotateConfiguration) error {
 	if sess.Status == Active {
 		isRotationIntervalExpired, err := sess.IsRotationIntervalExpired()
 		if err != nil {
@@ -63,7 +63,7 @@ func(sess *PlainAwsSession) Rotate(rotateConfiguration *RotateConfiguration) err
 	return nil
 }
 
-func(sess *PlainAwsSession) RotatePlainAwsSessionCredentials(mfaToken *string) error {
+func(sess *AwsPlainSession) RotatePlainAwsSessionCredentials(mfaToken *string) error {
 	doSessionTokenExist, err := session_token.DoExist(sess.Account.Name)
 	if err != nil {
 		return err
@@ -158,7 +158,7 @@ func(sess *PlainAwsSession) RotatePlainAwsSessionCredentials(mfaToken *string) e
 	}
 }
 
-func (sess *PlainAwsSession) unmarshallSessionToken() (AwsSessionToken, error) {
+func (sess *AwsPlainSession) unmarshallSessionToken() (AwsSessionToken, error) {
 	sessionTokenJson, _, err := access_keys.Get(sess.Account.Name)
 
 	var data AwsSessionToken
@@ -170,10 +170,10 @@ func (sess *PlainAwsSession) unmarshallSessionToken() (AwsSessionToken, error) {
 	return data, nil
 }
 
-func getById(sessionContainer Container, id string) (*PlainAwsSession, error) {
-	var sess *PlainAwsSession
+func getById(sessionContainer Container, id string) (*AwsPlainSession, error) {
+	var sess *AwsPlainSession
 
-	sessions, err := sessionContainer.GetPlainAwsSessions()
+	sessions, err := sessionContainer.GetSessions()
 	if err != nil { return sess, err }
 
 	for index := range sessions {
@@ -187,7 +187,7 @@ func getById(sessionContainer Container, id string) (*PlainAwsSession, error) {
 	return sess, err
 }
 
-func sendMfaRequestMessage(sess *PlainAwsSession) error {
+func sendMfaRequestMessage(sess *AwsPlainSession) error {
 	messageData := websocket.MfaTokenRequestData{
 		SessionId: sess.Id,
 	}
@@ -213,7 +213,7 @@ func sendMfaRequestMessage(sess *PlainAwsSession) error {
 func CreatePlainAwsSession(sessionContainer Container, name string, accountNumber string,
 	region string, user string, awsAccessKeyId string, awsSecretAccessKey string, mfaDevice string, profile string) error {
 
-	sessions, err := sessionContainer.GetPlainAwsSessions()
+	sessions, err := sessionContainer.GetSessions()
 	if err != nil {
 		return err
 	}
@@ -226,7 +226,7 @@ func CreatePlainAwsSession(sessionContainer Container, name string, accountNumbe
 		}
 	}
 
-	plainAwsAccount := PlainAwsAccount{
+	plainAwsAccount := AwsPlainAccount{
 		AccountNumber: accountNumber,
 		Name:          name,
 		Region:        region,
@@ -244,7 +244,7 @@ func CreatePlainAwsSession(sessionContainer Container, name string, accountNumbe
 		return err
 	}
 
-	sess := PlainAwsSession{
+	sess := AwsPlainSession{
 		Id:        uuidString,
 		Status:    NotActive,
 		StartTime: "",
@@ -252,7 +252,7 @@ func CreatePlainAwsSession(sessionContainer Container, name string, accountNumbe
 		Profile:   namedProfileId,
 	}
 
-	err = sessionContainer.SetPlainAwsSessions(append(sessions, &sess))
+	err = sessionContainer.SetSessions(append(sessions, &sess))
 	if err != nil {
 		return err
 	}
@@ -260,7 +260,7 @@ func CreatePlainAwsSession(sessionContainer Container, name string, accountNumbe
 	return nil
 }
 
-func GetPlainAwsSession(sessionContainer Container, id string) (*PlainAwsSession, error) {
+func GetPlainAwsSession(sessionContainer Container, id string) (*AwsPlainSession, error) {
 	sess, err := getById(sessionContainer, id)
 	if err != nil {
 		return sess, err
@@ -269,10 +269,10 @@ func GetPlainAwsSession(sessionContainer Container, id string) (*PlainAwsSession
 	return sess, nil
 }
 
-func ListPlainAwsSession(sessionContainer Container, query string) ([]*PlainAwsSession, error) {
-	filteredList := make([]*PlainAwsSession, 0)
+func ListPlainAwsSession(sessionContainer Container, query string) ([]*AwsPlainSession, error) {
+	filteredList := make([]*AwsPlainSession, 0)
 
-	allSessions, err := sessionContainer.GetPlainAwsSessions()
+	allSessions, err := sessionContainer.GetSessions()
 	if err != nil { return filteredList, nil }
 
 	if query == "" {
@@ -298,7 +298,7 @@ func ListPlainAwsSession(sessionContainer Container, query string) ([]*PlainAwsS
 func UpdatePlainAwsSession(sessionContainer Container, id string, name string, accountNumber string, region string,
 	user string, awsAccessKeyId string, awsSecretAccessKey string, mfaDevice string, profile string) error {
 
-	sessions, err := sessionContainer.GetPlainAwsSessions()
+	sessions, err := sessionContainer.GetSessions()
 	if err != nil { return err }
 
 	found := false
@@ -308,7 +308,7 @@ func UpdatePlainAwsSession(sessionContainer Container, id string, name string, a
 			if err != nil { return err }
 
 			sessions[index].Profile = namedProfileId
-			sessions[index].Account = &PlainAwsAccount{
+			sessions[index].Account = &AwsPlainAccount{
 				AccountNumber: accountNumber,
 				Name:          name,
 				Region:        region,
@@ -326,14 +326,14 @@ func UpdatePlainAwsSession(sessionContainer Container, id string, name string, a
 		return err
 	}
 
-	err = sessionContainer.SetPlainAwsSessions(sessions)
+	err = sessionContainer.SetSessions(sessions)
 	if err != nil { return err }
 
 	return nil
 }
 
 func DeletePlainAwsSession(sessionContainer Container, id string) error {
-	sessions, err := sessionContainer.GetPlainAwsSessions()
+	sessions, err := sessionContainer.GetSessions()
 	if err != nil {
 		return err
 	}
@@ -352,7 +352,7 @@ func DeletePlainAwsSession(sessionContainer Container, id string) error {
 		return err
 	}
 
-	err = sessionContainer.SetPlainAwsSessions(sessions)
+	err = sessionContainer.SetSessions(sessions)
 	if err != nil {
 		return err
 	}

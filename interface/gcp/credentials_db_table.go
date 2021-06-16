@@ -1,18 +1,18 @@
 package gcp
 
 import (
-  "database/sql"
-  "fmt"
-  _ "github.com/mattn/go-sqlite3"
-  "leapp_daemon/infrastructure/http/http_error"
+	"database/sql"
+	"fmt"
+	_ "github.com/mattn/go-sqlite3"
+	"leapp_daemon/infrastructure/http/http_error"
 )
 
 var credentialsTableName = "credentials"
 
-type CredentialsTable struct {
+type GcpCredentialsTable struct {
 }
 
-func (table *CredentialsTable) WriteCredentials(sqlFilePath string, accountId string, value string) error {
+func (table *GcpCredentialsTable) WriteCredentials(sqlFilePath string, accountId string, value string) error {
 	database, err := getSqliteDatabase(sqlFilePath)
 	if err != nil {
 		return err
@@ -32,7 +32,7 @@ func (table *CredentialsTable) WriteCredentials(sqlFilePath string, accountId st
 	return nil
 }
 
-func (table *CredentialsTable) RemoveCredentials(sqlFilePath string, accountId string) error {
+func (table *GcpCredentialsTable) RemoveCredentials(sqlFilePath string, accountId string) error {
 	database, err := getSqliteDatabase(sqlFilePath)
 	if err != nil {
 		return err
@@ -47,7 +47,7 @@ func (table *CredentialsTable) RemoveCredentials(sqlFilePath string, accountId s
 	return nil
 }
 
-func (table *CredentialsTable) createTable(database *sql.DB) error {
+func (table *GcpCredentialsTable) createTable(database *sql.DB) error {
 	createTableQuery := fmt.Sprintf(`CREATE TABLE IF NOT EXISTS "%v" (
 	  "account_id"	TEXT,
 	  "value"	BLOB,
@@ -67,7 +67,7 @@ func (table *CredentialsTable) createTable(database *sql.DB) error {
 	return nil
 }
 
-func (table *CredentialsTable) insertQuery(database *sql.DB, accountId string, value string) error {
+func (table *GcpCredentialsTable) insertQuery(database *sql.DB, accountId string, value string) error {
 	insertQuery := fmt.Sprintf("INSERT INTO %v (account_id, value) VALUES(?, ?) ON CONFLICT(account_id) DO UPDATE SET value=excluded.value", credentialsTableName)
 	statement, err := database.Prepare(insertQuery)
 	if err != nil {
@@ -82,7 +82,7 @@ func (table *CredentialsTable) insertQuery(database *sql.DB, accountId string, v
 	return nil
 }
 
-func (table *CredentialsTable) deleteQuery(database *sql.DB, accountId string) error {
+func (table *GcpCredentialsTable) deleteQuery(database *sql.DB, accountId string) error {
 	deleteQuery := fmt.Sprintf("DELETE FROM %v WHERE account_id=?", credentialsTableName)
 	statement, err := database.Prepare(deleteQuery)
 	if err != nil {

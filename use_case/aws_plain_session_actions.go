@@ -22,14 +22,14 @@ func (actions *AwsPlainSessionActions) Create(alias string, awsAccessKeyId strin
 		return err
 	}
 
-	plainAwsAccount := session.PlainAwsAccount{
+	plainAwsAccount := session.AwsPlainAccount{
 		MfaDevice:              mfaDevice,
 		Region:                 region,
 		NamedProfileId:         namedProfile.Id,
 		SessionTokenExpiration: "",
 	}
 
-	sess := session.PlainAwsSession{
+	sess := session.AwsPlainSession{
 		Id:           actions.Environment.GenerateUuid(),
 		Alias:        alias,
 		Status:       session.NotActive,
@@ -38,7 +38,7 @@ func (actions *AwsPlainSessionActions) Create(alias string, awsAccessKeyId strin
 		Account:      &plainAwsAccount,
 	}
 
-	err = session.GetPlainAwsSessionsFacade().AddPlainAwsSession(sess)
+	err = session.NewAwsPlainSessionsFacade().AddSession(sess)
 	if err != nil {
 		return err
 	}
@@ -57,9 +57,9 @@ func (actions *AwsPlainSessionActions) Create(alias string, awsAccessKeyId strin
 	return nil
 }
 
-func (actions *AwsPlainSessionActions) GetPlainAwsSession(id string) (*session.PlainAwsSession, error) {
-	var sess *session.PlainAwsSession
-	sess, err := session.GetPlainAwsSessionsFacade().GetPlainAwsSessionById(id)
+func (actions *AwsPlainSessionActions) GetPlainAwsSession(id string) (*session.AwsPlainSession, error) {
+	var sess *session.AwsPlainSession
+	sess, err := session.NewAwsPlainSessionsFacade().GetSessionById(id)
 	return sess, err
 }
 
@@ -108,7 +108,7 @@ func DeletePlainAwsSession(sessionId string) error {
 }
 
 func (actions *AwsPlainSessionActions) StartPlainAwsSession(sessionId string) error {
-	plainAwsSession, err := session.GetPlainAwsSessionsFacade().GetPlainAwsSessionById(sessionId)
+	plainAwsSession, err := session.NewAwsPlainSessionsFacade().GetSessionById(sessionId)
 	if err != nil {
 		return err
 	}
@@ -147,12 +147,12 @@ func (actions *AwsPlainSessionActions) StartPlainAwsSession(sessionId string) er
 		}
 	}
 
-	err = session.GetPlainAwsSessionsFacade().SetPlainAwsSessionStatusToPending(sessionId)
+	err = session.NewAwsPlainSessionsFacade().SetSessionStatusToPending(sessionId)
 	if err != nil {
 		return err
 	}
 
-	err = session.GetPlainAwsSessionsFacade().SetPlainAwsSessionStatusToActive(sessionId)
+	err = session.NewAwsPlainSessionsFacade().SetSessionStatusToActive(sessionId)
 	if err != nil {
 		return err
 	}
@@ -189,7 +189,7 @@ func StopPlainAwsSession(sessionId string) error {
 }
 
 // TODO: encapsulate this logic inside a session token generation interface
-func (actions *AwsPlainSessionActions) generateSessionToken(plainAwsSession session.PlainAwsSession) error {
+func (actions *AwsPlainSessionActions) generateSessionToken(plainAwsSession session.AwsPlainSession) error {
 	accessKeyIdSecretName := plainAwsSession.Id + "-plain-aws-session-access-key-id"
 
 	accessKeyId, err := actions.Keychain.GetSecret(accessKeyIdSecretName)
@@ -221,7 +221,7 @@ func (actions *AwsPlainSessionActions) generateSessionToken(plainAwsSession sess
 		return err
 	}
 
-	err = session.GetPlainAwsSessionsFacade().SetPlainAwsSessionSessionTokenExpiration(plainAwsSession.Id, *credentials.Expiration)
+	err = session.NewAwsPlainSessionsFacade().SetSessionTokenExpiration(plainAwsSession.Id, *credentials.Expiration)
 	if err != nil {
 		return err
 	}

@@ -16,7 +16,7 @@ type AwsCredentialsApplier struct {
 	NamedProfilesFacade NamedProfilesFacade
 }
 
-func (applier *AwsCredentialsApplier) UpdatePlainAwsSessions(oldPlainAwsSessions []session.PlainAwsSession, newPlainAwsSessions []session.PlainAwsSession) error {
+func (applier *AwsCredentialsApplier) UpdateAwsPlainSessions(oldPlainAwsSessions []session.AwsPlainSession, newPlainAwsSessions []session.AwsPlainSession) error {
 	for i, oldSess := range oldPlainAwsSessions {
 		if i < len(newPlainAwsSessions) {
 			newSess := newPlainAwsSessions[i]

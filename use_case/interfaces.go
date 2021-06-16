@@ -2,6 +2,7 @@ package use_case
 
 import (
 	"golang.org/x/oauth2"
+	"leapp_daemon/domain/configuration"
 	"leapp_daemon/domain/named_profile"
 	"leapp_daemon/domain/session"
 )
@@ -9,9 +10,6 @@ import (
 type FileSystem interface {
 	DoesFileExist(path string) bool
 	GetHomeDir() (string, error)
-	ReadFile(path string) ([]byte, error)
-	RemoveFile(path string) error
-	WriteToFile(path string, data []byte) error
 }
 
 type Environment interface {
@@ -29,6 +27,25 @@ type GcpApi interface {
 	GetOauthUrl() (string, error)
 	GetOauthToken(authCode string) (*oauth2.Token, error)
 	GetCredentials(oauthToken *oauth2.Token) string
+}
+
+type ConfigurationRepository interface {
+	CreateConfiguration(configuration.Configuration) error
+	GetConfiguration() (configuration.Configuration, error)
+	UpdateConfiguration(configuration.Configuration) error
+}
+
+type GcpConfigurationRepository interface {
+	DoesGcloudConfigFolderExist() (bool, error)
+	CreateConfiguration(configurationName string, account string, project string) error
+	RemoveConfiguration(configurationName string) error
+	ActivateConfiguration(configurationName string) error
+	DeactivateConfiguration() error
+	WriteDefaultCredentials(credentialsJson string) error
+	RemoveDefaultCredentials() error
+	WriteCredentialsToDb(accountId string, credentialsJson string) error
+	RemoveCredentialsFromDb(accountId string) error
+	RemoveAccessTokensFromDb(accountId string) error
 }
 
 type NamedProfilesFacade interface {

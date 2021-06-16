@@ -1,24 +1,24 @@
 package plain_aws_session_dto
 
 import (
-  "github.com/gin-gonic/gin"
-  "leapp_daemon/domain/session"
+	"github.com/gin-gonic/gin"
+	"leapp_daemon/domain/session"
 )
 
 // swagger:response getPlainAwsSessionResponse
 type GetPlainAwsSessionResponseWrapper struct {
-  // in: body
-  Body GetPlainAwsSessionResponse
+	// in: body
+	Body GetPlainAwsSessionResponse
 }
 
 type GetPlainAwsSessionResponse struct {
-  Message string
-  Data    session.PlainAwsSession
+	Message string
+	Data    session.AwsPlainSession
 }
 
 func (responseDto *GetPlainAwsSessionResponse) ToMap() gin.H {
-  return gin.H{
-    "message": responseDto.Message,
-    "data": responseDto.Data,
-  }
+	return gin.H{
+		"message": responseDto.Message,
+		"data":    responseDto.Data,
+	}
 }

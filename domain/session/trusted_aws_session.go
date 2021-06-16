@@ -28,7 +28,7 @@ type TrustedAwsRole struct {
 /*
 func CreateTrusterAwsSession(AccountName string, AccountNumber string, RoleName string, Region string) error {
 
-  sessions, err := sessionContainer.GetPlainAwsSessions()
+  sessions, err := sessionContainer.GetSessions()
   if err != nil {
     return err
   }
@@ -41,7 +41,7 @@ func CreateTrusterAwsSession(AccountName string, AccountNumber string, RoleName 
     }
   }
 
-  plainAwsAccount := PlainAwsAccount{
+  plainAwsAccount := AwsPlainAccount{
     AccountNumber: accountNumber,
     Name:          name,
     Region:        region,
@@ -61,7 +61,7 @@ func CreateTrusterAwsSession(AccountName string, AccountNumber string, RoleName 
   }
 
 
-  sess := PlainAwsSession{
+  sess := AwsPlainSession{
     Id:        uuidString,
     Status:    NotActive,
     StartTime: "",
@@ -69,7 +69,7 @@ func CreateTrusterAwsSession(AccountName string, AccountNumber string, RoleName 
     Profile: namedProfileId,
   }
 
-  err = sessionContainer.SetPlainAwsSessions(append(sessions, &sess))
+  err = sessionContainer.SetSessions(append(sessions, &sess))
   if err != nil {
     return err
   }

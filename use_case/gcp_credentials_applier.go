@@ -3,13 +3,12 @@ package use_case
 import (
 	"leapp_daemon/domain/session"
 	"leapp_daemon/infrastructure/logging"
-	"leapp_daemon/interface/repository"
 	"reflect"
 )
 
 type GcpCredentialsApplier struct {
 	Keychain   Keychain
-	Repository *repository.GcloudConfigurationRepository
+	Repository GcpConfigurationRepository
 }
 
 func (applier *GcpCredentialsApplier) UpdateGcpPlainSessions(oldSessions []session.GcpPlainSession, newSessions []session.GcpPlainSession) {
