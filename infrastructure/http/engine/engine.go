@@ -7,17 +7,17 @@ import (
 	"leapp_daemon/infrastructure/http/middleware"
 	"leapp_daemon/infrastructure/logging"
 	"leapp_daemon/interface/http/controller"
-	providers2 "leapp_daemon/providers"
+	"leapp_daemon/providers"
 )
 
 type engineWrapper struct {
-	providers *providers2.Providers
+	providers *providers.Providers
 	ginEngine *gin.Engine
 }
 
 var engineWrapperInstance *engineWrapper = nil
 
-func newEngineWrapper(providers *providers2.Providers) *engineWrapper {
+func newEngineWrapper(providers *providers.Providers) *engineWrapper {
 	ginEngine := gin.New()
 
 	engineWrapper := engineWrapper{
@@ -30,7 +30,7 @@ func newEngineWrapper(providers *providers2.Providers) *engineWrapper {
 	return &engineWrapper
 }
 
-func Engine(providers *providers2.Providers) *engineWrapper {
+func Engine(providers *providers.Providers) *engineWrapper {
 	if engineWrapperInstance != nil {
 		return engineWrapperInstance
 	} else {
@@ -52,7 +52,7 @@ func (engineWrapper *engineWrapper) Serve(port int) {
 	}
 }
 
-func initializeRoutes(ginEngine *gin.Engine, providers *providers2.Providers) {
+func initializeRoutes(ginEngine *gin.Engine, providers *providers.Providers) {
 	controller := controller.EngineController{Providers: providers}
 
 	v1 := ginEngine.Group("/api/v1")
