@@ -13,25 +13,14 @@ var (
 	sessionsAfterUpdate  []GcpPlainSession
 )
 
-func setup() {
-	facade = &GcpPlainSessionsFacade{
-		gcpPlainSessions: make([]GcpPlainSession, 0),
-	}
+func gcpPlainSessionFacadeSetup() {
+	facade = NewGcpPlainSessionsFacade()
 	sessionsBeforeUpdate = []GcpPlainSession{}
 	sessionsAfterUpdate = []GcpPlainSession{}
 }
 
-func TestSingleton(t *testing.T) {
-	facadeInstance1 := GetGcpPlainSessionFacade()
-	facadeInstance2 := GetGcpPlainSessionFacade()
-
-	if facadeInstance1 != facadeInstance2 {
-		t.Fatalf("singleton is not returning the same instance")
-	}
-}
-
 func TestGetSessions(t *testing.T) {
-	setup()
+	gcpPlainSessionFacadeSetup()
 
 	newSessions := []GcpPlainSession{{Id: "id"}}
 	facade.gcpPlainSessions = newSessions
@@ -42,7 +31,7 @@ func TestGetSessions(t *testing.T) {
 }
 
 func TestSetSessions(t *testing.T) {
-	setup()
+	gcpPlainSessionFacadeSetup()
 
 	newSessions := []GcpPlainSession{{Id: "id"}}
 	facade.SetSessions(newSessions)
@@ -53,7 +42,7 @@ func TestSetSessions(t *testing.T) {
 }
 
 func TestAddSession(t *testing.T) {
-	setup()
+	gcpPlainSessionFacadeSetup()
 	facade.Subscribe(FakeObserver{})
 
 	newSession := GcpPlainSession{Id: "id"}
@@ -69,7 +58,7 @@ func TestAddSession(t *testing.T) {
 }
 
 func TestAddSession_alreadyExistentId(t *testing.T) {
-	setup()
+	gcpPlainSessionFacadeSetup()
 	facade.Subscribe(FakeObserver{})
 
 	newSession := GcpPlainSession{Id: "ID"}
@@ -84,7 +73,7 @@ func TestAddSession_alreadyExistentId(t *testing.T) {
 }
 
 func TestAddSession_alreadyExistentName(t *testing.T) {
-	setup()
+	gcpPlainSessionFacadeSetup()
 	facade.Subscribe(FakeObserver{})
 
 	facade.gcpPlainSessions = []GcpPlainSession{{Id: "1", Name: "NAME"}}
@@ -98,25 +87,26 @@ func TestAddSession_alreadyExistentName(t *testing.T) {
 }
 
 func TestRemoveSession(t *testing.T) {
-	setup()
+	gcpPlainSessionFacadeSetup()
 	facade.Subscribe(FakeObserver{})
 
-	newSession := GcpPlainSession{Id: "ID"}
-	facade.gcpPlainSessions = []GcpPlainSession{newSession}
+	session1 := GcpPlainSession{Id: "ID1"}
+	session2 := GcpPlainSession{Id: "ID2"}
+	facade.gcpPlainSessions = []GcpPlainSession{session1, session2}
 
-	facade.RemoveSession("ID")
+	facade.RemoveSession("ID1")
 
-	if !reflect.DeepEqual(sessionsBeforeUpdate, []GcpPlainSession{newSession}) {
+	if !reflect.DeepEqual(sessionsBeforeUpdate, []GcpPlainSession{session1, session2}) {
 		t.Errorf("unexpected session")
 	}
 
-	if !reflect.DeepEqual(sessionsAfterUpdate, []GcpPlainSession{}) {
+	if !reflect.DeepEqual(sessionsAfterUpdate, []GcpPlainSession{session2}) {
 		t.Errorf("sessions were not empty")
 	}
 }
 
 func TestRemoveSession_notFound(t *testing.T) {
-	setup()
+	gcpPlainSessionFacadeSetup()
 	facade.Subscribe(FakeObserver{})
 
 	err := facade.RemoveSession("ID")
@@ -128,7 +118,7 @@ func TestRemoveSession_notFound(t *testing.T) {
 }
 
 func TestSetSessionStatus(t *testing.T) {
-	setup()
+	gcpPlainSessionFacadeSetup()
 	facade.Subscribe(FakeObserver{})
 
 	newSession := GcpPlainSession{Id: "ID", Status: NotActive}
@@ -146,10 +136,42 @@ func TestSetSessionStatus(t *testing.T) {
 }
 
 func TestSetSessionStatus_notFound(t *testing.T) {
-	setup()
+	gcpPlainSessionFacadeSetup()
 	facade.Subscribe(FakeObserver{})
 
 	err := facade.SetSessionStatus("ID", Pending)
+	test.ExpectHttpError(t, err, http.StatusNotFound, "gcp plain session with id ID not found")
+
+	if len(sessionsBeforeUpdate) > 0 || len(sessionsAfterUpdate) > 0 {
+		t.Errorf("sessions was unexpectedly changed")
+	}
+}
+
+func TestEditSession(t *testing.T) {
+	gcpPlainSessionFacadeSetup()
+	facade.Subscribe(FakeObserver{})
+
+	session1 := GcpPlainSession{Id: "ID1", Name: "Name", ProjectName: "Project", NamedProfileId: "NamedProfileId"}
+	session2 := GcpPlainSession{Id: "ID2", Name: "Name", ProjectName: "Project", NamedProfileId: "NamedProfileId"}
+	facade.gcpPlainSessions = []GcpPlainSession{session1, session2}
+
+	facade.EditSession("ID1", "NewName", "NewProject", "NewNamedProfileId")
+
+	if !reflect.DeepEqual(sessionsBeforeUpdate, []GcpPlainSession{session1, session2}) {
+		t.Errorf("unexpected session")
+	}
+
+	if !reflect.DeepEqual(sessionsAfterUpdate, []GcpPlainSession{
+		{Id: "ID1", Name: "NewName", ProjectName: "NewProject", NamedProfileId: "NewNamedProfileId"}, session2}) {
+		t.Errorf("sessions were not updated")
+	}
+}
+
+func TestEditSession_notFound(t *testing.T) {
+	gcpPlainSessionFacadeSetup()
+	facade.Subscribe(FakeObserver{})
+
+	err := facade.EditSession("ID", "", "", "")
 	test.ExpectHttpError(t, err, http.StatusNotFound, "gcp plain session with id ID not found")
 
 	if len(sessionsBeforeUpdate) > 0 || len(sessionsAfterUpdate) > 0 {

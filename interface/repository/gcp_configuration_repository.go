@@ -135,7 +135,7 @@ func (repo *GcpConfigurationRepository) RemoveConfiguration(configurationName st
 	return nil
 }
 
-func (repo *GcpConfigurationRepository) ActivateConfiguration(configurationName string) error {
+func (repo *GcpConfigurationRepository) ActivateConfiguration() error {
 	activeConfigFilePath, err := repo.getGcloudActiveConfigFilePath()
 	if err != nil {
 		return err

@@ -69,7 +69,7 @@ func (applier *GcpCredentialsApplier) activateSession(session *session.GcpPlainS
 		return
 	}
 
-	err = applier.Repository.ActivateConfiguration(session.Name)
+	err = applier.Repository.ActivateConfiguration()
 	if err != nil {
 		logging.Entry().Error(err)
 		return

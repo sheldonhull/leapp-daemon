@@ -40,7 +40,7 @@ type GcpConfigurationRepository interface {
 	DoesGcloudConfigFolderExist() (bool, error)
 	CreateConfiguration(configurationName string, account string, project string) error
 	RemoveConfiguration(configurationName string) error
-	ActivateConfiguration(configurationName string) error
+	ActivateConfiguration() error
 	DeactivateConfiguration() error
 	WriteDefaultCredentials(credentialsJson string) error
 	RemoveDefaultCredentials() error
