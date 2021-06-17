@@ -1,6 +1,7 @@
 package mock
 
 import (
+	"errors"
 	"fmt"
 	"leapp_daemon/infrastructure/http/http_error"
 )
@@ -26,7 +27,7 @@ func (chainMock *KeychainMock) GetCalls() []string {
 func (chainMock *KeychainMock) SetSecret(secret string, label string) error {
 	chainMock.calls = append(chainMock.calls, fmt.Sprintf("SetSecret(%v, %v)", secret, label))
 	if chainMock.ExpErrorOnSetSecret {
-		return http_error.NewUnprocessableEntityError(nil)
+		return http_error.NewUnprocessableEntityError(errors.New("unable to set secret"))
 	}
 
 	return nil

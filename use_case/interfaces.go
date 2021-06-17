@@ -38,8 +38,8 @@ type ConfigurationRepository interface {
 
 type GcpConfigurationRepository interface {
 	DoesGcloudConfigFolderExist() (bool, error)
-	CreateConfiguration(configurationName string, account string, project string) error
-	RemoveConfiguration(configurationName string) error
+	CreateConfiguration(account string, project string) error
+	RemoveConfiguration() error
 	ActivateConfiguration() error
 	DeactivateConfiguration() error
 	WriteDefaultCredentials(credentialsJson string) error
@@ -74,9 +74,9 @@ type AwsPlainSessionsFacade interface {
 
 type GcpPlainSessionsFacade interface {
 	GetSessions() []session.GcpPlainSession
-	GetSessionById(id string) (session.GcpPlainSession, error)
+	GetSessionById(sessionId string) (session.GcpPlainSession, error)
 	AddSession(session session.GcpPlainSession) error
 	SetSessionStatus(sessionId string, status session.Status) error
-	RemoveSession(id string) error
+	RemoveSession(sessionId string) error
 	EditSession(sessionId string, name string, projectName string, profileId string) error
 }

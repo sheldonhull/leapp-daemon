@@ -63,7 +63,7 @@ func (applier *GcpCredentialsApplier) activateSession(session *session.GcpPlainS
 		return
 	}
 
-	err = applier.Repository.CreateConfiguration(session.Name, session.AccountId, session.ProjectName)
+	err = applier.Repository.CreateConfiguration(session.AccountId, session.ProjectName)
 	if err != nil {
 		logging.Entry().Error(err)
 		return
@@ -107,7 +107,7 @@ func (applier *GcpCredentialsApplier) deactivateSession(session *session.GcpPlai
 		return
 	}
 
-	err = applier.Repository.RemoveConfiguration(session.Name)
+	err = applier.Repository.RemoveConfiguration()
 	if err != nil {
 		logging.Entry().Error(err)
 		return

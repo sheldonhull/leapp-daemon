@@ -22,13 +22,13 @@ func (repo *GcpConfigurationRepositoryMock) DoesGcloudConfigFolderExist() (bool,
 	return repo.ExpGcpConfigFolderExist, nil
 }
 
-func (repo *GcpConfigurationRepositoryMock) CreateConfiguration(configurationName string, account string, project string) error {
-	repo.calls = append(repo.calls, fmt.Sprintf("CreateConfiguration(%v, %v, %v)", configurationName, account, project))
+func (repo *GcpConfigurationRepositoryMock) CreateConfiguration(account string, project string) error {
+	repo.calls = append(repo.calls, fmt.Sprintf("CreateConfiguration(%v, %v)", account, project))
 	return nil
 }
 
-func (repo *GcpConfigurationRepositoryMock) RemoveConfiguration(configurationName string) error {
-	repo.calls = append(repo.calls, fmt.Sprintf("RemoveConfiguration(%v)", configurationName))
+func (repo *GcpConfigurationRepositoryMock) RemoveConfiguration() error {
+	repo.calls = append(repo.calls, "RemoveConfiguration()")
 	return nil
 }
 

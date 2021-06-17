@@ -31,14 +31,14 @@ func (facade *GcpPlainSessionsFacade) GetSessions() []GcpPlainSession {
 	return facade.gcpPlainSessions
 }
 
-func (facade *GcpPlainSessionsFacade) GetSessionById(id string) (GcpPlainSession, error) {
+func (facade *GcpPlainSessionsFacade) GetSessionById(sessionId string) (GcpPlainSession, error) {
 	for _, session := range facade.GetSessions() {
-		if session.Id == id {
+		if session.Id == sessionId {
 			return session, nil
 		}
 	}
 
-	return GcpPlainSession{}, http_error.NewNotFoundError(fmt.Errorf("gcp plain session with id %s not found", id))
+	return GcpPlainSession{}, http_error.NewNotFoundError(fmt.Errorf("gcp plain session with id %s not found", sessionId))
 }
 
 func (facade *GcpPlainSessionsFacade) SetSessions(sessions []GcpPlainSession) {
@@ -70,7 +70,7 @@ func (facade *GcpPlainSessionsFacade) AddSession(session GcpPlainSession) error 
 	return nil
 }
 
-func (facade *GcpPlainSessionsFacade) RemoveSession(id string) error {
+func (facade *GcpPlainSessionsFacade) RemoveSession(sessionId string) error {
 	sessionsLock.Lock()
 	defer sessionsLock.Unlock()
 
@@ -78,13 +78,13 @@ func (facade *GcpPlainSessionsFacade) RemoveSession(id string) error {
 	newSessions := make([]GcpPlainSession, 0)
 
 	for _, session := range currentSessions {
-		if session.Id != id {
+		if session.Id != sessionId {
 			newSessions = append(newSessions, session)
 		}
 	}
 
 	if len(currentSessions) == len(newSessions) {
-		return http_error.NewNotFoundError(fmt.Errorf("plain gcp session with id %s not found", id))
+		return http_error.NewNotFoundError(fmt.Errorf("plain gcp session with id %s not found", sessionId))
 	}
 
 	facade.updateState(newSessions)

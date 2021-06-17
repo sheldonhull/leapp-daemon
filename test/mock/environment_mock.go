@@ -6,6 +6,7 @@ import (
 
 type EnvironmentMock struct {
 	calls                 []string
+	ExpUuid               string
 	ExpIsCommandAvailable bool
 	ExpIsWindows          bool
 }
@@ -31,4 +32,9 @@ func (env *EnvironmentMock) IsCommandAvailable(command string) bool {
 func (env *EnvironmentMock) IsWindows() bool {
 	env.calls = append(env.calls, "IsWindows()")
 	return env.ExpIsWindows
+}
+
+func (env *EnvironmentMock) GenerateUuid() string {
+	env.calls = append(env.calls, "GenerateUuid()")
+	return env.ExpUuid
 }

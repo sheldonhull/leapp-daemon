@@ -170,7 +170,7 @@ func TestCreateConfiguration(t *testing.T) {
 	gcpConfigurationRepositorySetup()
 	envMock.ExpIsWindows = true
 
-	err := repo.CreateConfiguration("configurationName", "accountId", "projectId")
+	err := repo.CreateConfiguration("accountId", "projectId")
 	if err != nil {
 		t.Fatalf("unexpected error %v", err)
 	}
@@ -186,7 +186,7 @@ func TestCreateConfiguration_errorGettingHomeDir(t *testing.T) {
 	gcpConfigurationRepositorySetup()
 	fsMock.ExpErrorOnGetHomeDir = true
 
-	err := repo.CreateConfiguration("configurationName", "accountId", "projectId")
+	err := repo.CreateConfiguration("accountId", "projectId")
 	test.ExpectHttpError(t, err, 500, "error getting home dir")
 
 	verifyExpectedCalls(t, []string{"IsWindows()"}, []string{}, []string{}, []string{})
@@ -197,7 +197,7 @@ func TestCreateConfiguration_errorWritingFile(t *testing.T) {
 	fsMock.ExpErrorOnWriteToFile = true
 	envMock.ExpIsWindows = true
 
-	err := repo.CreateConfiguration("configurationName", "accountId", "projectId")
+	err := repo.CreateConfiguration("accountId", "projectId")
 	test.ExpectHttpError(t, err, 500, "error writing file")
 
 	verifyExpectedCalls(t, []string{"IsWindows()", "GetEnvironmentVariable(APPDATA)"},
@@ -208,7 +208,7 @@ func TestRemoveConfiguration(t *testing.T) {
 	gcpConfigurationRepositorySetup()
 	envMock.ExpIsWindows = true
 
-	err := repo.RemoveConfiguration("configurationName")
+	err := repo.RemoveConfiguration()
 	if err != nil {
 		t.Fatalf("unexpected error %v", err)
 	}
@@ -222,7 +222,7 @@ func TestRemoveConfiguration_errorGettingHomeDir(t *testing.T) {
 	gcpConfigurationRepositorySetup()
 	fsMock.ExpErrorOnGetHomeDir = true
 
-	err := repo.RemoveConfiguration("configurationName")
+	err := repo.RemoveConfiguration()
 	test.ExpectHttpError(t, err, 500, "error getting home dir")
 
 	verifyExpectedCalls(t, []string{"IsWindows()"}, []string{}, []string{}, []string{})
@@ -232,7 +232,7 @@ func TestRemoveConfiguration_errorRemovingFile(t *testing.T) {
 	gcpConfigurationRepositorySetup()
 	fsMock.ExpErrorOnRemoveFile = true
 
-	err := repo.RemoveConfiguration("configurationName")
+	err := repo.RemoveConfiguration()
 	test.ExpectHttpError(t, err, 500, "error removing file")
 
 	verifyExpectedCalls(t, []string{"IsWindows()"}, []string{"GetHomeDir()"}, []string{},

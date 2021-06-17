@@ -107,7 +107,7 @@ func (repo *GcpConfigurationRepository) DoesGcloudConfigFolderExist() (bool, err
 	return repo.FileSystem.DoesFileExist(configDir), nil
 }
 
-func (repo *GcpConfigurationRepository) CreateConfiguration(configurationName string, account string, project string) error {
+func (repo *GcpConfigurationRepository) CreateConfiguration(account string, project string) error {
 	configFilePath, err := repo.getGcloudConfigFilePath()
 	if err != nil {
 		return err
@@ -122,7 +122,7 @@ func (repo *GcpConfigurationRepository) CreateConfiguration(configurationName st
 	return nil
 }
 
-func (repo *GcpConfigurationRepository) RemoveConfiguration(configurationName string) error {
+func (repo *GcpConfigurationRepository) RemoveConfiguration() error {
 	configFilePath, err := repo.getGcloudConfigFilePath()
 	if err != nil {
 		return err

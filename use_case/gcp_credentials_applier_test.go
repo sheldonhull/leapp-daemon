@@ -9,8 +9,8 @@ import (
 
 var (
 	keychainMock              mock.KeychainMock
-	repoMock                  mock.GcpConfigurationRepositoryMock
-	applier                   *GcpCredentialsApplier
+	gcpRepoMock               mock.GcpConfigurationRepositoryMock
+	gcpCredentialsApplier     *GcpCredentialsApplier
 	expectedDeactivationCalls []string
 	expectedActivationCalls   []string
 )
@@ -19,22 +19,22 @@ func gcpCredentialsApplierSetup() {
 	expectedDeactivationCalls = []string{"RemoveDefaultCredentials()", "DeactivateConfiguration()",
 		"RemoveCredentialsFromDb()", "RemoveAccessTokensFromDb()", "RemoveConfiguration()"}
 	expectedActivationCalls = []string{"WriteDefaultCredentials(accountId, credentials)",
-		"CreateConfiguration(sessionName, accountId, projectName)", "ActivateConfiguration()", "WriteDefaultCredentials(credentials)"}
+		"CreateConfiguration(accountId, projectName)", "ActivateConfiguration()", "WriteDefaultCredentials(credentials)"}
 
 	keychainMock = mock.NewKeychainMock()
-	repoMock = mock.NewGcpConfigurationRepositoryMock()
-	applier = &GcpCredentialsApplier{
+	gcpRepoMock = mock.NewGcpConfigurationRepositoryMock()
+	gcpCredentialsApplier = &GcpCredentialsApplier{
 		Keychain:   &keychainMock,
-		Repository: &repoMock,
+		Repository: &gcpRepoMock,
 	}
 }
 
-func verifyExpectedCalls(t *testing.T, keychainMockCalls []string, repoMockCalls []string) {
+func gcpCredentialsApplierVerifyExpectedCalls(t *testing.T, keychainMockCalls []string, repoMockCalls []string) {
 	if !reflect.DeepEqual(keychainMock.GetCalls(), keychainMockCalls) {
 		t.Fatalf("keychainMock expectation violation.\nMock calls: %v", keychainMock.GetCalls())
 	}
-	if !reflect.DeepEqual(repoMock.GetCalls(), repoMockCalls) {
-		t.Fatalf("repoMock expectation violation.\nMock calls: %v", repoMock.GetCalls())
+	if !reflect.DeepEqual(gcpRepoMock.GetCalls(), repoMockCalls) {
+		t.Fatalf("gcpRepoMock expectation violation.\nMock calls: %v", gcpRepoMock.GetCalls())
 	}
 }
 
@@ -43,8 +43,8 @@ func TestUpdateGcpPlainSessions_OldActiveSessionAndNoNewActiveSessions(t *testin
 	oldSessions := []session.GcpPlainSession{{Status: session.Active}}
 	newSessions := []session.GcpPlainSession{}
 
-	applier.UpdateGcpPlainSessions(oldSessions, newSessions)
-	verifyExpectedCalls(t, []string{}, expectedDeactivationCalls)
+	gcpCredentialsApplier.UpdateGcpPlainSessions(oldSessions, newSessions)
+	gcpCredentialsApplierVerifyExpectedCalls(t, []string{}, expectedDeactivationCalls)
 }
 
 func TestUpdateGcpPlainSessions_OldAndNewActiveSessionWithDifferentIds(t *testing.T) {
@@ -54,9 +54,9 @@ func TestUpdateGcpPlainSessions_OldAndNewActiveSessionWithDifferentIds(t *testin
 	newSessions := []session.GcpPlainSession{{Id: "ID2", CredentialsLabel: "credentialsLabel", AccountId: "accountId",
 		Name: "sessionName", ProjectName: "projectName", Status: session.Active}}
 
-	applier.UpdateGcpPlainSessions(oldSessions, newSessions)
+	gcpCredentialsApplier.UpdateGcpPlainSessions(oldSessions, newSessions)
 	expectedRepositoryCalls := append(expectedDeactivationCalls, expectedActivationCalls...)
-	verifyExpectedCalls(t, []string{"GetSecret(credentialsLabel)"}, expectedRepositoryCalls)
+	gcpCredentialsApplierVerifyExpectedCalls(t, []string{"GetSecret(credentialsLabel)"}, expectedRepositoryCalls)
 }
 
 func TestUpdateGcpPlainSessions_OldAndNewActiveSessionAreEqual(t *testing.T) {
@@ -64,8 +64,8 @@ func TestUpdateGcpPlainSessions_OldAndNewActiveSessionAreEqual(t *testing.T) {
 	oldSessions := []session.GcpPlainSession{{Id: "ID1", Status: session.Active}}
 	newSessions := []session.GcpPlainSession{{Id: "ID1", Status: session.Active}}
 
-	applier.UpdateGcpPlainSessions(oldSessions, newSessions)
-	verifyExpectedCalls(t, []string{}, []string{})
+	gcpCredentialsApplier.UpdateGcpPlainSessions(oldSessions, newSessions)
+	gcpCredentialsApplierVerifyExpectedCalls(t, []string{}, []string{})
 }
 
 func TestUpdateGcpPlainSessions_OldAndNewActiveSessionWithSameIdsButDifferentParams(t *testing.T) {
@@ -76,8 +76,8 @@ func TestUpdateGcpPlainSessions_OldAndNewActiveSessionWithSameIdsButDifferentPar
 	newSessions := []session.GcpPlainSession{{Id: "ID1", CredentialsLabel: "credentialsLabel", AccountId: "accountId",
 		Name: "sessionName", ProjectName: "projectName", Status: session.Active}}
 
-	applier.UpdateGcpPlainSessions(oldSessions, newSessions)
-	verifyExpectedCalls(t, []string{"GetSecret(credentialsLabel)"}, expectedActivationCalls)
+	gcpCredentialsApplier.UpdateGcpPlainSessions(oldSessions, newSessions)
+	gcpCredentialsApplierVerifyExpectedCalls(t, []string{"GetSecret(credentialsLabel)"}, expectedActivationCalls)
 }
 
 func TestUpdateGcpPlainSessions_NoOldActiveSessionButNewActiveSessionPresent(t *testing.T) {
@@ -87,8 +87,8 @@ func TestUpdateGcpPlainSessions_NoOldActiveSessionButNewActiveSessionPresent(t *
 	newSessions := []session.GcpPlainSession{{Id: "ID1", CredentialsLabel: "credentialsLabel", AccountId: "accountId",
 		Name: "sessionName", ProjectName: "projectName", Status: session.Active}}
 
-	applier.UpdateGcpPlainSessions(oldSessions, newSessions)
-	verifyExpectedCalls(t, []string{"GetSecret(credentialsLabel)"}, expectedActivationCalls)
+	gcpCredentialsApplier.UpdateGcpPlainSessions(oldSessions, newSessions)
+	gcpCredentialsApplierVerifyExpectedCalls(t, []string{"GetSecret(credentialsLabel)"}, expectedActivationCalls)
 }
 
 func TestUpdateGcpPlainSessions_NoActiveSessions(t *testing.T) {
@@ -97,38 +97,6 @@ func TestUpdateGcpPlainSessions_NoActiveSessions(t *testing.T) {
 	oldSessions := []session.GcpPlainSession{{Id: "ID1", Status: session.NotActive}}
 	newSessions := []session.GcpPlainSession{{Id: "ID1", Status: session.Pending}}
 
-	applier.UpdateGcpPlainSessions(oldSessions, newSessions)
-	verifyExpectedCalls(t, []string{}, []string{})
+	gcpCredentialsApplier.UpdateGcpPlainSessions(oldSessions, newSessions)
+	gcpCredentialsApplierVerifyExpectedCalls(t, []string{}, []string{})
 }
-
-/*
-credentials, err := applier.Keychain.GetSecret(session.CredentialsLabel)
-	if err != nil {
-		logging.Entry().Error(err)
-		return
-	}
-
-	err = applier.Repository.WriteCredentialsToDb(session.AccountId, credentials)
-	if err != nil {
-		logging.Entry().Error(err)
-		return
-	}
-
-	err = applier.Repository.CreateConfiguration(session.Name, session.AccountId, session.ProjectName)
-	if err != nil {
-		logging.Entry().Error(err)
-		return
-	}
-
-	err = applier.Repository.ActivateConfiguration()
-	if err != nil {
-		logging.Entry().Error(err)
-		return
-	}
-
-	err = applier.Repository.WriteDefaultCredentials(credentials)
-	if err != nil {
-		logging.Entry().Error(err)
-		return
-	}
-*/
