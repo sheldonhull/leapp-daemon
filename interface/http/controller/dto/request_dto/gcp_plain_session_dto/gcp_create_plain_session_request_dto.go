@@ -28,9 +28,6 @@ type GcpCreatePlainSessionRequest struct {
 	// the OAuth code to obtain credentials
 	// required: true
 	OauthCode string `json:"oauthCode" binding:"required"`
-
-	// the profile name
-	ProfileName string `json:"profileName"`
 }
 
 func (requestDto *GcpCreatePlainSessionRequest) Build(context *gin.Context) error {

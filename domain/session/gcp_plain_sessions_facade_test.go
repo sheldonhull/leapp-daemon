@@ -151,18 +151,18 @@ func TestEditSession(t *testing.T) {
 	gcpPlainSessionFacadeSetup()
 	facade.Subscribe(FakeObserver{})
 
-	session1 := GcpPlainSession{Id: "ID1", Name: "Name1", ProjectName: "Project1", NamedProfileId: "NamedProfileId1"}
-	session2 := GcpPlainSession{Id: "ID2", Name: "Name2", ProjectName: "Project2", NamedProfileId: "NamedProfileId2"}
+	session1 := GcpPlainSession{Id: "ID1", Name: "Name1", ProjectName: "Project1"}
+	session2 := GcpPlainSession{Id: "ID2", Name: "Name2", ProjectName: "Project2"}
 	facade.gcpPlainSessions = []GcpPlainSession{session1, session2}
 
-	facade.EditSession("ID1", "NewName", "NewProject", "NewNamedProfileId")
+	facade.EditSession("ID1", "NewName", "NewProject")
 
 	if !reflect.DeepEqual(sessionsBeforeUpdate, []GcpPlainSession{session1, session2}) {
 		t.Errorf("unexpected session")
 	}
 
 	if !reflect.DeepEqual(sessionsAfterUpdate, []GcpPlainSession{
-		{Id: "ID1", Name: "NewName", ProjectName: "NewProject", NamedProfileId: "NewNamedProfileId"}, session2}) {
+		{Id: "ID1", Name: "NewName", ProjectName: "NewProject"}, session2}) {
 		t.Errorf("sessions were not updated")
 	}
 }
@@ -171,14 +171,14 @@ func TestEditSession_DuplicateSessionNameAttempt(t *testing.T) {
 	gcpPlainSessionFacadeSetup()
 	facade.Subscribe(FakeObserver{})
 
-	session1 := GcpPlainSession{Id: "ID1", Name: "Name1", ProjectName: "Project1", NamedProfileId: "NamedProfileId1"}
-	session2 := GcpPlainSession{Id: "ID2", Name: "Name2", ProjectName: "Project2", NamedProfileId: "NamedProfileId2"}
+	session1 := GcpPlainSession{Id: "ID1", Name: "Name1", ProjectName: "Project1"}
+	session2 := GcpPlainSession{Id: "ID2", Name: "Name2", ProjectName: "Project2"}
 	facade.gcpPlainSessions = []GcpPlainSession{session1, session2}
 
-	err := facade.EditSession("ID1", "Name2", "NewProject", "NewNamedProfileId")
+	err := facade.EditSession("ID1", "Name2", "NewProject")
 	test.ExpectHttpError(t, err, http.StatusConflict, "a session named Name2 is already present")
 
-	err = facade.EditSession("ID2", "Name1", "NewProject", "NewNamedProfileId")
+	err = facade.EditSession("ID2", "Name1", "NewProject")
 	test.ExpectHttpError(t, err, http.StatusConflict, "a session named Name1 is already present")
 }
 
@@ -186,7 +186,7 @@ func TestEditSession_notFound(t *testing.T) {
 	gcpPlainSessionFacadeSetup()
 	facade.Subscribe(FakeObserver{})
 
-	err := facade.EditSession("ID", "", "", "")
+	err := facade.EditSession("ID", "", "")
 	test.ExpectHttpError(t, err, http.StatusNotFound, "session with id ID not found")
 
 	if len(sessionsBeforeUpdate) > 0 || len(sessionsAfterUpdate) > 0 {

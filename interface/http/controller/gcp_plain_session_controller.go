@@ -49,8 +49,7 @@ func (controller *EngineController) CreateGcpPlainSession(context *gin.Context) 
 
 	actions := controller.Providers.GetGcpPlainSessionActions()
 
-	err = actions.CreateSession(requestDto.Name, requestDto.AccountId, requestDto.ProjectName,
-		requestDto.ProfileName, requestDto.OauthCode)
+	err = actions.CreateSession(requestDto.Name, requestDto.AccountId, requestDto.ProjectName, requestDto.OauthCode)
 	if err != nil {
 		_ = context.Error(err)
 		return
@@ -191,7 +190,7 @@ func (controller *EngineController) EditGcpPlainSession(context *gin.Context) {
 	}
 
 	actions := controller.Providers.GetGcpPlainSessionActions()
-	err = actions.EditSession(requestUriDto.Id, requestDto.Name, requestDto.ProjectName, requestDto.ProfileName)
+	err = actions.EditSession(requestUriDto.Id, requestDto.Name, requestDto.ProjectName)
 	if err != nil {
 		_ = context.Error(err)
 		return

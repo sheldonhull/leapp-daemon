@@ -7,44 +7,41 @@ import (
 
 // swagger:parameters editGcpPlainSession
 type GcpEditPlainSessionUriRequestWrapper struct {
-  // gcp plain session edit uri
-  // in:body
-  Body GcpEditPlainSessionUriRequest
+	// gcp plain session edit uri
+	// in:body
+	Body GcpEditPlainSessionUriRequest
 }
 
 // swagger:parameters editGcpPlainSession
 type GcpEditPlainSessionRequestWrapper struct {
-  // gcp plain session edit body
-  // in:body
-  Body GcpEditPlainSessionRequest
+	// gcp plain session edit body
+	// in:body
+	Body GcpEditPlainSessionRequest
 }
 
 type GcpEditPlainSessionUriRequest struct {
-  // the Id of the session
-  //required: true
-  Id string `uri:"id" binding:"required"`
+	// the Id of the session
+	//required: true
+	Id string `uri:"id" binding:"required"`
 }
 
 type GcpEditPlainSessionRequest struct {
-  // the name which will be displayed
+	// the name which will be displayed
 	// required: true
 	Name string `json:"name" binding:"required"`
 
 	// the name of the gcp project
 	// required: true
 	ProjectName string `json:"projectName" binding:"required"`
-
-	// the profile name
-	ProfileName string `json:"profileName"`
 }
 
 func (requestDto *GcpEditPlainSessionUriRequest) Build(context *gin.Context) error {
-  err := context.ShouldBindUri(requestDto)
-  if err != nil {
-    return http_error.NewBadRequestError(err)
-  } else {
-    return nil
-  }
+	err := context.ShouldBindUri(requestDto)
+	if err != nil {
+		return http_error.NewBadRequestError(err)
+	} else {
+		return nil
+	}
 }
 
 func (requestDto *GcpEditPlainSessionRequest) Build(context *gin.Context) error {

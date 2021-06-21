@@ -104,7 +104,7 @@ func (facade *GcpPlainSessionsFacade) SetSessionStatus(sessionId string, status 
 	return facade.replaceSession(sessionId, sessionToUpdate)
 }
 
-func (facade *GcpPlainSessionsFacade) EditSession(sessionId string, sessionName string, projectName string, profileId string) error {
+func (facade *GcpPlainSessionsFacade) EditSession(sessionId string, sessionName string, projectName string) error {
 	sessionsLock.Lock()
 	defer sessionsLock.Unlock()
 
@@ -123,7 +123,6 @@ func (facade *GcpPlainSessionsFacade) EditSession(sessionId string, sessionName 
 
 	sessionToEdit.Name = sessionName
 	sessionToEdit.ProjectName = projectName
-	sessionToEdit.NamedProfileId = profileId
 
 	return facade.replaceSession(sessionId, sessionToEdit)
 }

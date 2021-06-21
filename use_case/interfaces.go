@@ -78,5 +78,5 @@ type GcpPlainSessionsFacade interface {
 	AddSession(session session.GcpPlainSession) error
 	SetSessionStatus(sessionId string, status session.Status) error
 	RemoveSession(sessionId string) error
-	EditSession(sessionId string, name string, projectName string, profileId string) error
+	EditSession(sessionId string, name string, projectName string) error
 }

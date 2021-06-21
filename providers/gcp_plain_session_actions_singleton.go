@@ -15,7 +15,6 @@ func (prov *Providers) GetGcpPlainSessionActions() *use_case.GcpPlainSessionActi
 	if gcpPlainSessionActionsSingleton == nil {
 		gcpPlainSessionActionsSingleton = &use_case.GcpPlainSessionActions{
 			GcpApi:                prov.GetGcpApi(),
-			NamedProfilesActions:  prov.GetNamedProfilesActions(),
 			Environment:           prov.GetEnvironment(),
 			Keychain:              prov.GetKeychain(),
 			GcpPlainSessionFacade: prov.GetGcpPlainSessionFacade(),

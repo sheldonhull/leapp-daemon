@@ -64,8 +64,8 @@ func (facade *GcpPlainSessionsFacadeMock) RemoveSession(sessionId string) error 
 	return nil
 }
 
-func (facade *GcpPlainSessionsFacadeMock) EditSession(sessionId string, name string, projectName string, profileId string) error {
-	facade.calls = append(facade.calls, fmt.Sprintf("EditSession(%v, %v, %v, %v)", sessionId, name, projectName, profileId))
+func (facade *GcpPlainSessionsFacadeMock) EditSession(sessionId string, name string, projectName string) error {
+	facade.calls = append(facade.calls, fmt.Sprintf("EditSession(%v, %v, %v)", sessionId, name, projectName))
 	if facade.ExpErrorOnEditSession {
 		return http_error.NewConflictError(errors.New("unable to edit session, collision detected"))
 	}

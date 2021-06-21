@@ -10,7 +10,6 @@ type GcpPlainSessionActions struct {
 	Environment           Environment
 	Keychain              Keychain
 	GcpPlainSessionFacade GcpPlainSessionsFacade
-	NamedProfilesActions  NamedProfilesActionsInterface
 }
 
 func (actions *GcpPlainSessionActions) GetSession(sessionId string) (session.GcpPlainSession, error) {
@@ -21,13 +20,7 @@ func (actions *GcpPlainSessionActions) GetOAuthUrl() (string, error) {
 	return actions.GcpApi.GetOauthUrl()
 }
 
-func (actions *GcpPlainSessionActions) CreateSession(name string, accountId string, projectName string, profileName string,
-	oauthCode string) error {
-
-	namedProfile, err := actions.NamedProfilesActions.GetOrCreateNamedProfile(profileName)
-	if err != nil {
-		return err
-	}
+func (actions *GcpPlainSessionActions) CreateSession(name string, accountId string, projectName string, oauthCode string) error {
 
 	newSessionId := actions.Environment.GenerateUuid()
 	credentialsLabel := newSessionId + "-gcp-plain-session-credentials"
@@ -37,7 +30,6 @@ func (actions *GcpPlainSessionActions) CreateSession(name string, accountId stri
 		Name:             name,
 		AccountId:        accountId,
 		ProjectName:      projectName,
-		NamedProfileId:   namedProfile.Id,
 		CredentialsLabel: credentialsLabel,
 		Status:           session.NotActive,
 		StartTime:        "",
@@ -90,13 +82,8 @@ func (actions *GcpPlainSessionActions) DeleteSession(sessionId string) error {
 	return facade.RemoveSession(sessionId)
 }
 
-func (actions *GcpPlainSessionActions) EditSession(sessionId string, name string, projectName string, profileName string) error {
+func (actions *GcpPlainSessionActions) EditSession(sessionId string, name string, projectName string) error {
 	sessionsFacade := actions.GcpPlainSessionFacade
 
-	namedProfile, err := actions.NamedProfilesActions.GetOrCreateNamedProfile(profileName)
-	if err != nil {
-		return err
-	}
-
-	return sessionsFacade.EditSession(sessionId, name, projectName, namedProfile.Id)
+	return sessionsFacade.EditSession(sessionId, name, projectName)
 }
