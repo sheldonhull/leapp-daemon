@@ -7,6 +7,6 @@ type GcpPlainSession struct {
 	ProjectName      string
 	CredentialsLabel string
 	Status           Status
-	StartTime        string // TODO: initialize in actions
-	LastStopTime     string // TODO: initialize in actions
+	StartTime        string
+	LastStopTime     string
 }

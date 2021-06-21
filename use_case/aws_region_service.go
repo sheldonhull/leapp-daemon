@@ -27,7 +27,7 @@ func EditAwsSessionRegion(sessionId string, region string) error {
 			}
 		}
 
-		for _, federatedSession := range config.FederatedAwsSessions {
+		for _, federatedSession := range config.AwsFederatedSessions {
 			if federatedSession.Id == sessionId {
 				federatedSession.Account.Region = region
 				err = configuration.UpdateConfiguration(config, false)

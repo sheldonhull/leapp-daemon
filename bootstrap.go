@@ -44,7 +44,7 @@ func AwsPlainBootstrap(prov *providers.Providers, config configuration.Configura
 	}
 
 	awsPlainSessionFacade := prov.GetAwsPlainSessionFacade()
-	awsPlainSessions := config.PlainAwsSessions
+	awsPlainSessions := config.AwsPlainSessions
 	awsPlainSessionFacade.SetSessions(awsPlainSessions)
 	awsPlainSessionFacade.Subscribe(prov.GetAwsSessionWriter())
 	awsPlainSessionFacade.Subscribe(prov.GetAwsCredentialsApplier())

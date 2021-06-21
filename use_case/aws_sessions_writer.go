@@ -14,7 +14,7 @@ func (sessionWriter *AwsSessionsWriter) UpdateAwsPlainSessions(oldSessions []ses
 		return err
 	}
 
-	config.PlainAwsSessions = newSessions
+	config.AwsPlainSessions = newSessions
 	err = sessionWriter.ConfigurationRepository.UpdateConfiguration(config)
 
 	return err

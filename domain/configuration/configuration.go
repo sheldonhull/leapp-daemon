@@ -10,9 +10,9 @@ import (
 
 type Configuration struct {
 	ProxyConfiguration   ProxyConfiguration
-	PlainAwsSessions     []session.AwsPlainSession     // TODO: migrate to AwsPlainSessions
-	FederatedAwsSessions []session.AwsFederatedSession // TODO: migrate to AwsFederatedSessions
-	TrustedAwsSessions   []session.AwsTrustedSession   // TODO: migrate to AwsTrustedSessions
+	AwsPlainSessions     []session.AwsPlainSession
+	AwsFederatedSessions []session.AwsFederatedSession
+	AwsTrustedSessions   []session.AwsTrustedSession
 	GcpPlainSessions     []session.GcpPlainSession
 	NamedProfiles        []named_profile.NamedProfile
 }
@@ -34,8 +34,8 @@ func GetDefaultConfiguration() Configuration {
 			Username:      "",
 			Password:      "",
 		},
-		FederatedAwsSessions: make([]session.AwsFederatedSession, 0),
-		PlainAwsSessions:     make([]session.AwsPlainSession, 0),
+		AwsFederatedSessions: make([]session.AwsFederatedSession, 0),
+		AwsPlainSessions:     make([]session.AwsPlainSession, 0),
 		GcpPlainSessions:     make([]session.GcpPlainSession, 0),
 	}
 }
@@ -60,13 +60,13 @@ func (config *Configuration) AddAwsPlainSession(awsPlainSession session.AwsPlain
 	}
 
 	sessions = append(sessions, awsPlainSession)
-	config.PlainAwsSessions = sessions
+	config.AwsPlainSessions = sessions
 
 	return nil
 }
 
 func (config *Configuration) GetAllAwsPlainSessions() ([]session.AwsPlainSession, error) {
-	return config.PlainAwsSessions, nil
+	return config.AwsPlainSessions, nil
 }
 
 func (config *Configuration) RemoveAwsPlainSession(awsPlainSession session.AwsPlainSession) error {
@@ -77,7 +77,7 @@ func (config *Configuration) RemoveAwsPlainSession(awsPlainSession session.AwsPl
 
 	for i, sess := range sessions {
 		if awsPlainSession.Id == sess.Id {
-			config.PlainAwsSessions = append(config.PlainAwsSessions[:i], config.PlainAwsSessions[i+1:]...)
+			config.AwsPlainSessions = append(config.AwsPlainSessions[:i], config.AwsPlainSessions[i+1:]...)
 			return nil
 		}
 	}
@@ -185,20 +185,20 @@ func (config *Configuration) Update() error {
 }
 
 func (config *Configuration) GetFederatedAwsSessions() ([]*session.AwsFederatedSession, error) {
-	return config.FederatedAwsSessions, nil
+	return config.AwsFederatedSessions, nil
 }
 
 func (config *Configuration) SetFederatedAwsSessions(federatedAwsSessions []*session.AwsFederatedSession) error {
-	config.FederatedAwsSessions = federatedAwsSessions
+	config.AwsFederatedSessions = federatedAwsSessions
 	return nil
 }
 
 func (config *Configuration) GetTrustedAwsSessions() ([]*session.AwsTrustedSession, error) {
-  return config.TrustedAwsSessions, nil
+  return config.AwsTrustedSessions, nil
 }
 
 func (config *Configuration) SetTrustedAwsSessions(trustedAwsSessions []*session.AwsTrustedSession) error {
-  config.TrustedAwsSessions = trustedAwsSessions
+  config.AwsTrustedSessions = trustedAwsSessions
   return nil
 }
 
@@ -219,8 +219,8 @@ func (config *Configuration) GetAllSessions() []session.Rotatable {
     sessions = append(sessions, sess)
   }
 
-  for i := range config.FederatedAwsSessions {
-    sess := config.FederatedAwsSessions[i]
+  for i := range config.AwsFederatedSessions {
+    sess := config.AwsFederatedSessions[i]
     sessions = append(sessions, sess)
   }
 
