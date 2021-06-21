@@ -165,78 +165,85 @@ func TestCreateSession_FacadeAddSessionReturnsError(t *testing.T) {
 func TestStartSession_NoPreviousActiveSession(t *testing.T) {
 	gcpPlainSessionActionsSetup()
 	gcpPlainSessionFacadeMock.ExpGetSessions = []session.GcpPlainSession{{Id: "ID2", Status: session.NotActive}}
+	envMock.ExpTime = "start-time"
 	sessionId := "ID1"
 
 	err := gcpPlainSessionActions.StartSession(sessionId)
 	if err != nil {
 		t.Fatalf("Unexpected error")
 	}
-	gcpPlainSessionActionsVerifyExpectedCalls(t, []string{}, []string{}, []string{}, []string{"GetSessions()", "SetSessionStatus(ID1, 2)"})
+	gcpPlainSessionActionsVerifyExpectedCalls(t, []string{}, []string{}, []string{}, []string{"GetSessions()", "StartSession(ID1, start-time)"})
 }
 
 func TestStartSession_PreviousActiveSessionDiffersFromNewActiveSession(t *testing.T) {
 	gcpPlainSessionActionsSetup()
 	gcpPlainSessionFacadeMock.ExpGetSessions = []session.GcpPlainSession{{Id: "ID2", Status: session.Active}}
+	envMock.ExpTime = "start-time"
 	sessionId := "ID1"
 
 	err := gcpPlainSessionActions.StartSession(sessionId)
 	if err != nil {
 		t.Fatalf("Unexpected error")
 	}
-	gcpPlainSessionActionsVerifyExpectedCalls(t, []string{}, []string{}, []string{}, []string{"GetSessions()", "SetSessionStatus(ID2, 0)", "SetSessionStatus(ID1, 2)"})
+	gcpPlainSessionActionsVerifyExpectedCalls(t, []string{}, []string{}, []string{}, []string{"GetSessions()", "StopSession(ID2, start-time)", "StartSession(ID1, start-time)"})
 }
 
 func TestStartSession_SessionWasAlreadyActive(t *testing.T) {
 	gcpPlainSessionActionsSetup()
 	gcpPlainSessionFacadeMock.ExpGetSessions = []session.GcpPlainSession{{Id: "ID1", Status: session.Active}}
+	envMock.ExpTime = "start-time"
 	sessionId := "ID1"
 
 	err := gcpPlainSessionActions.StartSession(sessionId)
 	if err != nil {
 		t.Fatalf("Unexpected error")
 	}
-	gcpPlainSessionActionsVerifyExpectedCalls(t, []string{}, []string{}, []string{}, []string{"GetSessions()", "SetSessionStatus(ID1, 2)"})
+	gcpPlainSessionActionsVerifyExpectedCalls(t, []string{}, []string{}, []string{}, []string{"GetSessions()", "StartSession(ID1, start-time)"})
 }
 
 func TestStartSession_PreviousActiveSessionDifferentAndFacadeSetSessionStatusReturnsError(t *testing.T) {
 	gcpPlainSessionActionsSetup()
 	gcpPlainSessionFacadeMock.ExpGetSessions = []session.GcpPlainSession{{Id: "ID2", Status: session.Active}}
-	gcpPlainSessionFacadeMock.ExpErrorOnSetSessionStatus = true
+	gcpPlainSessionFacadeMock.ExpErrorOnStopSession = true
+	envMock.ExpTime = "start-time"
 	sessionId := "ID1"
 
 	err := gcpPlainSessionActions.StartSession(sessionId)
-	test.ExpectHttpError(t, err, http.StatusInternalServerError, "unable to set the session status")
-	gcpPlainSessionActionsVerifyExpectedCalls(t, []string{}, []string{}, []string{}, []string{"GetSessions()", "SetSessionStatus(ID2, 0)"})
+	test.ExpectHttpError(t, err, http.StatusInternalServerError, "unable to stop the session")
+	gcpPlainSessionActionsVerifyExpectedCalls(t, []string{}, []string{}, []string{}, []string{"GetSessions()", "StopSession(ID2, start-time)"})
 }
 
 func TestStartSession_FacadeSetSessionStatusReturnsError(t *testing.T) {
 	gcpPlainSessionActionsSetup()
 	gcpPlainSessionFacadeMock.ExpGetSessions = []session.GcpPlainSession{{Id: "ID2", Status: session.NotActive}}
-	gcpPlainSessionFacadeMock.ExpErrorOnSetSessionStatus = true
+	gcpPlainSessionFacadeMock.ExpErrorOnStartSession = true
+	envMock.ExpTime = "start-time"
 	sessionId := "ID1"
 
 	err := gcpPlainSessionActions.StartSession(sessionId)
-	test.ExpectHttpError(t, err, http.StatusInternalServerError, "unable to set the session status")
-	gcpPlainSessionActionsVerifyExpectedCalls(t, []string{}, []string{}, []string{}, []string{"GetSessions()", "SetSessionStatus(ID1, 2)"})
+	test.ExpectHttpError(t, err, http.StatusInternalServerError, "unable to start the session")
+	gcpPlainSessionActionsVerifyExpectedCalls(t, []string{}, []string{}, []string{}, []string{"GetSessions()", "StartSession(ID1, start-time)"})
 }
 
 func TestStopSession(t *testing.T) {
 	gcpPlainSessionActionsSetup()
+	envMock.ExpTime = "stop-time"
 	sessionId := "ID"
 	err := gcpPlainSessionActions.StopSession(sessionId)
 	if err != nil {
 		t.Fatalf("Unexpected error")
 	}
-	gcpPlainSessionActionsVerifyExpectedCalls(t, []string{}, []string{}, []string{}, []string{"SetSessionStatus(ID, 0)"})
+	gcpPlainSessionActionsVerifyExpectedCalls(t, []string{}, []string{}, []string{}, []string{"StopSession(ID, stop-time)"})
 }
 
 func TestStopSession_FacadeReturnsError(t *testing.T) {
 	gcpPlainSessionActionsSetup()
-	gcpPlainSessionFacadeMock.ExpErrorOnSetSessionStatus = true
+	gcpPlainSessionFacadeMock.ExpErrorOnStopSession = true
+	envMock.ExpTime = "stop-time"
 	sessionId := "ID"
 	err := gcpPlainSessionActions.StopSession(sessionId)
-	test.ExpectHttpError(t, err, http.StatusInternalServerError, "unable to set the session status")
-	gcpPlainSessionActionsVerifyExpectedCalls(t, []string{}, []string{}, []string{}, []string{"SetSessionStatus(ID, 0)"})
+	test.ExpectHttpError(t, err, http.StatusInternalServerError, "unable to stop the session")
+	gcpPlainSessionActionsVerifyExpectedCalls(t, []string{}, []string{}, []string{}, []string{"StopSession(ID, stop-time)"})
 }
 
 func TestDeleteSession(t *testing.T) {

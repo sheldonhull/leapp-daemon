@@ -91,19 +91,6 @@ func (facade *GcpPlainSessionsFacade) RemoveSession(sessionId string) error {
 	return nil
 }
 
-func (facade *GcpPlainSessionsFacade) SetSessionStatus(sessionId string, status Status) error {
-	sessionsLock.Lock()
-	defer sessionsLock.Unlock()
-
-	sessionToUpdate, err := facade.GetSessionById(sessionId)
-	if err != nil {
-		return err
-	}
-
-	sessionToUpdate.Status = status
-	return facade.replaceSession(sessionId, sessionToUpdate)
-}
-
 func (facade *GcpPlainSessionsFacade) EditSession(sessionId string, sessionName string, projectName string) error {
 	sessionsLock.Lock()
 	defer sessionsLock.Unlock()
@@ -125,6 +112,35 @@ func (facade *GcpPlainSessionsFacade) EditSession(sessionId string, sessionName 
 	sessionToEdit.ProjectName = projectName
 
 	return facade.replaceSession(sessionId, sessionToEdit)
+}
+
+func (facade *GcpPlainSessionsFacade) StartSession(sessionId string, startTime string) error {
+	return facade.setSessionStatus(sessionId, Active, startTime, "")
+}
+
+func (facade *GcpPlainSessionsFacade) StopSession(sessionId string, stopTime string) error {
+	return facade.setSessionStatus(sessionId, NotActive, "", stopTime)
+}
+
+func (facade *GcpPlainSessionsFacade) setSessionStatus(sessionId string, status Status, startTime string, lastStopTime string) error {
+	sessionsLock.Lock()
+	defer sessionsLock.Unlock()
+
+	sessionToUpdate, err := facade.GetSessionById(sessionId)
+	if err != nil {
+		return err
+	}
+
+	sessionToUpdate.Status = status
+	if startTime != "" {
+		sessionToUpdate.StartTime = startTime
+		sessionToUpdate.LastStopTime = ""
+	}
+	if lastStopTime != "" {
+		sessionToUpdate.StartTime = ""
+		sessionToUpdate.LastStopTime = lastStopTime
+	}
+	return facade.replaceSession(sessionId, sessionToUpdate)
 }
 
 func (facade *GcpPlainSessionsFacade) replaceSession(sessionId string, newSession GcpPlainSession) error {

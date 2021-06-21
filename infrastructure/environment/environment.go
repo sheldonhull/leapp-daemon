@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"runtime"
 	"strings"
+	"time"
 )
 
 type Environment struct {
@@ -30,4 +31,8 @@ func (env *Environment) IsWindows() bool {
 
 func (env *Environment) GenerateUuid() string {
 	return strings.Replace(uuid.New().String(), "-", "", -1)
+}
+
+func (env *Environment) GetTime() string {
+	return time.Now().Format(time.RFC3339)
 }

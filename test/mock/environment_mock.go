@@ -7,6 +7,7 @@ import (
 type EnvironmentMock struct {
 	calls                 []string
 	ExpUuid               string
+	ExpTime               string
 	ExpIsCommandAvailable bool
 	ExpIsWindows          bool
 }
@@ -37,4 +38,8 @@ func (env *EnvironmentMock) IsWindows() bool {
 func (env *EnvironmentMock) GenerateUuid() string {
 	env.calls = append(env.calls, "GenerateUuid()")
 	return env.ExpUuid
+}
+
+func (env *EnvironmentMock) GetTime() string {
+	return env.ExpTime
 }

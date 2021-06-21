@@ -8,14 +8,15 @@ import (
 )
 
 type GcpPlainSessionsFacadeMock struct {
-	calls                      []string
-	ExpErrorOnGetSessionById   bool
-	ExpErrorOnAddSession       bool
-	ExpErrorOnEditSession      bool
-	ExpErrorOnRemoveSession    bool
-	ExpErrorOnSetSessionStatus bool
-	ExpGetSessionById          session.GcpPlainSession
-	ExpGetSessions             []session.GcpPlainSession
+	calls                    []string
+	ExpErrorOnGetSessionById bool
+	ExpErrorOnAddSession     bool
+	ExpErrorOnEditSession    bool
+	ExpErrorOnRemoveSession  bool
+	ExpErrorOnStartSession   bool
+	ExpErrorOnStopSession    bool
+	ExpGetSessionById        session.GcpPlainSession
+	ExpGetSessions           []session.GcpPlainSession
 }
 
 func NewGcpPlainSessionsFacadeMock() GcpPlainSessionsFacadeMock {
@@ -48,10 +49,18 @@ func (facade *GcpPlainSessionsFacadeMock) AddSession(session session.GcpPlainSes
 	return nil
 }
 
-func (facade *GcpPlainSessionsFacadeMock) SetSessionStatus(sessionId string, status session.Status) error {
-	facade.calls = append(facade.calls, fmt.Sprintf("SetSessionStatus(%v, %v)", sessionId, status))
-	if facade.ExpErrorOnSetSessionStatus {
-		return http_error.NewInternalServerError(errors.New("unable to set the session status"))
+func (facade *GcpPlainSessionsFacadeMock) StartSession(sessionId string, startTime string) error {
+	facade.calls = append(facade.calls, fmt.Sprintf("StartSession(%v, %v)", sessionId, startTime))
+	if facade.ExpErrorOnStartSession {
+		return http_error.NewInternalServerError(errors.New("unable to start the session"))
+	}
+	return nil
+}
+
+func (facade *GcpPlainSessionsFacadeMock) StopSession(sessionId string, stopTime string) error {
+	facade.calls = append(facade.calls, fmt.Sprintf("StopSession(%v, %v)", sessionId, stopTime))
+	if facade.ExpErrorOnStopSession {
+		return http_error.NewInternalServerError(errors.New("unable to stop the session"))
 	}
 	return nil
 }

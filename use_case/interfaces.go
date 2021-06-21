@@ -15,6 +15,7 @@ type FileSystem interface {
 
 type Environment interface {
 	GenerateUuid() string
+	GetTime() string
 }
 
 type Keychain interface {
@@ -76,7 +77,8 @@ type GcpPlainSessionsFacade interface {
 	GetSessions() []session.GcpPlainSession
 	GetSessionById(sessionId string) (session.GcpPlainSession, error)
 	AddSession(session session.GcpPlainSession) error
-	SetSessionStatus(sessionId string, status session.Status) error
+	StartSession(sessionId string, startTime string) error
+	StopSession(sessionId string, stopTime string) error
 	RemoveSession(sessionId string) error
 	EditSession(sessionId string, name string, projectName string) error
 }

@@ -5,6 +5,7 @@ import (
 	"runtime"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestGetEnvironmentVariable(t *testing.T) {
@@ -96,5 +97,19 @@ func TestGenerateUuid_withoutDashes(t *testing.T) {
 	uuid := env.GenerateUuid()
 	if strings.Contains(uuid, "-") {
 		t.Fatalf("uuid should not contain dashes")
+	}
+}
+
+func TestGetTime(t *testing.T) {
+	env := Environment{}
+
+	timestamp := env.GetTime()
+	parsedTime, err := time.Parse(time.RFC3339, timestamp)
+	if err != nil {
+		t.Fatalf("cannot parse timestamp")
+	}
+
+	if time.Now().Before(parsedTime) {
+		t.Fatalf("getTime is returning a time after now")
 	}
 }

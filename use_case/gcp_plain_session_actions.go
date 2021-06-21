@@ -54,20 +54,21 @@ func (actions *GcpPlainSessionActions) CreateSession(name string, accountId stri
 func (actions *GcpPlainSessionActions) StartSession(sessionId string) error {
 
 	facade := actions.GcpPlainSessionFacade
+	currentTime := actions.Environment.GetTime()
+
 	for _, currentSession := range facade.GetSessions() {
 		if currentSession.Status != session.NotActive && currentSession.Id != sessionId {
-			err := facade.SetSessionStatus(currentSession.Id, session.NotActive)
+			err := facade.StopSession(currentSession.Id, currentTime)
 			if err != nil {
 				return err
 			}
 		}
 	}
-	return facade.SetSessionStatus(sessionId, session.Active)
+	return facade.StartSession(sessionId, currentTime)
 }
 
 func (actions *GcpPlainSessionActions) StopSession(sessionId string) error {
-
-	return actions.GcpPlainSessionFacade.SetSessionStatus(sessionId, session.NotActive)
+	return actions.GcpPlainSessionFacade.StopSession(sessionId, actions.Environment.GetTime())
 }
 
 func (actions *GcpPlainSessionActions) DeleteSession(sessionId string) error {

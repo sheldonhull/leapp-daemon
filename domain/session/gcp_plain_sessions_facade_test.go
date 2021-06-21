@@ -117,29 +117,59 @@ func TestRemoveSession_notFound(t *testing.T) {
 	}
 }
 
-func TestSetSessionStatus(t *testing.T) {
+func TestStartSession(t *testing.T) {
 	gcpPlainSessionFacadeSetup()
 	facade.Subscribe(FakeObserver{})
 
 	newSession := GcpPlainSession{Id: "ID", Status: NotActive}
 	facade.gcpPlainSessions = []GcpPlainSession{newSession}
 
-	facade.SetSessionStatus("ID", Pending)
+	facade.StartSession("ID", "start-time")
 
 	if !reflect.DeepEqual(sessionsBeforeUpdate, []GcpPlainSession{newSession}) {
 		t.Errorf("unexpected session")
 	}
 
-	if !reflect.DeepEqual(sessionsAfterUpdate, []GcpPlainSession{{Id: "ID", Status: Pending}}) {
+	if !reflect.DeepEqual(sessionsAfterUpdate, []GcpPlainSession{{Id: "ID", Status: Active, StartTime: "start-time"}}) {
 		t.Errorf("sessions were not updated")
 	}
 }
 
-func TestSetSessionStatus_notFound(t *testing.T) {
+func TestStartSession_notFound(t *testing.T) {
 	gcpPlainSessionFacadeSetup()
 	facade.Subscribe(FakeObserver{})
 
-	err := facade.SetSessionStatus("ID", Pending)
+	err := facade.StartSession("ID", "start-time")
+	test.ExpectHttpError(t, err, http.StatusNotFound, "session with id ID not found")
+
+	if len(sessionsBeforeUpdate) > 0 || len(sessionsAfterUpdate) > 0 {
+		t.Errorf("sessions was unexpectedly changed")
+	}
+}
+
+func TestStopSession(t *testing.T) {
+	gcpPlainSessionFacadeSetup()
+	facade.Subscribe(FakeObserver{})
+
+	newSession := GcpPlainSession{Id: "ID", Status: Active}
+	facade.gcpPlainSessions = []GcpPlainSession{newSession}
+
+	facade.StopSession("ID", "stop-time")
+
+	if !reflect.DeepEqual(sessionsBeforeUpdate, []GcpPlainSession{newSession}) {
+		t.Errorf("unexpected session")
+	}
+
+	if !reflect.DeepEqual(sessionsAfterUpdate, []GcpPlainSession{{Id: "ID", Status: NotActive, LastStopTime: "stop-time"}}) {
+		t.Errorf("sessions were not updated")
+	}
+}
+
+func TestStopSession_notFound(t *testing.T) {
+	gcpPlainSessionFacadeSetup()
+	facade.Subscribe(FakeObserver{})
+
+	err := facade.StopSession("ID", "stop-time")
 	test.ExpectHttpError(t, err, http.StatusNotFound, "session with id ID not found")
 
 	if len(sessionsBeforeUpdate) > 0 || len(sessionsAfterUpdate) > 0 {
