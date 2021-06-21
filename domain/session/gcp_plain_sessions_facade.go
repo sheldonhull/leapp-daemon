@@ -38,7 +38,7 @@ func (facade *GcpPlainSessionsFacade) GetSessionById(sessionId string) (GcpPlain
 		}
 	}
 
-	return GcpPlainSession{}, http_error.NewNotFoundError(fmt.Errorf("gcp plain session with id %s not found", sessionId))
+	return GcpPlainSession{}, http_error.NewNotFoundError(fmt.Errorf("session with id %s not found", sessionId))
 }
 
 func (facade *GcpPlainSessionsFacade) SetSessions(sessions []GcpPlainSession) {
@@ -48,23 +48,23 @@ func (facade *GcpPlainSessionsFacade) SetSessions(sessions []GcpPlainSession) {
 	facade.gcpPlainSessions = sessions
 }
 
-func (facade *GcpPlainSessionsFacade) AddSession(session GcpPlainSession) error {
+func (facade *GcpPlainSessionsFacade) AddSession(newSession GcpPlainSession) error {
 	sessionsLock.Lock()
 	defer sessionsLock.Unlock()
 
 	currentSessions := facade.GetSessions()
 
 	for _, sess := range currentSessions {
-		if session.Id == sess.Id {
-			return http_error.NewConflictError(fmt.Errorf("a session with id %v is already present", session.Id))
+		if newSession.Id == sess.Id {
+			return http_error.NewConflictError(fmt.Errorf("a session with id %v is already present", newSession.Id))
 		}
 
-		if session.Name == sess.Name {
+		if newSession.Name == sess.Name {
 			return http_error.NewConflictError(fmt.Errorf("a session named %v is already present", sess.Name))
 		}
 	}
 
-	newSessions := append(currentSessions, session)
+	newSessions := append(currentSessions, newSession)
 
 	facade.updateState(newSessions)
 	return nil
@@ -84,7 +84,7 @@ func (facade *GcpPlainSessionsFacade) RemoveSession(sessionId string) error {
 	}
 
 	if len(currentSessions) == len(newSessions) {
-		return http_error.NewNotFoundError(fmt.Errorf("plain gcp session with id %s not found", sessionId))
+		return http_error.NewNotFoundError(fmt.Errorf("session with id %s not found", sessionId))
 	}
 
 	facade.updateState(newSessions)
@@ -104,7 +104,7 @@ func (facade *GcpPlainSessionsFacade) SetSessionStatus(sessionId string, status 
 	return facade.replaceSession(sessionId, sessionToUpdate)
 }
 
-func (facade *GcpPlainSessionsFacade) EditSession(sessionId string, name string, projectName string, profileId string) error {
+func (facade *GcpPlainSessionsFacade) EditSession(sessionId string, sessionName string, projectName string, profileId string) error {
 	sessionsLock.Lock()
 	defer sessionsLock.Unlock()
 
@@ -113,7 +113,15 @@ func (facade *GcpPlainSessionsFacade) EditSession(sessionId string, name string,
 		return err
 	}
 
-	sessionToEdit.Name = name
+	currentSessions := facade.GetSessions()
+	for _, sess := range currentSessions {
+
+		if sess.Id != sessionId && sess.Name == sessionName {
+			return http_error.NewConflictError(fmt.Errorf("a session named %v is already present", sess.Name))
+		}
+	}
+
+	sessionToEdit.Name = sessionName
 	sessionToEdit.ProjectName = projectName
 	sessionToEdit.NamedProfileId = profileId
 
