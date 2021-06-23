@@ -9,14 +9,14 @@ type GcpSessionsWriter struct {
 	ConfigurationRepository ConfigurationRepository
 }
 
-func (sessionWriter *GcpSessionsWriter) UpdateGcpPlainSessions(oldSessions []session.GcpPlainSession, newSessions []session.GcpPlainSession) {
+func (sessionWriter *GcpSessionsWriter) UpdateGcpIamUserAccountOauthSessions(oldSessions []session.GcpIamUserAccountOauthSession, newSessions []session.GcpIamUserAccountOauthSession) {
 	config, err := sessionWriter.ConfigurationRepository.GetConfiguration()
 	if err != nil {
 		logging.Entry().Error(err)
 		return
 	}
 
-	config.GcpPlainSessions = newSessions
+	config.GcpIamUserAccountOauthSessions = newSessions
 	err = sessionWriter.ConfigurationRepository.UpdateConfiguration(config)
 	if err != nil {
 		logging.Entry().Error(err)

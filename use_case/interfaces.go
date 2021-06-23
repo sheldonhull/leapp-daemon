@@ -61,22 +61,22 @@ type NamedProfilesActionsInterface interface {
 	GetOrCreateNamedProfile(profileName string) (named_profile.NamedProfile, error)
 }
 
-type AwsPlainSessionsFacade interface {
-	Subscribe(observer session.AwsPlainSessionsObserver)
-	GetSessions() []session.AwsPlainSession
-	SetSessions(sessions []session.AwsPlainSession)
-	AddSession(session session.AwsPlainSession) error
+type AwsIamUserSessionsFacade interface {
+	Subscribe(observer session.AwsIamUserSessionsObserver)
+	GetSessions() []session.AwsIamUserSession
+	SetSessions(sessions []session.AwsIamUserSession)
+	AddSession(session session.AwsIamUserSession) error
 	RemoveSession(id string) error
-	GetSessionById(id string) (*session.AwsPlainSession, error)
+	GetSessionById(id string) (*session.AwsIamUserSession, error)
 	SetSessionStatusToPending(id string) error
 	SetSessionStatusToActive(id string) error
 	SetSessionTokenExpiration(sessionId string, sessionTokenExpiration time.Time) error
 }
 
-type GcpPlainSessionsFacade interface {
-	GetSessions() []session.GcpPlainSession
-	GetSessionById(sessionId string) (session.GcpPlainSession, error)
-	AddSession(session session.GcpPlainSession) error
+type GcpIamUserAccountOauthSessionsFacade interface {
+	GetSessions() []session.GcpIamUserAccountOauthSession
+	GetSessionById(sessionId string) (session.GcpIamUserAccountOauthSession, error)
+	AddSession(session session.GcpIamUserAccountOauthSession) error
 	StartSession(sessionId string, startTime string) error
 	StopSession(sessionId string, stopTime string) error
 	RemoveSession(sessionId string) error

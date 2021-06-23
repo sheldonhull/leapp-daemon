@@ -38,65 +38,65 @@ func gcpCredentialsApplierVerifyExpectedCalls(t *testing.T, keychainMockCalls []
 	}
 }
 
-func TestUpdateGcpPlainSessions_OldActiveSessionAndNoNewActiveSessions(t *testing.T) {
+func TestUpdateGcpIamUserAccountOauthSessions_OldActiveSessionAndNoNewActiveSessions(t *testing.T) {
 	gcpCredentialsApplierSetup()
-	oldSessions := []session.GcpPlainSession{{Status: session.Active}}
-	newSessions := []session.GcpPlainSession{}
+	oldSessions := []session.GcpIamUserAccountOauthSession{{Status: session.Active}}
+	newSessions := []session.GcpIamUserAccountOauthSession{}
 
-	gcpCredentialsApplier.UpdateGcpPlainSessions(oldSessions, newSessions)
+	gcpCredentialsApplier.UpdateGcpIamUserAccountOauthSessions(oldSessions, newSessions)
 	gcpCredentialsApplierVerifyExpectedCalls(t, []string{}, expectedDeactivationCalls)
 }
 
-func TestUpdateGcpPlainSessions_OldAndNewActiveSessionWithDifferentIds(t *testing.T) {
+func TestUpdateGcpIamUserAccountOauthSessions_OldAndNewActiveSessionWithDifferentIds(t *testing.T) {
 	gcpCredentialsApplierSetup()
 	keychainMock.ExpGetSecret = "credentials"
-	oldSessions := []session.GcpPlainSession{{Id: "ID1", Status: session.Active}}
-	newSessions := []session.GcpPlainSession{{Id: "ID2", CredentialsLabel: "credentialsLabel", AccountId: "accountId",
+	oldSessions := []session.GcpIamUserAccountOauthSession{{Id: "ID1", Status: session.Active}}
+	newSessions := []session.GcpIamUserAccountOauthSession{{Id: "ID2", CredentialsLabel: "credentialsLabel", AccountId: "accountId",
 		Name: "sessionName", ProjectName: "projectName", Status: session.Active}}
 
-	gcpCredentialsApplier.UpdateGcpPlainSessions(oldSessions, newSessions)
+	gcpCredentialsApplier.UpdateGcpIamUserAccountOauthSessions(oldSessions, newSessions)
 	expectedRepositoryCalls := append(expectedDeactivationCalls, expectedActivationCalls...)
 	gcpCredentialsApplierVerifyExpectedCalls(t, []string{"GetSecret(credentialsLabel)"}, expectedRepositoryCalls)
 }
 
-func TestUpdateGcpPlainSessions_OldAndNewActiveSessionAreEqual(t *testing.T) {
+func TestUpdateGcpIamUserAccountOauthSessions_OldAndNewActiveSessionAreEqual(t *testing.T) {
 	gcpCredentialsApplierSetup()
-	oldSessions := []session.GcpPlainSession{{Id: "ID1", Status: session.Active}}
-	newSessions := []session.GcpPlainSession{{Id: "ID1", Status: session.Active}}
+	oldSessions := []session.GcpIamUserAccountOauthSession{{Id: "ID1", Status: session.Active}}
+	newSessions := []session.GcpIamUserAccountOauthSession{{Id: "ID1", Status: session.Active}}
 
-	gcpCredentialsApplier.UpdateGcpPlainSessions(oldSessions, newSessions)
+	gcpCredentialsApplier.UpdateGcpIamUserAccountOauthSessions(oldSessions, newSessions)
 	gcpCredentialsApplierVerifyExpectedCalls(t, []string{}, []string{})
 }
 
-func TestUpdateGcpPlainSessions_OldAndNewActiveSessionWithSameIdsButDifferentParams(t *testing.T) {
+func TestUpdateGcpIamUserAccountOauthSessions_OldAndNewActiveSessionWithSameIdsButDifferentParams(t *testing.T) {
 	gcpCredentialsApplierSetup()
 	keychainMock.ExpGetSecret = "credentials"
-	oldSessions := []session.GcpPlainSession{{Id: "ID1", CredentialsLabel: "credentialsLabel", AccountId: "accountId",
+	oldSessions := []session.GcpIamUserAccountOauthSession{{Id: "ID1", CredentialsLabel: "credentialsLabel", AccountId: "accountId",
 		Name: "sessionName", ProjectName: "oldProjectName", Status: session.Active}}
-	newSessions := []session.GcpPlainSession{{Id: "ID1", CredentialsLabel: "credentialsLabel", AccountId: "accountId",
+	newSessions := []session.GcpIamUserAccountOauthSession{{Id: "ID1", CredentialsLabel: "credentialsLabel", AccountId: "accountId",
 		Name: "sessionName", ProjectName: "projectName", Status: session.Active}}
 
-	gcpCredentialsApplier.UpdateGcpPlainSessions(oldSessions, newSessions)
+	gcpCredentialsApplier.UpdateGcpIamUserAccountOauthSessions(oldSessions, newSessions)
 	gcpCredentialsApplierVerifyExpectedCalls(t, []string{"GetSecret(credentialsLabel)"}, expectedActivationCalls)
 }
 
-func TestUpdateGcpPlainSessions_NoOldActiveSessionButNewActiveSessionPresent(t *testing.T) {
+func TestUpdateGcpIamUserAccountOauthSessions_NoOldActiveSessionButNewActiveSessionPresent(t *testing.T) {
 	gcpCredentialsApplierSetup()
 	keychainMock.ExpGetSecret = "credentials"
-	oldSessions := []session.GcpPlainSession{{Id: "ID1", Status: session.NotActive}}
-	newSessions := []session.GcpPlainSession{{Id: "ID1", CredentialsLabel: "credentialsLabel", AccountId: "accountId",
+	oldSessions := []session.GcpIamUserAccountOauthSession{{Id: "ID1", Status: session.NotActive}}
+	newSessions := []session.GcpIamUserAccountOauthSession{{Id: "ID1", CredentialsLabel: "credentialsLabel", AccountId: "accountId",
 		Name: "sessionName", ProjectName: "projectName", Status: session.Active}}
 
-	gcpCredentialsApplier.UpdateGcpPlainSessions(oldSessions, newSessions)
+	gcpCredentialsApplier.UpdateGcpIamUserAccountOauthSessions(oldSessions, newSessions)
 	gcpCredentialsApplierVerifyExpectedCalls(t, []string{"GetSecret(credentialsLabel)"}, expectedActivationCalls)
 }
 
-func TestUpdateGcpPlainSessions_NoActiveSessions(t *testing.T) {
+func TestUpdateGcpIamUserAccountOauthSessions_NoActiveSessions(t *testing.T) {
 	gcpCredentialsApplierSetup()
 	keychainMock.ExpGetSecret = "credentials"
-	oldSessions := []session.GcpPlainSession{{Id: "ID1", Status: session.NotActive}}
-	newSessions := []session.GcpPlainSession{{Id: "ID1", Status: session.Pending}}
+	oldSessions := []session.GcpIamUserAccountOauthSession{{Id: "ID1", Status: session.NotActive}}
+	newSessions := []session.GcpIamUserAccountOauthSession{{Id: "ID1", Status: session.Pending}}
 
-	gcpCredentialsApplier.UpdateGcpPlainSessions(oldSessions, newSessions)
+	gcpCredentialsApplier.UpdateGcpIamUserAccountOauthSessions(oldSessions, newSessions)
 	gcpCredentialsApplierVerifyExpectedCalls(t, []string{}, []string{})
 }

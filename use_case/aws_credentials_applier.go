@@ -16,7 +16,7 @@ type AwsCredentialsApplier struct {
 	NamedProfilesFacade NamedProfilesFacade
 }
 
-func (applier *AwsCredentialsApplier) UpdateAwsPlainSessions(oldSessions []session.AwsPlainSession, newSessions []session.AwsPlainSession) error {
+func (applier *AwsCredentialsApplier) UpdateAwsIamUserSessions(oldSessions []session.AwsIamUserSession, newSessions []session.AwsIamUserSession) error {
 	for i, oldSess := range oldSessions {
 		if i < len(newSessions) {
 			newSess := newSessions[i]
@@ -108,13 +108,13 @@ func (applier *AwsCredentialsApplier) getAccessKeys(sessionId string) (accessKey
 	accessKeyId = ""
 	secretAccessKey = ""
 
-	accessKeyIdSecretName := sessionId + "-plain-aws-session-access-key-id"
+	accessKeyIdSecretName := sessionId + "-aws-iam-user-session-access-key-id"
 	accessKeyId, err := applier.Keychain.GetSecret(accessKeyIdSecretName)
 	if err != nil {
 		return accessKeyId, secretAccessKey, http_error.NewUnprocessableEntityError(err)
 	}
 
-	secretAccessKeySecretName := sessionId + "-plain-aws-session-secret-access-key"
+	secretAccessKeySecretName := sessionId + "-aws-iam-user-session-secret-access-key"
 	secretAccessKey, err = applier.Keychain.GetSecret(secretAccessKeySecretName)
 	if err != nil {
 		return accessKeyId, secretAccessKey, http_error.NewUnprocessableEntityError(err)
@@ -126,7 +126,7 @@ func (applier *AwsCredentialsApplier) getAccessKeys(sessionId string) (accessKey
 func (applier *AwsCredentialsApplier) getSessionToken(sessionId string) (sessionToken string, error error) {
 	sessionToken = ""
 
-	sessionTokenSecretName := sessionId + "-plain-aws-session-session-token"
+	sessionTokenSecretName := sessionId + "-aws-iam-user-session-session-token"
 	sessionToken, err := applier.Keychain.GetSecret(sessionTokenSecretName)
 	if err != nil {
 		return sessionToken, http_error.NewUnprocessableEntityError(err)

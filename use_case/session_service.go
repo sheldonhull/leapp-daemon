@@ -4,9 +4,9 @@ import (
 	"leapp_daemon/domain/named_profile"
 )
 
-func ListAllSessions(plainSessionFacade GcpPlainSessionsFacade) (*map[string]interface{}, error) {
+func ListAllSessions(gcpIamUserAccountOauthSessionFacade GcpIamUserAccountOauthSessionsFacade) (*map[string]interface{}, error) {
 
-	sessions := plainSessionFacade.GetSessions()
+	sessions := gcpIamUserAccountOauthSessionFacade.GetSessions()
 
 	return &map[string]interface{}{
 		"GcpSessions": sessions,

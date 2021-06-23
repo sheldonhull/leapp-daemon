@@ -53,47 +53,51 @@ func (engineWrapper *engineWrapper) Serve(port int) {
 }
 
 func initializeRoutes(ginEngine *gin.Engine, providers *providers.Providers) {
-	controller := controller.EngineController{Providers: providers}
+	contr := controller.EngineController{Providers: providers}
 
 	v1 := ginEngine.Group("/api/v1")
 	{
-		v1.GET("/session/list", controller.ListSession)
-		v1.POST("/session/mfa/token/confirm", controller.ConfirmMfaToken)
+		// All sessions
+		v1.GET("sessions", contr.ListSession)
 
-		// AWS
-		v1.GET("/session/plain/:id", controller.GetAwsPlainSession)
-		v1.POST("/session/plain", controller.CreateAwsPlainSession)
-		v1.PUT("/session/plain/:id", controller.UpdateAwsPlainSession)
-		v1.DELETE("/session/plain/:id", controller.DeleteAwsPlainSession)
-		v1.POST("/session/plain/:id/start", controller.StartAwsPlainSession)
-		v1.POST("/session/plain/:id/stop", controller.StopAwsPlainSession)
+		// AWS sessions
+		v1.GET("aws/named-profiles", contr.ListNamedProfiles)
+		v1.GET("aws/regions", contr.GetAwsRegionList)
+		v1.PUT("aws/sessions/:id/region", contr.EditAwsRegion)
 
-		v1.GET("/session/federated/:id", controller.GetAwsFederatedSession)
-		v1.POST("/session/federated", controller.CreateAwsFederatedSession)
-		v1.PUT("/session/federated/:id", controller.EditAwsFederatedSession)
-		v1.DELETE("/session/federated/:id", controller.DeleteAwsFederatedSession)
-		v1.POST("/session/federated/:id/start", controller.StartAwsFederatedSession)
-		v1.POST("/session/federated/:id/stop", controller.StopAwsFederatedSession)
+		// AWS IAM User sessions
+		v1.GET("aws/iam-user-sessions/:id", contr.GetAwsIamUserSession)
+		v1.POST("aws/iam-user-sessions", contr.CreateAwsIamUserSession)
+		v1.PUT("aws/iam-user-sessions/:id", contr.UpdateAwsIamUserSession)
+		v1.DELETE("aws/iam-user-sessions/:id", contr.DeleteAwsIamUserSession)
+		v1.POST("aws/iam-user-sessions/:id/confirm-mfa-token", contr.ConfirmMfaToken)
+		v1.POST("aws/iam-user-sessions/:id/start", contr.StartAwsIamUserSession)
+		v1.POST("aws/iam-user-sessions/:id/stop", contr.StopAwsIamUserSession)
 
-		v1.GET("/session/trusted/:id", controller.GetAwsTrustedSession)
-		v1.POST("/session/trusted", controller.CreateAwsTrustedSession)
-		v1.PUT("/session/trusted/:id", controller.EditAwsTrustedSession)
-		v1.DELETE("/session/trusted/:id", controller.DeleteAwsTrustedSession)
+		// AWS IAM Role Federated sessions
+		v1.GET("aws/iam-role-federated-sessions/:id", contr.GetAwsIamRoleFederatedSession)
+		v1.POST("aws/iam-role-federated-sessions", contr.CreateAwsIamRoleFederatedSession)
+		v1.PUT("aws/iam-role-federated-sessions/:id", contr.EditAwsIamRoleFederatedSession)
+		v1.DELETE("aws/iam-role-federated-sessions/:id", contr.DeleteAwsIamRoleFederatedSession)
+		v1.POST("aws/iam-role-federated-sessions/:id/start", contr.StartAwsIamRoleFederatedSession)
+		v1.POST("aws/iam-role-federated-sessions/:id/stop", contr.StopAwsIamRoleFederatedSession)
 
-		v1.GET("/region/aws/list", controller.GetAwsRegionList)
-		v1.PUT("/region/aws/", controller.EditAwsRegion)
+		// AWS IAM Role Chained sessions
+		v1.GET("aws/iam-role-chained-sessions/:id", contr.GetAwsIamRoleChainedSession)
+		v1.POST("aws/iam-role-chained-sessions", contr.CreateAwsIamRoleChainedSession)
+		v1.PUT("aws/iam-role-chained-sessions/:id", contr.EditAwsIamRoleChainedSession)
+		v1.DELETE("aws/iam-role-chained-sessions/:id", contr.DeleteAwsIamRoleChainedSession)
 
-		v1.GET("/named_profile/aws/list", controller.ListNamedProfiles)
+		// GCP IAM UserAccount OAuth sessions
+		v1.GET("gcp/iam-user-account-oauth-url", contr.GetGcpOauthUrl)
+		v1.POST("gcp/iam-user-account-oauth-sessions", contr.CreateGcpIamUserAccountOauthSession)
+		v1.GET("gcp/iam-user-account-oauth-sessions/:id", contr.GetGcpIamUserAccountOauthSession)
+		v1.PUT("gcp/iam-user-account-oauth-sessions/:id", contr.EditGcpIamUserAccountOauthSession)
+		v1.POST("gcp/iam-user-account-oauth-sessions/:id/start", contr.StartGcpIamUserAccountOauthSession)
+		v1.POST("gcp/iam-user-account-oauth-sessions/:id/stop", contr.StopGcpIamUserAccountOauthSession)
+		v1.DELETE("gcp/iam-user-account-oauth-sessions/:id", contr.DeleteGcpIamUserAccountOauthSession)
 
-		// GCP
-		v1.GET("/gcp/oauth/url", controller.GetGcpOauthUrl)
-		v1.POST("/gcp/session/plain", controller.CreateGcpPlainSession)
-		v1.GET("/gcp/session/plain/:id", controller.GetGcpPlainSession)
-		v1.PUT("/gcp/session/plain/:id", controller.EditGcpPlainSession)
-		v1.DELETE("/gcp/session/plain/:id", controller.DeleteGcpPlainSession)
-		v1.POST("/gcp/session/plain/:id/start", controller.StartGcpPlainSession)
-		v1.POST("/gcp/session/plain/:id/stop", controller.StopGcpPlainSession)
-
-		v1.GET("/ws", controller.GetWs)
+		// WebSocket
+		v1.GET("ws", contr.GetWs)
 	}
 }

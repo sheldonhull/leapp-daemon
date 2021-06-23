@@ -13,8 +13,8 @@ func main() {
 
 	config := ConfigurationBootstrap(prov)
 	NamedProfilesBootstrap(prov, config)
-	AwsPlainBootstrap(prov, config)
-	GcpPlainBootstrap(prov, config)
+	AwsIamUserBootstrap(prov, config)
+	GcpIamUserAccountOauthBootstrap(prov, config)
 
 	//timer.Initialize(1, use_case.RotateAllSessionsCredentials)
 	//defer timer.Close()

@@ -18,7 +18,7 @@ func EditAwsSessionRegion(sessionId string, region string) error {
 		}
 
 		// Find a valid Aws Session
-		for _, plainSession := range config.plainAwsSessions {
+		for _, plainSession := range config.awsIamUserSessions {
 			if plainSession.Id == sessionId {
 				plainSession.Account.Region = region
 				err = configuration.UpdateConfiguration(config, false)
@@ -27,7 +27,7 @@ func EditAwsSessionRegion(sessionId string, region string) error {
 			}
 		}
 
-		for _, federatedSession := range config.AwsFederatedSessions {
+		for _, federatedSession := range config.AwsIamRoleFederatedSessions {
 			if federatedSession.Id == sessionId {
 				federatedSession.Account.Region = region
 				err = configuration.UpdateConfiguration(config, false)

@@ -8,15 +8,15 @@ import (
 )
 
 var (
-	oldSessions       []session.GcpPlainSession
-	newSessions       []session.GcpPlainSession
+	oldSessions       []session.GcpIamUserAccountOauthSession
+	newSessions       []session.GcpIamUserAccountOauthSession
 	fileRepoMock      mock.FileConfigurationRepositoryMock
 	gcpSessionsWriter *GcpSessionsWriter
 )
 
 func gcpSessionsWriterSetup() {
-	oldSessions = []session.GcpPlainSession{}
-	newSessions = []session.GcpPlainSession{{Id: "ID"}}
+	oldSessions = []session.GcpIamUserAccountOauthSession{}
+	newSessions = []session.GcpIamUserAccountOauthSession{{Id: "ID"}}
 
 	fileRepoMock = mock.NewFileConfigurationRepositoryMock()
 	gcpSessionsWriter = &GcpSessionsWriter{
@@ -30,25 +30,25 @@ func gcpSessionsWriterVerifyExpectedCalls(t *testing.T, fileRepoMockCalls []stri
 	}
 }
 
-func TestUpdateGcpPlainSessions(t *testing.T) {
+func TestUpdateGcpIamUserAccountOauthSessions(t *testing.T) {
 	gcpSessionsWriterSetup()
 
-	gcpSessionsWriter.UpdateGcpPlainSessions(oldSessions, newSessions)
+	gcpSessionsWriter.UpdateGcpIamUserAccountOauthSessions(oldSessions, newSessions)
 	gcpSessionsWriterVerifyExpectedCalls(t, []string{"GetConfiguration()", "UpdateConfiguration()"})
 }
 
-func TestUpdateGcpPlainSessions_ErrorGettingConfiguration(t *testing.T) {
+func TestUpdateGcpIamUserAccountOauthSessions_ErrorGettingConfiguration(t *testing.T) {
 	gcpSessionsWriterSetup()
 	fileRepoMock.ExpErrorOnGetConfiguration = true
 
-	gcpSessionsWriter.UpdateGcpPlainSessions(oldSessions, newSessions)
+	gcpSessionsWriter.UpdateGcpIamUserAccountOauthSessions(oldSessions, newSessions)
 	gcpSessionsWriterVerifyExpectedCalls(t, []string{"GetConfiguration()"})
 }
 
-func TestUpdateGcpPlainSessions_ErrorUpdatingConfiguration(t *testing.T) {
+func TestUpdateGcpIamUserAccountOauthSessions_ErrorUpdatingConfiguration(t *testing.T) {
 	gcpSessionsWriterSetup()
 	fileRepoMock.ExpErrorOnUpdateConfiguration = true
 
-	gcpSessionsWriter.UpdateGcpPlainSessions(oldSessions, newSessions)
+	gcpSessionsWriter.UpdateGcpIamUserAccountOauthSessions(oldSessions, newSessions)
 	gcpSessionsWriterVerifyExpectedCalls(t, []string{"GetConfiguration()", "UpdateConfiguration()"})
 }

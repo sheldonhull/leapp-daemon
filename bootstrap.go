@@ -16,7 +16,7 @@ func ConfigurationBootstrap(prov *providers.Providers) configuration.Configurati
 	return config
 }
 
-func AwsPlainBootstrap(prov *providers.Providers, config configuration.Configuration) {
+func AwsIamUserBootstrap(prov *providers.Providers, config configuration.Configuration) {
 	fileSystem := prov.GetFileSystem()
 	homeDir, err := fileSystem.GetHomeDir()
 	if err != nil {
@@ -43,21 +43,21 @@ func AwsPlainBootstrap(prov *providers.Providers, config configuration.Configura
 		}
 	}
 
-	awsPlainSessionFacade := prov.GetAwsPlainSessionFacade()
-	awsPlainSessions := config.AwsPlainSessions
-	awsPlainSessionFacade.SetSessions(awsPlainSessions)
-	awsPlainSessionFacade.Subscribe(prov.GetAwsSessionWriter())
-	awsPlainSessionFacade.Subscribe(prov.GetAwsCredentialsApplier())
-	logging.Info(fmt.Sprintf("%+v", awsPlainSessions))
+	awsIamUserSessionFacade := prov.GetAwsIamUserSessionFacade()
+	awsIamUserSessions := config.AwsIamUserSessions
+	awsIamUserSessionFacade.SetSessions(awsIamUserSessions)
+	awsIamUserSessionFacade.Subscribe(prov.GetAwsSessionWriter())
+	awsIamUserSessionFacade.Subscribe(prov.GetAwsCredentialsApplier())
+	logging.Info(fmt.Sprintf("%+v", awsIamUserSessions))
 }
 
-func GcpPlainBootstrap(prov *providers.Providers, config configuration.Configuration) {
-	gcpPlainSessionFacade := prov.GetGcpPlainSessionFacade()
-	gcpPlainSessions := config.GcpPlainSessions
-	gcpPlainSessionFacade.SetSessions(gcpPlainSessions)
-	gcpPlainSessionFacade.Subscribe(prov.GetGcpSessionWriter())
-	gcpPlainSessionFacade.Subscribe(prov.GetGcpCredentialsApplier())
-	logging.Info(fmt.Sprintf("%+v", gcpPlainSessions))
+func GcpIamUserAccountOauthBootstrap(prov *providers.Providers, config configuration.Configuration) {
+	gcpIamUserAccountOauthSessionFacade := prov.GetGcpIamUserAccountOauthSessionFacade()
+	gcpIamUserAccountOauthSessions := config.GcpIamUserAccountOauthSessions
+	gcpIamUserAccountOauthSessionFacade.SetSessions(gcpIamUserAccountOauthSessions)
+	gcpIamUserAccountOauthSessionFacade.Subscribe(prov.GetGcpSessionWriter())
+	gcpIamUserAccountOauthSessionFacade.Subscribe(prov.GetGcpCredentialsApplier())
+	logging.Info(fmt.Sprintf("%+v", gcpIamUserAccountOauthSessions))
 }
 
 func NamedProfilesBootstrap(prov *providers.Providers, config configuration.Configuration) {

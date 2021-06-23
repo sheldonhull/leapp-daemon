@@ -22,7 +22,7 @@ func (controller *EngineController) ListSession(context *gin.Context) {
 	  listType := requestDto.Type
 	  query := requestDto.Query*/
 
-	sessionList, err := use_case.ListAllSessions(controller.Providers.GetGcpPlainSessionFacade())
+	sessionList, err := use_case.ListAllSessions(controller.Providers.GetGcpIamUserAccountOauthSessionFacade())
 	if err != nil {
 		_ = context.Error(err)
 		return
