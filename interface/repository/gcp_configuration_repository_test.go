@@ -16,8 +16,8 @@ var (
 	expectedDefaultCredentialsFilePath string
 	expectedCredentialsDbFilePath      string
 	expectedAccessTokensDbFilePath     string
-	envMock                            mock.EnvironmentMock
-	fsMock                             mock.FileSystemMock
+	gcpEnvMock                         mock.EnvironmentMock
+	gcpFsMock                          mock.FileSystemMock
 	credentialsTableMock               mock.GcpCredentialsDbTableMock
 	accessTokensTableMock              mock.GcpAccessTokensDbTableMock
 	repo                               *GcpConfigurationRepository
@@ -31,25 +31,25 @@ func gcpConfigurationRepositorySetup() {
 	expectedCredentialsDbFilePath = filepath.Join(expectedConfigDirPath, "credentials.db")
 	expectedAccessTokensDbFilePath = filepath.Join(expectedConfigDirPath, "access_tokens.db")
 
-	envMock = mock.NewEnvironmentMock()
-	fsMock = mock.NewFileSystemMock()
+	gcpEnvMock = mock.NewEnvironmentMock()
+	gcpFsMock = mock.NewFileSystemMock()
 	credentialsTableMock = mock.NewGcpCredentialsDbTableMock()
 	accessTokensTableMock = mock.NewGcpAccessTokensDbTableMock()
 
 	repo = &GcpConfigurationRepository{
-		Environment:       &envMock,
-		FileSystem:        &fsMock,
+		Environment:       &gcpEnvMock,
+		FileSystem:        &gcpFsMock,
 		CredentialsTable:  &credentialsTableMock,
 		AccessTokensTable: &accessTokensTableMock,
 	}
 }
 
 func verifyExpectedCalls(t *testing.T, envMockCalls []string, fsMockCalls []string, credentialsTableMockCalls []string, accessTokensTableMockCalls []string) {
-	if !reflect.DeepEqual(envMock.GetCalls(), envMockCalls) {
-		t.Fatalf("envMock expectation violation.\nMock calls: %v", envMock.GetCalls())
+	if !reflect.DeepEqual(gcpEnvMock.GetCalls(), envMockCalls) {
+		t.Fatalf("gcpEnvMock expectation violation.\nMock calls: %v", gcpEnvMock.GetCalls())
 	}
-	if !reflect.DeepEqual(fsMock.GetCalls(), fsMockCalls) {
-		t.Fatalf("fsMock expectation violation.\nMock calls: %v", fsMock.GetCalls())
+	if !reflect.DeepEqual(gcpFsMock.GetCalls(), fsMockCalls) {
+		t.Fatalf("gcpFsMock expectation violation.\nMock calls: %v", gcpFsMock.GetCalls())
 	}
 	if !reflect.DeepEqual(credentialsTableMock.GetCalls(), credentialsTableMockCalls) {
 		t.Fatalf("credentialsTableMockCalls expectation violation.\nMock calls: %v", credentialsTableMock.GetCalls())
@@ -61,7 +61,7 @@ func verifyExpectedCalls(t *testing.T, envMockCalls []string, fsMockCalls []stri
 
 func TestIsGcloudCliAvailable_available(t *testing.T) {
 	gcpConfigurationRepositorySetup()
-	envMock.ExpIsCommandAvailable = true
+	gcpEnvMock.ExpIsCommandAvailable = true
 
 	if !repo.isGcloudCliAvailable() {
 		t.Fatalf("should be available")
@@ -77,8 +77,8 @@ func TestIsGcloudCliAvailable_unavailable(t *testing.T) {
 
 func TestDoesGcloudConfigFolderExist_exists(t *testing.T) {
 	gcpConfigurationRepositorySetup()
-	fsMock.ExpDoesFileExist = true
-	envMock.ExpIsWindows = true
+	gcpFsMock.ExpDoesFileExist = true
+	gcpEnvMock.ExpIsWindows = true
 
 	exists, err := repo.DoesGcloudConfigFolderExist()
 	if err != nil {
@@ -96,7 +96,7 @@ func TestDoesGcloudConfigFolderExist_exists(t *testing.T) {
 
 func TestDoesGcloudConfigFolderExist_not_exists(t *testing.T) {
 	gcpConfigurationRepositorySetup()
-	envMock.ExpIsWindows = true
+	gcpEnvMock.ExpIsWindows = true
 
 	exists, err := repo.DoesGcloudConfigFolderExist()
 	if err != nil {
@@ -114,7 +114,7 @@ func TestDoesGcloudConfigFolderExist_not_exists(t *testing.T) {
 
 func TestDoesGcloudConfigFolderExist_errorGettingHomeDir(t *testing.T) {
 	gcpConfigurationRepositorySetup()
-	fsMock.ExpErrorOnGetHomeDir = true
+	gcpFsMock.ExpErrorOnGetHomeDir = true
 
 	_, err := repo.DoesGcloudConfigFolderExist()
 	test.ExpectHttpError(t, err, 500, "error getting home dir")
@@ -124,7 +124,7 @@ func TestDoesGcloudConfigFolderExist_errorGettingHomeDir(t *testing.T) {
 
 func TestGcloudConfigurationRepository_onWindows(t *testing.T) {
 	gcpConfigurationRepositorySetup()
-	envMock.ExpIsWindows = true
+	gcpEnvMock.ExpIsWindows = true
 
 	configDir, err := repo.gcloudConfigDir()
 	if err != nil {
@@ -142,6 +142,7 @@ func TestGcloudConfigurationRepository_onWindows(t *testing.T) {
 
 func TestGcloudConfigurationRepository_onUnix(t *testing.T) {
 	gcpConfigurationRepositorySetup()
+	gcpFsMock.ExpHomeDir = "/user/home"
 	configDir, err := repo.gcloudConfigDir()
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -158,7 +159,7 @@ func TestGcloudConfigurationRepository_onUnix(t *testing.T) {
 
 func TestGcloudConfigurationRepository_error(t *testing.T) {
 	gcpConfigurationRepositorySetup()
-	fsMock.ExpErrorOnGetHomeDir = true
+	gcpFsMock.ExpErrorOnGetHomeDir = true
 
 	_, err := repo.gcloudConfigDir()
 	test.ExpectHttpError(t, err, 500, "error getting home dir")
@@ -168,7 +169,7 @@ func TestGcloudConfigurationRepository_error(t *testing.T) {
 
 func TestCreateConfiguration(t *testing.T) {
 	gcpConfigurationRepositorySetup()
-	envMock.ExpIsWindows = true
+	gcpEnvMock.ExpIsWindows = true
 
 	err := repo.CreateConfiguration("accountId", "projectId")
 	if err != nil {
@@ -184,7 +185,7 @@ func TestCreateConfiguration(t *testing.T) {
 
 func TestCreateConfiguration_errorGettingHomeDir(t *testing.T) {
 	gcpConfigurationRepositorySetup()
-	fsMock.ExpErrorOnGetHomeDir = true
+	gcpFsMock.ExpErrorOnGetHomeDir = true
 
 	err := repo.CreateConfiguration("accountId", "projectId")
 	test.ExpectHttpError(t, err, 500, "error getting home dir")
@@ -194,8 +195,8 @@ func TestCreateConfiguration_errorGettingHomeDir(t *testing.T) {
 
 func TestCreateConfiguration_errorWritingFile(t *testing.T) {
 	gcpConfigurationRepositorySetup()
-	fsMock.ExpErrorOnWriteToFile = true
-	envMock.ExpIsWindows = true
+	gcpFsMock.ExpErrorOnWriteToFile = true
+	gcpEnvMock.ExpIsWindows = true
 
 	err := repo.CreateConfiguration("accountId", "projectId")
 	test.ExpectHttpError(t, err, 500, "error writing file")
@@ -206,7 +207,7 @@ func TestCreateConfiguration_errorWritingFile(t *testing.T) {
 
 func TestRemoveConfiguration(t *testing.T) {
 	gcpConfigurationRepositorySetup()
-	envMock.ExpIsWindows = true
+	gcpEnvMock.ExpIsWindows = true
 
 	err := repo.RemoveConfiguration()
 	if err != nil {
@@ -220,7 +221,7 @@ func TestRemoveConfiguration(t *testing.T) {
 
 func TestRemoveConfiguration_errorGettingHomeDir(t *testing.T) {
 	gcpConfigurationRepositorySetup()
-	fsMock.ExpErrorOnGetHomeDir = true
+	gcpFsMock.ExpErrorOnGetHomeDir = true
 
 	err := repo.RemoveConfiguration()
 	test.ExpectHttpError(t, err, 500, "error getting home dir")
@@ -230,7 +231,7 @@ func TestRemoveConfiguration_errorGettingHomeDir(t *testing.T) {
 
 func TestRemoveConfiguration_errorRemovingFile(t *testing.T) {
 	gcpConfigurationRepositorySetup()
-	fsMock.ExpErrorOnRemoveFile = true
+	gcpFsMock.ExpErrorOnRemoveFile = true
 
 	err := repo.RemoveConfiguration()
 	test.ExpectHttpError(t, err, 500, "error removing file")
@@ -241,7 +242,7 @@ func TestRemoveConfiguration_errorRemovingFile(t *testing.T) {
 
 func TestActivateConfiguration(t *testing.T) {
 	gcpConfigurationRepositorySetup()
-	envMock.ExpIsWindows = true
+	gcpEnvMock.ExpIsWindows = true
 
 	err := repo.ActivateConfiguration()
 	if err != nil {
@@ -256,7 +257,7 @@ func TestActivateConfiguration(t *testing.T) {
 
 func TestActivateConfiguration_errorGettingHomeDir(t *testing.T) {
 	gcpConfigurationRepositorySetup()
-	fsMock.ExpErrorOnGetHomeDir = true
+	gcpFsMock.ExpErrorOnGetHomeDir = true
 
 	err := repo.ActivateConfiguration()
 	test.ExpectHttpError(t, err, 500, "error getting home dir")
@@ -266,8 +267,8 @@ func TestActivateConfiguration_errorGettingHomeDir(t *testing.T) {
 
 func TestActivateConfiguration_errorWritingFile(t *testing.T) {
 	gcpConfigurationRepositorySetup()
-	fsMock.ExpErrorOnWriteToFile = true
-	envMock.ExpIsWindows = true
+	gcpFsMock.ExpErrorOnWriteToFile = true
+	gcpEnvMock.ExpIsWindows = true
 
 	err := repo.ActivateConfiguration()
 	test.ExpectHttpError(t, err, 500, "error writing file")
@@ -278,7 +279,7 @@ func TestActivateConfiguration_errorWritingFile(t *testing.T) {
 
 func TestDeactivateConfiguration(t *testing.T) {
 	gcpConfigurationRepositorySetup()
-	envMock.ExpIsWindows = true
+	gcpEnvMock.ExpIsWindows = true
 
 	err := repo.DeactivateConfiguration()
 	if err != nil {
@@ -292,7 +293,7 @@ func TestDeactivateConfiguration(t *testing.T) {
 
 func TestDeactivateConfiguration_errorGettingHomeDir(t *testing.T) {
 	gcpConfigurationRepositorySetup()
-	fsMock.ExpErrorOnGetHomeDir = true
+	gcpFsMock.ExpErrorOnGetHomeDir = true
 
 	err := repo.DeactivateConfiguration()
 	test.ExpectHttpError(t, err, 500, "error getting home dir")
@@ -302,7 +303,7 @@ func TestDeactivateConfiguration_errorGettingHomeDir(t *testing.T) {
 
 func TestDeactivateConfiguration_errorRemovingFile(t *testing.T) {
 	gcpConfigurationRepositorySetup()
-	fsMock.ExpErrorOnRemoveFile = true
+	gcpFsMock.ExpErrorOnRemoveFile = true
 
 	err := repo.DeactivateConfiguration()
 	test.ExpectHttpError(t, err, 500, "error removing file")
@@ -313,7 +314,7 @@ func TestDeactivateConfiguration_errorRemovingFile(t *testing.T) {
 
 func TestWriteDefaultCredentials(t *testing.T) {
 	gcpConfigurationRepositorySetup()
-	envMock.ExpIsWindows = true
+	gcpEnvMock.ExpIsWindows = true
 
 	defaultCredentialJson := "{\"credentials\":\"json\"}"
 	err := repo.WriteDefaultCredentials(defaultCredentialJson)
@@ -328,7 +329,7 @@ func TestWriteDefaultCredentials(t *testing.T) {
 
 func TestWriteDefaultCredentials_errorGettingHomeDir(t *testing.T) {
 	gcpConfigurationRepositorySetup()
-	fsMock.ExpErrorOnGetHomeDir = true
+	gcpFsMock.ExpErrorOnGetHomeDir = true
 
 	err := repo.WriteDefaultCredentials("{\"credentials\":\"json\"}")
 	test.ExpectHttpError(t, err, 500, "error getting home dir")
@@ -338,8 +339,8 @@ func TestWriteDefaultCredentials_errorGettingHomeDir(t *testing.T) {
 
 func TestWriteDefaultCredentials_errorWritingFile(t *testing.T) {
 	gcpConfigurationRepositorySetup()
-	fsMock.ExpErrorOnWriteToFile = true
-	envMock.ExpIsWindows = true
+	gcpFsMock.ExpErrorOnWriteToFile = true
+	gcpEnvMock.ExpIsWindows = true
 
 	err := repo.WriteDefaultCredentials("{\"credentials\":\"json\"}")
 	test.ExpectHttpError(t, err, 500, "error writing file")
@@ -350,7 +351,7 @@ func TestWriteDefaultCredentials_errorWritingFile(t *testing.T) {
 
 func TestRemoveDefaultCredentials(t *testing.T) {
 	gcpConfigurationRepositorySetup()
-	envMock.ExpIsWindows = true
+	gcpEnvMock.ExpIsWindows = true
 
 	err := repo.RemoveDefaultCredentials()
 	if err != nil {
@@ -364,7 +365,7 @@ func TestRemoveDefaultCredentials(t *testing.T) {
 
 func TestRemoveDefaultCredentials_errorGettingHomeDir(t *testing.T) {
 	gcpConfigurationRepositorySetup()
-	fsMock.ExpErrorOnGetHomeDir = true
+	gcpFsMock.ExpErrorOnGetHomeDir = true
 
 	err := repo.RemoveDefaultCredentials()
 	test.ExpectHttpError(t, err, 500, "error getting home dir")
@@ -374,7 +375,7 @@ func TestRemoveDefaultCredentials_errorGettingHomeDir(t *testing.T) {
 
 func TestRemoveDefaultCredentials_errorRemovingFile(t *testing.T) {
 	gcpConfigurationRepositorySetup()
-	fsMock.ExpErrorOnRemoveFile = true
+	gcpFsMock.ExpErrorOnRemoveFile = true
 
 	err := repo.RemoveDefaultCredentials()
 	test.ExpectHttpError(t, err, 500, "error removing file")
@@ -385,7 +386,7 @@ func TestRemoveDefaultCredentials_errorRemovingFile(t *testing.T) {
 
 func TestWriteCredentialsToDb(t *testing.T) {
 	gcpConfigurationRepositorySetup()
-	envMock.ExpIsWindows = true
+	gcpEnvMock.ExpIsWindows = true
 
 	accountId := "account_id@domain.com"
 	defaultCredentialJson := "{\"credentials\":\"json\"}"
@@ -402,7 +403,7 @@ func TestWriteCredentialsToDb(t *testing.T) {
 
 func TestWriteCredentialsToDb_errorGettingHomeDir(t *testing.T) {
 	gcpConfigurationRepositorySetup()
-	fsMock.ExpErrorOnGetHomeDir = true
+	gcpFsMock.ExpErrorOnGetHomeDir = true
 
 	accountId := "account_id@domain.com"
 	defaultCredentialJson := "{\"credentials\":\"json\"}"
@@ -414,7 +415,7 @@ func TestWriteCredentialsToDb_errorGettingHomeDir(t *testing.T) {
 
 func TestWriteCredentialsToDb_errorWritingCredentials(t *testing.T) {
 	gcpConfigurationRepositorySetup()
-	envMock.ExpIsWindows = true
+	gcpEnvMock.ExpIsWindows = true
 	credentialsTableMock.ExpErrorOnExecInsertQuery = true
 
 	accountId := "account_id@domain.com"
@@ -429,8 +430,8 @@ func TestWriteCredentialsToDb_errorWritingCredentials(t *testing.T) {
 
 func TestRemoveCredentialsFromDb(t *testing.T) {
 	gcpConfigurationRepositorySetup()
-	envMock.ExpIsWindows = true
-	fsMock.ExpDoesFileExist = true
+	gcpEnvMock.ExpIsWindows = true
+	gcpFsMock.ExpDoesFileExist = true
 
 	accountId := "account_id@domain.com"
 	err := repo.RemoveCredentialsFromDb(accountId)
@@ -447,7 +448,7 @@ func TestRemoveCredentialsFromDb(t *testing.T) {
 
 func TestRemoveCredentialsFromDb_DbFileDoesNotExist(t *testing.T) {
 	gcpConfigurationRepositorySetup()
-	envMock.ExpIsWindows = true
+	gcpEnvMock.ExpIsWindows = true
 
 	accountId := "account_id@domain.com"
 	err := repo.RemoveCredentialsFromDb(accountId)
@@ -463,7 +464,7 @@ func TestRemoveCredentialsFromDb_DbFileDoesNotExist(t *testing.T) {
 
 func TestRemoveCredentialsFromDb_errorGettingHomeDir(t *testing.T) {
 	gcpConfigurationRepositorySetup()
-	fsMock.ExpErrorOnGetHomeDir = true
+	gcpFsMock.ExpErrorOnGetHomeDir = true
 
 	accountId := "account_id@domain.com"
 	err := repo.RemoveCredentialsFromDb(accountId)
@@ -474,8 +475,8 @@ func TestRemoveCredentialsFromDb_errorGettingHomeDir(t *testing.T) {
 
 func TestRemoveCredentialsFromDb_errorRemovingCredentialsFromDb(t *testing.T) {
 	gcpConfigurationRepositorySetup()
-	envMock.ExpIsWindows = true
-	fsMock.ExpDoesFileExist = true
+	gcpEnvMock.ExpIsWindows = true
+	gcpFsMock.ExpDoesFileExist = true
 	credentialsTableMock.ExpErrorOnExecDeleteQuery = true
 
 	accountId := "account_id@domain.com"
@@ -490,8 +491,8 @@ func TestRemoveCredentialsFromDb_errorRemovingCredentialsFromDb(t *testing.T) {
 
 func TestRemoveAccessTokensFromDb(t *testing.T) {
 	gcpConfigurationRepositorySetup()
-	envMock.ExpIsWindows = true
-	fsMock.ExpDoesFileExist = true
+	gcpEnvMock.ExpIsWindows = true
+	gcpFsMock.ExpDoesFileExist = true
 
 	accountId := "account_id@domain.com"
 	err := repo.RemoveAccessTokensFromDb(accountId)
@@ -508,7 +509,7 @@ func TestRemoveAccessTokensFromDb(t *testing.T) {
 
 func TestRemoveAccessTokensFromDb_DbFileDoesNotExist(t *testing.T) {
 	gcpConfigurationRepositorySetup()
-	envMock.ExpIsWindows = true
+	gcpEnvMock.ExpIsWindows = true
 
 	accountId := "account_id@domain.com"
 	err := repo.RemoveAccessTokensFromDb(accountId)
@@ -524,7 +525,7 @@ func TestRemoveAccessTokensFromDb_DbFileDoesNotExist(t *testing.T) {
 
 func TestRemoveAccessTokensFromDb_errorGettingHomeDir(t *testing.T) {
 	gcpConfigurationRepositorySetup()
-	fsMock.ExpErrorOnGetHomeDir = true
+	gcpFsMock.ExpErrorOnGetHomeDir = true
 
 	accountId := "account_id@domain.com"
 	err := repo.RemoveAccessTokensFromDb(accountId)
@@ -535,8 +536,8 @@ func TestRemoveAccessTokensFromDb_errorGettingHomeDir(t *testing.T) {
 
 func TestRemoveAccessTokensFromDb_errorRemovingCredentialsFromDb(t *testing.T) {
 	gcpConfigurationRepositorySetup()
-	envMock.ExpIsWindows = true
-	fsMock.ExpDoesFileExist = true
+	gcpEnvMock.ExpIsWindows = true
+	gcpFsMock.ExpDoesFileExist = true
 	accessTokensTableMock.ExpErrorOnExecDeleteQuery = true
 
 	accountId := "account_id@domain.com"

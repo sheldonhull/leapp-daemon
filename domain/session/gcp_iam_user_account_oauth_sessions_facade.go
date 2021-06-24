@@ -6,7 +6,7 @@ import (
 	"sync"
 )
 
-var sessionsLock sync.Mutex
+var gcpIamUserAccountOauthSessionsLock sync.Mutex
 
 type GcpIamUserAccountOauthSessionsObserver interface {
 	UpdateGcpIamUserAccountOauthSessions(oldSessions []GcpIamUserAccountOauthSession, newSessions []GcpIamUserAccountOauthSession)
@@ -42,15 +42,15 @@ func (facade *GcpIamUserAccountOauthSessionsFacade) GetSessionById(sessionId str
 }
 
 func (facade *GcpIamUserAccountOauthSessionsFacade) SetSessions(sessions []GcpIamUserAccountOauthSession) {
-	sessionsLock.Lock()
-	defer sessionsLock.Unlock()
+	gcpIamUserAccountOauthSessionsLock.Lock()
+	defer gcpIamUserAccountOauthSessionsLock.Unlock()
 
 	facade.gcpIamUserAccountOauthSessions = sessions
 }
 
 func (facade *GcpIamUserAccountOauthSessionsFacade) AddSession(newSession GcpIamUserAccountOauthSession) error {
-	sessionsLock.Lock()
-	defer sessionsLock.Unlock()
+	gcpIamUserAccountOauthSessionsLock.Lock()
+	defer gcpIamUserAccountOauthSessionsLock.Unlock()
 
 	currentSessions := facade.GetSessions()
 
@@ -71,8 +71,8 @@ func (facade *GcpIamUserAccountOauthSessionsFacade) AddSession(newSession GcpIam
 }
 
 func (facade *GcpIamUserAccountOauthSessionsFacade) RemoveSession(sessionId string) error {
-	sessionsLock.Lock()
-	defer sessionsLock.Unlock()
+	gcpIamUserAccountOauthSessionsLock.Lock()
+	defer gcpIamUserAccountOauthSessionsLock.Unlock()
 
 	currentSessions := facade.GetSessions()
 	newSessions := make([]GcpIamUserAccountOauthSession, 0)
@@ -92,8 +92,8 @@ func (facade *GcpIamUserAccountOauthSessionsFacade) RemoveSession(sessionId stri
 }
 
 func (facade *GcpIamUserAccountOauthSessionsFacade) EditSession(sessionId string, sessionName string, projectName string) error {
-	sessionsLock.Lock()
-	defer sessionsLock.Unlock()
+	gcpIamUserAccountOauthSessionsLock.Lock()
+	defer gcpIamUserAccountOauthSessionsLock.Unlock()
 
 	sessionToEdit, err := facade.GetSessionById(sessionId)
 	if err != nil {
@@ -123,8 +123,8 @@ func (facade *GcpIamUserAccountOauthSessionsFacade) StopSession(sessionId string
 }
 
 func (facade *GcpIamUserAccountOauthSessionsFacade) setSessionStatus(sessionId string, status Status, startTime string, lastStopTime string) error {
-	sessionsLock.Lock()
-	defer sessionsLock.Unlock()
+	gcpIamUserAccountOauthSessionsLock.Lock()
+	defer gcpIamUserAccountOauthSessionsLock.Unlock()
 
 	sessionToUpdate, err := facade.GetSessionById(sessionId)
 	if err != nil {

@@ -64,7 +64,7 @@ func (controller *EngineController) GetAwsIamUserSession(context *gin.Context) {
 
 	responseDto := aws_iam_user_session_response_dto.AwsGetIamUserSessionResponse{
 		Message: "success",
-		Data:    *sess,
+		Data:    sess,
 	}
 
 	context.JSON(http.StatusOK, responseDto.ToMap())

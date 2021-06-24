@@ -12,15 +12,14 @@ type AwsIamUserSessionContainer interface {
 }
 
 type AwsIamUserSession struct {
-	Id           string
-	Alias        string
-	Status       Status
-	StartTime    string
-	LastStopTime string
-	Account      *AwsIamUserAccount
-}
-
-type AwsIamUserAccount struct {
+	Id                     string
+	Name                   string
+	Status                 Status
+	StartTime              string
+	LastStopTime           string
+	AccessKeyIdLabel       string
+	SecretKeyLabel         string
+	SessionTokenLabel      string
 	MfaDevice              string
 	Region                 string
 	NamedProfileId         string
@@ -34,7 +33,7 @@ type AwsSessionToken struct {
 }
 
 func (sess *AwsIamUserSession) IsMfaRequired() (bool, error) {
-	return sess.Account.MfaDevice != "", nil
+	return sess.MfaDevice != "", nil
 }
 
 func (sess *AwsIamUserSession) IsRotationIntervalExpired() (bool, error) {

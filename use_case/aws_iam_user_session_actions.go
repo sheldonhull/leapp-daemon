@@ -15,7 +15,7 @@ type AwsIamUserSessionActions struct {
 	AwsIamUserSessionsFacade AwsIamUserSessionsFacade
 }
 
-func (actions *AwsIamUserSessionActions) Create(alias string, awsAccessKeyId string, awsSecretAccessKey string,
+func (actions *AwsIamUserSessionActions) Create(name string, awsAccessKeyId string, awsSecretAccessKey string,
 	mfaDevice string, region string, profileName string) error {
 
 	namedProfile, err := actions.NamedProfilesActions.GetOrCreateNamedProfile(profileName)
@@ -23,20 +23,16 @@ func (actions *AwsIamUserSessionActions) Create(alias string, awsAccessKeyId str
 		return err
 	}
 
-	awsIamUserAccount := session.AwsIamUserAccount{
+	sess := session.AwsIamUserSession{
+		Id:                     actions.Environment.GenerateUuid(),
+		Name:                   name,
+		Status:                 session.NotActive,
+		StartTime:              "",
+		LastStopTime:           "",
 		MfaDevice:              mfaDevice,
 		Region:                 region,
 		NamedProfileId:         namedProfile.Id,
 		SessionTokenExpiration: "",
-	}
-
-	sess := session.AwsIamUserSession{
-		Id:           actions.Environment.GenerateUuid(),
-		Alias:        alias,
-		Status:       session.NotActive,
-		StartTime:    "",
-		LastStopTime: "",
-		Account:      &awsIamUserAccount,
 	}
 
 	err = actions.AwsIamUserSessionsFacade.AddSession(sess)
@@ -58,10 +54,8 @@ func (actions *AwsIamUserSessionActions) Create(alias string, awsAccessKeyId str
 	return nil
 }
 
-func (actions *AwsIamUserSessionActions) GetAwsIamUserSession(id string) (*session.AwsIamUserSession, error) {
-	var sess *session.AwsIamUserSession
-	sess, err := actions.AwsIamUserSessionsFacade.GetSessionById(id)
-	return sess, err
+func (actions *AwsIamUserSessionActions) GetAwsIamUserSession(sessionId string) (session.AwsIamUserSession, error) {
+	return actions.AwsIamUserSessionsFacade.GetSessionById(sessionId)
 }
 
 func (actions *AwsIamUserSessionActions) UpdateAwsIamUserSession(sessionId string, name string, accountNumber string, region string, user string,
@@ -119,8 +113,13 @@ func (actions *AwsIamUserSessionActions) StartAwsIamUserSession(sessionId string
 		return err
 	}
 
+	err = actions.AwsIamUserSessionsFacade.StartingSession(sessionId)
+	if err != nil {
+		return err
+	}
+
 	if doesSessionTokenExist {
-		sessionTokenExpiration := awsIamUserSession.Account.SessionTokenExpiration
+		sessionTokenExpiration := awsIamUserSession.SessionTokenExpiration
 
 		if sessionTokenExpiration != "" {
 			currentTime := time.Now()
@@ -130,30 +129,25 @@ func (actions *AwsIamUserSessionActions) StartAwsIamUserSession(sessionId string
 			}
 
 			if currentTime.After(sessionTokenExpirationTime) {
-				err = actions.generateSessionToken(*awsIamUserSession)
+				err = actions.generateSessionToken(awsIamUserSession)
 				if err != nil {
 					return err
 				}
 			}
 		} else {
-			err = actions.generateSessionToken(*awsIamUserSession)
+			err = actions.generateSessionToken(awsIamUserSession)
 			if err != nil {
 				return err
 			}
 		}
 	} else {
-		err = actions.generateSessionToken(*awsIamUserSession)
+		err = actions.generateSessionToken(awsIamUserSession)
 		if err != nil {
 			return err
 		}
 	}
 
-	err = actions.AwsIamUserSessionsFacade.SetSessionStatusToPending(sessionId)
-	if err != nil {
-		return err
-	}
-
-	err = actions.AwsIamUserSessionsFacade.SetSessionStatusToActive(sessionId)
+	err = actions.AwsIamUserSessionsFacade.StartSession(sessionId, actions.Environment.GetTime())
 	if err != nil {
 		return err
 	}
@@ -205,8 +199,8 @@ func (actions *AwsIamUserSessionActions) generateSessionToken(awsIamUserSession 
 		return http_error.NewUnprocessableEntityError(err)
 	}
 
-	credentials, err := sts_client.GenerateAccessToken(awsIamUserSession.Account.Region,
-		awsIamUserSession.Account.MfaDevice, nil, accessKeyId, secretAccessKey)
+	credentials, err := sts_client.GenerateAccessToken(awsIamUserSession.Region,
+		awsIamUserSession.MfaDevice, nil, accessKeyId, secretAccessKey)
 	if err != nil {
 		return err
 	}
@@ -222,7 +216,7 @@ func (actions *AwsIamUserSessionActions) generateSessionToken(awsIamUserSession 
 		return err
 	}
 
-	err = actions.AwsIamUserSessionsFacade.SetSessionTokenExpiration(awsIamUserSession.Id, *credentials.Expiration)
+	err = actions.AwsIamUserSessionsFacade.SetSessionTokenExpiration(awsIamUserSession.Id, credentials.Expiration.Format(time.RFC3339))
 	if err != nil {
 		return err
 	}

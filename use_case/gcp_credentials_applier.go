@@ -86,30 +86,25 @@ func (applier *GcpCredentialsApplier) deactivateSession(session *session.GcpIamU
 	err := applier.Repository.RemoveDefaultCredentials()
 	if err != nil {
 		logging.Entry().Error(err)
-		return
 	}
 
 	err = applier.Repository.DeactivateConfiguration()
 	if err != nil {
 		logging.Entry().Error(err)
-		return
 	}
 
 	err = applier.Repository.RemoveCredentialsFromDb(session.AccountId)
 	if err != nil {
 		logging.Entry().Error(err)
-		return
 	}
 
 	err = applier.Repository.RemoveAccessTokensFromDb(session.AccountId)
 	if err != nil {
 		logging.Entry().Error(err)
-		return
 	}
 
 	err = applier.Repository.RemoveConfiguration()
 	if err != nil {
 		logging.Entry().Error(err)
-		return
 	}
 }

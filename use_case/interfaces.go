@@ -5,7 +5,7 @@ import (
 	"leapp_daemon/domain/configuration"
 	"leapp_daemon/domain/named_profile"
 	"leapp_daemon/domain/session"
-	"time"
+	"leapp_daemon/interface/repository"
 )
 
 type FileSystem interface {
@@ -50,6 +50,10 @@ type GcpConfigurationRepository interface {
 	RemoveAccessTokensFromDb(accountId string) error
 }
 
+type AwsConfigurationRepository interface {
+	WriteCredentials(credentials []repository.AwsTempCredentials) error
+}
+
 type NamedProfilesFacade interface {
 	GetNamedProfiles() []named_profile.NamedProfile
 	GetNamedProfileById(id string) (named_profile.NamedProfile, error)
@@ -64,13 +68,16 @@ type NamedProfilesActionsInterface interface {
 type AwsIamUserSessionsFacade interface {
 	Subscribe(observer session.AwsIamUserSessionsObserver)
 	GetSessions() []session.AwsIamUserSession
+	GetSessionById(sessionId string) (session.AwsIamUserSession, error)
 	SetSessions(sessions []session.AwsIamUserSession)
 	AddSession(session session.AwsIamUserSession) error
-	RemoveSession(id string) error
-	GetSessionById(id string) (*session.AwsIamUserSession, error)
-	SetSessionStatusToPending(id string) error
-	SetSessionStatusToActive(id string) error
-	SetSessionTokenExpiration(sessionId string, sessionTokenExpiration time.Time) error
+	RemoveSession(sessionId string) error
+	EditSession(sessionId string, sessionName string, region string, accessKeyIdLabel string, secretKeyLabel string,
+		sessionTokenLabel string, mfaDevice string, sessionTokenExpiration string, namedProfileId string) error
+	SetSessionTokenExpiration(sessionId string, sessionTokenExpiration string) error
+	StartingSession(sessionId string) error
+	StartSession(sessionId string, startTime string) error
+	StopSession(sessionId string, stopTime string) error
 }
 
 type GcpIamUserAccountOauthSessionsFacade interface {
