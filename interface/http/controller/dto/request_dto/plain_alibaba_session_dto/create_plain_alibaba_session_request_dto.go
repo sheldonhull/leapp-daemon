@@ -22,7 +22,7 @@ type CreatePlainAlibabaSessionRequest struct {
 	// required: true
 	Region string `json:"region" binding:"required"`
 
-	User                   string `json:"user" binding:"required"`
+	/*User                   string `json:"user" binding:"required"`*/
 	AlibabaAccessKeyId     string `json:"alibabaAccessKeyId" binding:"required"`
 	AlibabaSecretAccessKey string `json:"alibabaSecretAccessKey" binding:"required"`
 	ProfileName            string `json:"profileName"`

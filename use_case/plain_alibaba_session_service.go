@@ -2,6 +2,7 @@ package use_case
 
 import (
 	"fmt"
+	"leapp_daemon/domain/constant"
 	"leapp_daemon/domain/named_profile"
 	"leapp_daemon/domain/region"
 	"leapp_daemon/domain/session"
@@ -13,7 +14,7 @@ import (
 
 type PlainAlibabaSessionService struct {
 	Keychain Keychain
-  }
+}
 
 func (service *PlainAlibabaSessionService) Create(alias string, alibabaAccessKeyId string, alibabaSecretAccessKey string, regionName string, profileName string) error {
 
@@ -61,12 +62,12 @@ func (service *PlainAlibabaSessionService) Create(alias string, alibabaAccessKey
 		return err
 	}
 
-	err = service.Keychain.SetSecret(alibabaAccessKeyId, sess.Id+"-plain-alibaba-session-access-key-id")
+	err = service.Keychain.SetSecret(alibabaAccessKeyId, sess.Id+constant.PlainAlibabaKeyIdSuffix)
 	if err != nil {
 		return http_error.NewInternalServerError(err)
 	}
 
-	err = service.Keychain.SetSecret(alibabaSecretAccessKey, sess.Id+"-plain-alibaba-session-secret-access-key")
+	err = service.Keychain.SetSecret(alibabaSecretAccessKey, sess.Id+constant.PlainAlibabaSecretAccessKeySuffix)
 	if err != nil {
 		return http_error.NewInternalServerError(err)
 	}
@@ -74,57 +75,61 @@ func (service *PlainAlibabaSessionService) Create(alias string, alibabaAccessKey
 	return nil
 }
 
-func (service *PlainAlibabaSessionService) GetPlainAlibabaSession(id string) (*session.PlainAlibabaSession, error) {
+func (service *PlainAlibabaSessionService) Get(id string) (*session.PlainAlibabaSession, error) {
 	var sess *session.PlainAlibabaSession
 	sess, err := session.GetPlainAlibabaSessionsFacade().GetPlainAlibabaSessionById(id)
 	return sess, err
 }
 
-func (service *PlainAlibabaSessionService) UpdatePlainAlibabaSession(sessionId string, name string, region string, user string,
-	alibabaAccessKeyId string, alibabaSecretAccessKey string, profile string) error {
+func (service *PlainAlibabaSessionService) Update(id string, alias string, regionName string, /*user string,*/
+	alibabaAccessKeyId string, alibabaSecretAccessKey string, profileName string) error {
 
-	/*
-		config, err := configuration.ReadConfiguration()
-		if err != nil {
-			return err
-		}
+	isRegionValid := region.IsAlibabaRegionValid(regionName)
+	if !isRegionValid {
+		return http_error.NewUnprocessableEntityError(fmt.Errorf("Region " + regionName + " not valid"))
+	}
 
-		err = session.UpdatePlainAlibabaSession(config, sessionId, name, region, user, alibabaAccessKeyId, alibabaSecretAccessKey, mfaDevice, profile)
-		if err != nil {
-			return err
-		}
+	plainAlibabaAccount := session.PlainAlibabaAccount{
+		Region:         regionName,
+		NamedProfileId: "", //TODO: temp fix
+	}
 
-		err = config.Update()
-		if err != nil {
-			return err
-		}
-	*/
+	sess := session.PlainAlibabaSession{
+		Id:      id,
+		Alias:   alias,
+		Status:  session.NotActive,
+		Account: &plainAlibabaAccount,
+	}
 
-	return nil
-}
+	err := session.GetPlainAlibabaSessionsFacade().UpdatePlainAlibabaSession(sess)
+	if err != nil {
+		return http_error.NewInternalServerError(err)
+	}
 
-func DeletePlainAlibabaSession(sessionId string) error {
-	/*
-		config, err := configuration.ReadConfiguration()
-		if err != nil {
-			return err
-		}
+	err = service.Keychain.SetSecret(alibabaAccessKeyId, sess.Id+constant.PlainAlibabaKeyIdSuffix)
+	if err != nil {
+		return http_error.NewInternalServerError(err)
+	}
 
-		err = session.DeletePlainAlibabaSession(config, sessionId)
-		if err != nil {
-			return err
-		}
-
-		err = config.Update()
-		if err != nil {
-			return err
-		}
-	*/
+	err = service.Keychain.SetSecret(alibabaSecretAccessKey, sess.Id+constant.PlainAlibabaSecretAccessKeySuffix)
+	if err != nil {
+		return http_error.NewInternalServerError(err)
+	}
 
 	return nil
 }
 
-func (service *PlainAlibabaSessionService) StartPlainAlibabaSession(sessionId string) error {
+func (service *PlainAlibabaSessionService) Delete(sessionId string) error {
+
+	err := session.GetPlainAlibabaSessionsFacade().RemovePlainAlibabaSession(sessionId)
+	if err != nil {
+		return http_error.NewInternalServerError(err)
+	}
+
+	return nil
+}
+
+func (service *PlainAlibabaSessionService) Start(sessionId string) error {
 
 	err := session.GetPlainAlibabaSessionsFacade().SetPlainAlibabaSessionStatusToPending(sessionId)
 	if err != nil {
@@ -139,30 +144,12 @@ func (service *PlainAlibabaSessionService) StartPlainAlibabaSession(sessionId st
 	return nil
 }
 
-func StopPlainAlibabaSession(sessionId string) error {
-	/*
-			config, err := configuration.ReadConfiguration()
-			if err != nil {
-				return err
-			}
+func (service *PlainAlibabaSessionService) Stop(sessionId string) error {
 
-			// Passing nil because, it will be the rotate method to check if we need the mfaToken or not
-			err = session.StopPlainAlibabaSession(config, sessionId)
-			if err != nil {
-				return err
-			}
-
-			err = config.Update()
-			if err != nil {
-				return err
-			}
-
-		  // sess, err := session.GetPlainAlibabaSession(config, sessionId)
-			err = session_token.RemoveFromIniFile("default")
-			if err != nil {
-				return err
-			}
-	*/
+	err := session.GetPlainAlibabaSessionsFacade().SetPlainAlibabaSessionStatusToNotActive(sessionId)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

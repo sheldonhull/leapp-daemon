@@ -109,6 +109,19 @@ func main() {
 		Keychain:   &keychain.Keychain{},
 	})
 
+	trustedAlibabaSessions := config.TrustedAlibabaSessions
+	logging.Info(fmt.Sprintf("%+v", trustedAlibabaSessions))
+	trustedAlibabaSessionFacade := session.GetTrustedAlibabaSessionsFacade()
+	trustedAlibabaSessionFacade.SetTrustedAlibabaSessions(trustedAlibabaSessions)
+	trustedAlibabaSessionFacade.Subscribe(&use_case.SessionsWriter{
+		ConfigurationRepository: &fileConfigurationRepository,
+	})
+	
+	trustedAlibabaSessionFacade.Subscribe(&use_case.AlibabaCredentialsApplier{
+		FileSystem: fileSystem,
+		Keychain:   &keychain.Keychain{},
+	})
+
 	//timer.Initialize(1, use_case.RotateAllSessionsCredentials)
 	//go websocket.Hub.Run()
 	eng := engine.Engine()

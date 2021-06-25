@@ -62,7 +62,7 @@ func GetPlainAlibabaSessionController(context *gin.Context) {
 		Keychain: &keychain.Keychain{},
 	}
 
-	sess, err := plainAlibabaSessionService.GetPlainAlibabaSession(requestDto.Id)
+	sess, err := plainAlibabaSessionService.Get(requestDto.Id)
 	if err != nil {
 		_ = context.Error(err)
 		return
@@ -102,11 +102,11 @@ func UpdatePlainAlibabaSessionController(context *gin.Context) {
 		Keychain: &keychain.Keychain{},
 	}
 
-	err = plainAlibabaSessionService.UpdatePlainAlibabaSession(
+	err = plainAlibabaSessionService.Update(
 		requestUriDto.Id,
 		requestDto.Name,
 		requestDto.Region,
-		requestDto.User,
+		//requestDto.User,
 		requestDto.AlibabaAccessKeyId,
 		requestDto.AlibabaSecretAccessKey,
 		requestDto.ProfileName)
@@ -164,7 +164,7 @@ func StartPlainAlibabaSessionController(context *gin.Context) {
 		Keychain: &keychain.Keychain{},
 	}
 
-	err = plainAlibabaSessionService.StartPlainAlibabaSession(requestDto.Id)
+	err = plainAlibabaSessionService.Start(requestDto.Id)
 
 	if err != nil {
 		_ = context.Error(err)
@@ -185,7 +185,11 @@ func StopPlainAlibabaSessionController(context *gin.Context) {
 		return
 	}
 
-	err = use_case.StopPlainAlibabaSession(requestDto.Id)
+	plainAlibabaSessionService := use_case.PlainAlibabaSessionService{
+		Keychain: &keychain.Keychain{},
+	}
+
+	err = plainAlibabaSessionService.Stop(requestDto.Id)
 
 	if err != nil {
 		_ = context.Error(err)

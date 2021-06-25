@@ -44,3 +44,15 @@ func(sessionWriter *SessionsWriter) UpdateFederatedAlibabaSessions(oldFederatedA
 
   return err
 }
+
+func(sessionWriter *SessionsWriter) UpdateTrustedAlibabaSessions(oldTrustedAlibabaSessions []session.TrustedAlibabaSession, newTrustedAlibabaSessions []session.TrustedAlibabaSession) error {
+  config, err := sessionWriter.ConfigurationRepository.GetConfiguration()
+  if err != nil {
+    return err
+  }
+
+  config.TrustedAlibabaSessions = newTrustedAlibabaSessions
+  err = sessionWriter.ConfigurationRepository.UpdateConfiguration(config)
+
+  return err
+}

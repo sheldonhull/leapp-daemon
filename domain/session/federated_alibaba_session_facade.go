@@ -40,15 +40,12 @@ func (fac *federatedAlibabaSessionsFacade) GetFederatedAlibabaSessions() []Feder
 	return fac.federatedAlibabaSessions
 }
 
-func (fac *federatedAlibabaSessionsFacade) SetFederatedAlibabaSessions(federatedAlibabaSessions []FederatedAlibabaSession) error {
-	oldFederatedAlibabaSessions := fac.GetFederatedAlibabaSessions()
-	fac.federatedAlibabaSessions = federatedAlibabaSessions
+func (fac *federatedAlibabaSessionsFacade) SetFederatedAlibabaSessions(newFederatedAlibabaSessions []FederatedAlibabaSession) error {
+	fac.federatedAlibabaSessions = newFederatedAlibabaSessions
 
-	for _, observer := range fac.observers {
-		err := observer.UpdateFederatedAlibabaSessions(oldFederatedAlibabaSessions, federatedAlibabaSessions)
-		if err != nil {
-			return err
-		}
+	err := fac.updateState(newFederatedAlibabaSessions)
+	if err != nil {
+		return err
 	}
 	return nil
 }
@@ -111,7 +108,7 @@ func (fac *federatedAlibabaSessionsFacade) RemoveFederatedAlibabaSession(id stri
 	}
 
 	if len(fac.GetFederatedAlibabaSessions()) == len(newFederatedAlibabaSessions) {
-		return http_error.NewNotFoundError(fmt.Errorf("plain Alibaba session with id %s not found", id))
+		return http_error.NewNotFoundError(fmt.Errorf("federated Alibaba session with id %s not found", id))
 	}
 
 	err := fac.updateState(newFederatedAlibabaSessions)
@@ -128,7 +125,7 @@ func (fac *federatedAlibabaSessionsFacade) GetFederatedAlibabaSessionById(id str
 			return &federatedAlibabaSession, nil
 		}
 	}
-	return nil, http_error.NewNotFoundError(fmt.Errorf("plain Alibaba session with id %s not found", id))
+	return nil, http_error.NewNotFoundError(fmt.Errorf("federated Alibaba session with id %s not found", id))
 }
 
 func (fac *federatedAlibabaSessionsFacade) SetFederatedAlibabaSessionById(newSession FederatedAlibabaSession) {
@@ -151,7 +148,7 @@ func (fac *federatedAlibabaSessionsFacade) SetFederatedAlibabaSessionStatusToPen
 	}
 
 	if !(federatedAlibabaSession.Status == NotActive) {
-		return http_error.NewUnprocessableEntityError(fmt.Errorf("plain Alibaba session with id " + id + "cannot be started because it's in pending or active state"))
+		return http_error.NewUnprocessableEntityError(fmt.Errorf("federated Alibaba session with id " + id + "cannot be started because it's in pending or active state"))
 	}
 
 	oldFederatedAlibabaSessions := fac.GetFederatedAlibabaSessions()
@@ -188,7 +185,7 @@ func (fac *federatedAlibabaSessionsFacade) SetFederatedAlibabaSessionStatusToAct
 	}
 
 	if !(federatedAlibabaSession.Status == Pending) {
-		return http_error.NewUnprocessableEntityError(fmt.Errorf("plain Alibaba session with id " + id + "cannot be started because it's not in pending state"))
+		return http_error.NewUnprocessableEntityError(fmt.Errorf("federated Alibaba session with id " + id + "cannot be started because it's not in pending state"))
 	}
 
 	oldFederatedAlibabaSessions := fac.GetFederatedAlibabaSessions()
@@ -201,6 +198,49 @@ func (fac *federatedAlibabaSessionsFacade) SetFederatedAlibabaSessionStatusToAct
 		newFederatedAlibabaSessions = append(newFederatedAlibabaSessions, newFederatedAlibabaSession)
 	}
 
+	for i, session := range newFederatedAlibabaSessions {
+		if session.Id == id {
+			newFederatedAlibabaSessions[i].Status = Active
+		}
+	}
+
+	err = fac.updateState(newFederatedAlibabaSessions)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (fac *federatedAlibabaSessionsFacade) SetFederatedAlibabaSessionStatusToNotActive(id string) error {
+	federatedAlibabaSessionsLock.Lock()
+	defer federatedAlibabaSessionsLock.Unlock()
+
+	federatedAlibabaSession, err := fac.GetFederatedAlibabaSessionById(id)
+	if err != nil {
+		return err
+	}
+	if federatedAlibabaSession.Status != Active {
+		fmt.Println(federatedAlibabaSession.Status)
+		return http_error.NewUnprocessableEntityError(fmt.Errorf("federated Alibaba session with id " + id + "cannot be started because it's not in active state"))
+	}
+
+	oldFederatedAlibabaSessions := fac.GetFederatedAlibabaSessions()
+	newFederatedAlibabaSessions := make([]FederatedAlibabaSession, 0)
+
+	for i := range oldFederatedAlibabaSessions {
+		newFederatedAlibabaSession := oldFederatedAlibabaSessions[i]
+		newFederatedAlibabaSessionAccount := *oldFederatedAlibabaSessions[i].Account
+		newFederatedAlibabaSession.Account = &newFederatedAlibabaSessionAccount
+		newFederatedAlibabaSessions = append(newFederatedAlibabaSessions, newFederatedAlibabaSession)
+	}
+
+	for i, session := range newFederatedAlibabaSessions {
+		if session.Id == id {
+			newFederatedAlibabaSessions[i].Status = NotActive
+		}
+	}
+
 	err = fac.updateState(newFederatedAlibabaSessions)
 	if err != nil {
 		return err
@@ -211,7 +251,7 @@ func (fac *federatedAlibabaSessionsFacade) SetFederatedAlibabaSessionStatusToAct
 
 func (fac *federatedAlibabaSessionsFacade) updateState(newState []FederatedAlibabaSession) error {
 	oldFederatedAlibabaSessions := fac.GetFederatedAlibabaSessions()
-	fac.SetFederatedAlibabaSessions(newState)
+	fac.federatedAlibabaSessions = newState
 
 	for _, observer := range fac.observers {
 		err := observer.UpdateFederatedAlibabaSessions(oldFederatedAlibabaSessions, newState)

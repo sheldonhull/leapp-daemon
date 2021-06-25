@@ -1,22 +1,23 @@
 package plain_alibaba_session_dto
 
 import (
-  "github.com/gin-gonic/gin"
-  http_error2 "leapp_daemon/infrastructure/http/http_error"
+	http_error2 "leapp_daemon/infrastructure/http/http_error"
+
+	"github.com/gin-gonic/gin"
 )
 
 // swagger:parameters updatePlainAlibabaSession
 type UpdatePlainAlibabaSessionUriRequestWrapper struct {
-  // plain alibaba session update uri body
-  // in:body
-  Body UpdatePlainAlibabaSessionUriRequest
+	// plain alibaba session update uri body
+	// in:body
+	Body UpdatePlainAlibabaSessionUriRequest
 }
 
 // swagger:parameters updatePlainAlibabaSession
 type UpdatePlainAlibabaSessionRequestWrapper struct {
-  // plain alibaba session update uri body
-  // in:body
-  Body UpdatePlainAlibabaSessionRequest
+	// plain alibaba session update uri body
+	// in:body
+	Body UpdatePlainAlibabaSessionRequest
 }
 
 type UpdatePlainAlibabaSessionUriRequest struct {
@@ -24,12 +25,12 @@ type UpdatePlainAlibabaSessionUriRequest struct {
 }
 
 type UpdatePlainAlibabaSessionRequest struct {
-	Name string `json:"name" binding:"required"`
+	Name   string `json:"name" binding:"required"`
 	Region string `json:"region" binding:"required"`
-	User string `json:"user" binding:"required"`
-	AlibabaAccessKeyId string `json:"alibabaAccessKeyId" binding:"required"`
+	//User string `json:"user" binding:"required"`
+	AlibabaAccessKeyId     string `json:"alibabaAccessKeyId" binding:"required"`
 	AlibabaSecretAccessKey string `json:"alibabaSecretAccessKey" binding:"required"`
-	ProfileName string `json:"profileName"`
+	ProfileName            string `json:"profileName"`
 }
 
 func (requestDto *UpdatePlainAlibabaSessionRequest) Build(context *gin.Context) error {

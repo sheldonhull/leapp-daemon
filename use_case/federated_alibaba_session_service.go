@@ -160,23 +160,10 @@ func (service *FederatedAlibabaSessionService) Update(sessionId string, name str
 }
 
 func (service *FederatedAlibabaSessionService) Delete(sessionId string) error {
-	/*
-		config, err := configuration.ReadConfiguration()
-		if err != nil {
-			return err
-		}
-
-		err = session2.DeleteFederatedAlibabaSession(config, sessionId)
-		if err != nil {
-			return err
-		}
-
-		err = config.Update()
-		if err != nil {
-			return err
-		}
-	*/
-
+	err := session.GetFederatedAlibabaSessionsFacade().RemoveFederatedAlibabaSession(sessionId)
+	if err != nil {
+		return http_error.NewInternalServerError(err)
+	}
 	return nil
 }
 
@@ -196,29 +183,11 @@ func (service *FederatedAlibabaSessionService) Start(sessionId string) error {
 }
 
 func (service *FederatedAlibabaSessionService) Stop(sessionId string) error {
-	/*
-		config, err := configuration.ReadConfiguration()
-		if err != nil {
-			return err
-		}
-
-		// Passing nil because, it will be the rotate method to check if we need the mfaToken or not
-		err = session2.StopFederatedAlibabaSession(config, sessionId)
-		if err != nil {
-			return err
-		}
-
-		err = config.Update()
-		if err != nil {
-			return err
-		}
-
-		// sess, err := session.GetFederatedAlibabaSession(config, sessionId)
-		err = session_token.RemoveFromIniFile("default")
-		if err != nil {
-			return err
-		}
-	*/
+	
+	err := session.GetFederatedAlibabaSessionsFacade().SetFederatedAlibabaSessionStatusToNotActive(sessionId)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

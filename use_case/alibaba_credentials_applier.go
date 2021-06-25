@@ -7,6 +7,7 @@ import (
 	"leapp_daemon/domain/named_profile"
 	"leapp_daemon/domain/session"
 	"leapp_daemon/infrastructure/http/http_error"
+	"os"
 )
 
 type CredentialsFile struct {
@@ -43,8 +44,6 @@ type AlibabaCredentialsApplier struct {
 	Keychain   Keychain
 }
 
-//TODO: refactoring needed
-
 func (alibabaCredentialsApplier *AlibabaCredentialsApplier) UpdatePlainAlibabaSessions(oldPlainAlibabaSessions []session.PlainAlibabaSession, newPlainAlibabaSessions []session.PlainAlibabaSession) error {
 	for i, oldSess := range oldPlainAlibabaSessions {
 		if i < len(newPlainAlibabaSessions) {
@@ -72,6 +71,19 @@ func (alibabaCredentialsApplier *AlibabaCredentialsApplier) UpdatePlainAlibabaSe
 				out, _ := json.MarshalIndent(config, "", "  ")
 				alibabaCredentialsApplier.overwriteFile(out, credentialsFilePath)
 			}
+
+			if oldSess.Status == session.Active && newSess.Status == session.NotActive {
+				homeDir, err := alibabaCredentialsApplier.FileSystem.GetHomeDir()
+				if err != nil {
+					return err
+				}
+
+				credentialsFilePath := homeDir + "/" + constant.AlibabaCredentialsFilePath
+				err = os.Remove(credentialsFilePath)
+				if err != nil {
+					return err
+				}
+			}
 		}
 	}
 
@@ -92,6 +104,52 @@ func (alibabaCredentialsApplier *AlibabaCredentialsApplier) UpdateFederatedAliba
 
 				credentialsFilePath := homeDir + "/" + constant.AlibabaCredentialsFilePath
 				profileName := named_profile.GetNamedProfilesFacade().GetNamedProfileById(newSess.Account.NamedProfileId).Name
+				region := newSess.Account.Region
+
+				accessKeyId, secretAccessKey, stsToken, err := alibabaCredentialsApplier.getFederatedCreds(newSess.Id)
+				if err != nil {
+					return err
+				}
+
+				namedProfileSection := NamedProfileSection{Name: profileName, Mode: "StsToken", Access_key_id: accessKeyId, Access_key_secret: secretAccessKey, Sts_token: stsToken, Region_id: region, Output_format: "json", Language: "en"}
+				profiles := []NamedProfileSection{namedProfileSection}
+				config := CredentialsFile{Current: namedProfileSection.Name, Profiles: profiles}
+				out, _ := json.MarshalIndent(config, "", "  ")
+				alibabaCredentialsApplier.overwriteFile(out, credentialsFilePath)
+			}
+
+			if oldSess.Status == session.Active && newSess.Status == session.NotActive {
+				homeDir, err := alibabaCredentialsApplier.FileSystem.GetHomeDir()
+				if err != nil {
+					return err
+				}
+
+				credentialsFilePath := homeDir + "/" + constant.AlibabaCredentialsFilePath
+				err = os.Remove(credentialsFilePath)
+				if err != nil {
+					return err
+				}
+			}
+		}
+	}
+	return nil
+}
+
+func (alibabaCredentialsApplier *AlibabaCredentialsApplier) UpdateTrustedAlibabaSessions(oldTrustedAlibabaSessions []session.TrustedAlibabaSession, newTrustedAlibabaSessions []session.TrustedAlibabaSession) error {
+	for i, oldSess := range oldTrustedAlibabaSessions {
+		if i < len(newTrustedAlibabaSessions) {
+			newSess := newTrustedAlibabaSessions[i]
+
+			if oldSess.Status == session.NotActive && newSess.Status == session.Pending {
+
+				homeDir, err := alibabaCredentialsApplier.FileSystem.GetHomeDir()
+				if err != nil {
+					return err
+				}
+
+				credentialsFilePath := homeDir + "/" + constant.AlibabaCredentialsFilePath
+				// if you got errors check here
+				profileName := newSess.Account.Name
 				region := newSess.Account.Region
 
 				accessKeyId, secretAccessKey, stsToken, err := alibabaCredentialsApplier.getFederatedCreds(newSess.Id)

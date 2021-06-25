@@ -40,8 +40,25 @@ func (fac *plainAlibabaSessionsFacade) GetPlainAlibabaSessions() []PlainAlibabaS
 	return fac.plainAlibabaSessions
 }
 
-func (fac *plainAlibabaSessionsFacade) SetPlainAlibabaSessions(plainAlibabaSessions []PlainAlibabaSession) {
-	fac.plainAlibabaSessions = plainAlibabaSessions
+func (fac *plainAlibabaSessionsFacade) SetPlainAlibabaSessions(newPlainAlibabaSessions []PlainAlibabaSession) error {
+	fac.plainAlibabaSessions = newPlainAlibabaSessions
+
+	err := fac.updateState(newPlainAlibabaSessions)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (fac *plainAlibabaSessionsFacade) UpdatePlainAlibabaSession(newSession PlainAlibabaSession) error {
+	allSessions := fac.GetPlainAlibabaSessions()
+	for i, plainAlibabaSession := range allSessions {
+		if plainAlibabaSession.Id == newSession.Id {
+			allSessions[i] = newSession
+		}
+	}
+	err := fac.SetPlainAlibabaSessions(allSessions)
+	return err
 }
 
 func (fac *plainAlibabaSessionsFacade) AddPlainAlibabaSession(plainAlibabaSession PlainAlibabaSession) error {
@@ -182,6 +199,49 @@ func (fac *plainAlibabaSessionsFacade) SetPlainAlibabaSessionStatusToActive(id s
 		newPlainAlibabaSessions = append(newPlainAlibabaSessions, newPlainAlibabaSession)
 	}
 
+	for i, session := range newPlainAlibabaSessions {
+		if session.Id == id {
+			newPlainAlibabaSessions[i].Status = Active
+		}
+	}
+
+	err = fac.updateState(newPlainAlibabaSessions)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (fac *plainAlibabaSessionsFacade) SetPlainAlibabaSessionStatusToNotActive(id string) error {
+	plainAlibabaSessionsLock.Lock()
+	defer plainAlibabaSessionsLock.Unlock()
+
+	plainAlibabaSession, err := fac.GetPlainAlibabaSessionById(id)
+	if err != nil {
+		return err
+	}
+	if plainAlibabaSession.Status != Active {
+		fmt.Println(plainAlibabaSession.Status)
+		return http_error.NewUnprocessableEntityError(fmt.Errorf("plain Alibaba session with id " + id + "cannot be started because it's not in active state"))
+	}
+
+	oldPlainAlibabaSessions := fac.GetPlainAlibabaSessions()
+	newPlainAlibabaSessions := make([]PlainAlibabaSession, 0)
+
+	for i := range oldPlainAlibabaSessions {
+		newPlainAlibabaSession := oldPlainAlibabaSessions[i]
+		newPlainAlibabaSessionAccount := *oldPlainAlibabaSessions[i].Account
+		newPlainAlibabaSession.Account = &newPlainAlibabaSessionAccount
+		newPlainAlibabaSessions = append(newPlainAlibabaSessions, newPlainAlibabaSession)
+	}
+
+	for i, session := range newPlainAlibabaSessions {
+		if session.Id == id {
+			newPlainAlibabaSessions[i].Status = NotActive
+		}
+	}
+
 	err = fac.updateState(newPlainAlibabaSessions)
 	if err != nil {
 		return err
@@ -192,7 +252,7 @@ func (fac *plainAlibabaSessionsFacade) SetPlainAlibabaSessionStatusToActive(id s
 
 func (fac *plainAlibabaSessionsFacade) updateState(newState []PlainAlibabaSession) error {
 	oldPlainAlibabaSessions := fac.GetPlainAlibabaSessions()
-	fac.SetPlainAlibabaSessions(newState)
+	fac.plainAlibabaSessions = newState
 
 	for _, observer := range fac.observers {
 		err := observer.UpdatePlainAlibabaSessions(oldPlainAlibabaSessions, newState)

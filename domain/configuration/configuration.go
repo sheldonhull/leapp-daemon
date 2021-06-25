@@ -21,6 +21,7 @@ type Configuration struct {
 	TrustedAwsSessions       []session.TrustedAwsSession
 	PlainAlibabaSessions     []session.PlainAlibabaSession
 	FederatedAlibabaSessions []session.FederatedAlibabaSession
+	TrustedAlibabaSessions   []session.TrustedAlibabaSession
 	NamedProfiles            []named_profile.NamedProfile
 }
 
