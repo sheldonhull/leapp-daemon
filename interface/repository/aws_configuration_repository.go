@@ -100,7 +100,7 @@ func (repo *AwsConfigurationRepository) backupIfNeeded(iniFile *ini.File, creden
 	iniSections := iniFile.Sections()
 	backupIniFile := false
 	for _, iniSection := range iniSections {
-		if !strings.Contains(iniSection.Comment, "Leapp") {
+		if iniSection.Name() != ini.DefaultSection && !strings.Contains(iniSection.Comment, "Leapp") {
 			backupIniFile = true
 			break
 		}
@@ -110,9 +110,6 @@ func (repo *AwsConfigurationRepository) backupIfNeeded(iniFile *ini.File, creden
 		err := repo.backupCredentialsFile(credentialsFilePath)
 		if err != nil {
 			return err
-		}
-		for _, iniSection := range iniSections {
-			iniFile.DeleteSection(iniSection.Name())
 		}
 	}
 	return nil
@@ -131,7 +128,7 @@ func (repo *AwsConfigurationRepository) WriteCredentials(credentials []AwsTempCr
 
 	credentialsFilePath, err := repo.getCredentialsFilePath()
 	if err != nil {
-		return err
+		return http_error.NewInternalServerError(err)
 	}
 
 	var iniFile *ini.File
@@ -140,14 +137,14 @@ func (repo *AwsConfigurationRepository) WriteCredentials(credentials []AwsTempCr
 		if err != nil {
 			return err
 		}
+
 		err = repo.backupIfNeeded(iniFile, credentialsFilePath)
 		if err != nil {
 			return err
 		}
-	} else {
-		iniFile = ini.Empty()
 	}
 
+	iniFile = ini.Empty()
 	for _, credential := range credentials {
 		err = repo.createProfileSection(iniFile, credential)
 		if err != nil {

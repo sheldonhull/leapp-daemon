@@ -10,6 +10,7 @@ import (
 )
 
 var (
+	expectedHomeDirPath                string
 	expectedConfigDirPath              string
 	expectedConfigFilePath             string
 	expectedActiveConfigFilePath       string
@@ -24,7 +25,8 @@ var (
 )
 
 func gcpConfigurationRepositorySetup() {
-	expectedConfigDirPath = filepath.Join("c:/", "appdata", "gcloud")
+	expectedHomeDirPath = filepath.Join("c:/", "appdata")
+	expectedConfigDirPath = filepath.Join(expectedHomeDirPath, "gcloud")
 	expectedConfigFilePath = filepath.Join(expectedConfigDirPath, "configurations", "config_leapp")
 	expectedActiveConfigFilePath = filepath.Join(expectedConfigDirPath, "active_config")
 	expectedDefaultCredentialsFilePath = filepath.Join(expectedConfigDirPath, "application_default_credentials.json")
@@ -119,7 +121,7 @@ func TestDoesGcloudConfigFolderExist_errorGettingHomeDir(t *testing.T) {
 	_, err := repo.DoesGcloudConfigFolderExist()
 	test.ExpectHttpError(t, err, 500, "error getting home dir")
 
-	verifyExpectedCalls(t, []string{"IsWindows()"}, []string{}, []string{}, []string{})
+	verifyExpectedCalls(t, []string{"IsWindows()"}, []string{"GetHomeDir()"}, []string{}, []string{})
 }
 
 func TestGcloudConfigurationRepository_onWindows(t *testing.T) {
@@ -164,7 +166,7 @@ func TestGcloudConfigurationRepository_error(t *testing.T) {
 	_, err := repo.gcloudConfigDir()
 	test.ExpectHttpError(t, err, 500, "error getting home dir")
 
-	verifyExpectedCalls(t, []string{"IsWindows()"}, []string{}, []string{}, []string{})
+	verifyExpectedCalls(t, []string{"IsWindows()"}, []string{"GetHomeDir()"}, []string{}, []string{})
 }
 
 func TestCreateConfiguration(t *testing.T) {
@@ -190,7 +192,7 @@ func TestCreateConfiguration_errorGettingHomeDir(t *testing.T) {
 	err := repo.CreateConfiguration("accountId", "projectId")
 	test.ExpectHttpError(t, err, 500, "error getting home dir")
 
-	verifyExpectedCalls(t, []string{"IsWindows()"}, []string{}, []string{}, []string{})
+	verifyExpectedCalls(t, []string{"IsWindows()"}, []string{"GetHomeDir()"}, []string{}, []string{})
 }
 
 func TestCreateConfiguration_errorWritingFile(t *testing.T) {
@@ -201,8 +203,10 @@ func TestCreateConfiguration_errorWritingFile(t *testing.T) {
 	err := repo.CreateConfiguration("accountId", "projectId")
 	test.ExpectHttpError(t, err, 500, "error writing file")
 
+	expectedFileContent := "[core]\naccount = accountId\nproject = projectId\n"
+	expectedWriteFile := fmt.Sprintf("WriteToFile(%v, %v)", expectedConfigFilePath, []byte(expectedFileContent))
 	verifyExpectedCalls(t, []string{"IsWindows()", "GetEnvironmentVariable(APPDATA)"},
-		[]string{}, []string{}, []string{})
+		[]string{expectedWriteFile}, []string{}, []string{})
 }
 
 func TestRemoveConfiguration(t *testing.T) {
@@ -226,18 +230,20 @@ func TestRemoveConfiguration_errorGettingHomeDir(t *testing.T) {
 	err := repo.RemoveConfiguration()
 	test.ExpectHttpError(t, err, 500, "error getting home dir")
 
-	verifyExpectedCalls(t, []string{"IsWindows()"}, []string{}, []string{}, []string{})
+	verifyExpectedCalls(t, []string{"IsWindows()"}, []string{"GetHomeDir()"}, []string{}, []string{})
 }
 
 func TestRemoveConfiguration_errorRemovingFile(t *testing.T) {
 	gcpConfigurationRepositorySetup()
+	gcpEnvMock.ExpIsWindows = true
 	gcpFsMock.ExpErrorOnRemoveFile = true
 
 	err := repo.RemoveConfiguration()
 	test.ExpectHttpError(t, err, 500, "error removing file")
 
-	verifyExpectedCalls(t, []string{"IsWindows()"}, []string{"GetHomeDir()"}, []string{},
-		[]string{})
+	expectedFile := fmt.Sprintf("RemoveFile(%v)", expectedConfigFilePath)
+	verifyExpectedCalls(t, []string{"IsWindows()", "GetEnvironmentVariable(APPDATA)"},
+		[]string{expectedFile}, []string{}, []string{})
 }
 
 func TestActivateConfiguration(t *testing.T) {
@@ -262,19 +268,21 @@ func TestActivateConfiguration_errorGettingHomeDir(t *testing.T) {
 	err := repo.ActivateConfiguration()
 	test.ExpectHttpError(t, err, 500, "error getting home dir")
 
-	verifyExpectedCalls(t, []string{"IsWindows()"}, []string{}, []string{}, []string{})
+	verifyExpectedCalls(t, []string{"IsWindows()"}, []string{"GetHomeDir()"}, []string{}, []string{})
 }
 
 func TestActivateConfiguration_errorWritingFile(t *testing.T) {
 	gcpConfigurationRepositorySetup()
-	gcpFsMock.ExpErrorOnWriteToFile = true
 	gcpEnvMock.ExpIsWindows = true
+	gcpFsMock.ExpErrorOnWriteToFile = true
 
 	err := repo.ActivateConfiguration()
 	test.ExpectHttpError(t, err, 500, "error writing file")
 
+	expectedFile := fmt.Sprintf("WriteToFile(%v, %v)", expectedActiveConfigFilePath,
+		[]byte("leapp"))
 	verifyExpectedCalls(t, []string{"IsWindows()", "GetEnvironmentVariable(APPDATA)"},
-		[]string{}, []string{}, []string{})
+		[]string{expectedFile}, []string{}, []string{})
 }
 
 func TestDeactivateConfiguration(t *testing.T) {
@@ -298,18 +306,20 @@ func TestDeactivateConfiguration_errorGettingHomeDir(t *testing.T) {
 	err := repo.DeactivateConfiguration()
 	test.ExpectHttpError(t, err, 500, "error getting home dir")
 
-	verifyExpectedCalls(t, []string{"IsWindows()"}, []string{}, []string{}, []string{})
+	verifyExpectedCalls(t, []string{"IsWindows()"}, []string{"GetHomeDir()"}, []string{}, []string{})
 }
 
 func TestDeactivateConfiguration_errorRemovingFile(t *testing.T) {
 	gcpConfigurationRepositorySetup()
+	gcpEnvMock.ExpIsWindows = true
 	gcpFsMock.ExpErrorOnRemoveFile = true
 
 	err := repo.DeactivateConfiguration()
 	test.ExpectHttpError(t, err, 500, "error removing file")
 
-	verifyExpectedCalls(t, []string{"IsWindows()"}, []string{"GetHomeDir()"}, []string{},
-		[]string{})
+	expectedFile := fmt.Sprintf("RemoveFile(%v)", expectedActiveConfigFilePath)
+	verifyExpectedCalls(t, []string{"IsWindows()", "GetEnvironmentVariable(APPDATA)"},
+		[]string{expectedFile}, []string{}, []string{})
 }
 
 func TestWriteDefaultCredentials(t *testing.T) {
@@ -334,7 +344,7 @@ func TestWriteDefaultCredentials_errorGettingHomeDir(t *testing.T) {
 	err := repo.WriteDefaultCredentials("{\"credentials\":\"json\"}")
 	test.ExpectHttpError(t, err, 500, "error getting home dir")
 
-	verifyExpectedCalls(t, []string{"IsWindows()"}, []string{}, []string{}, []string{})
+	verifyExpectedCalls(t, []string{"IsWindows()"}, []string{"GetHomeDir()"}, []string{}, []string{})
 }
 
 func TestWriteDefaultCredentials_errorWritingFile(t *testing.T) {
@@ -345,8 +355,11 @@ func TestWriteDefaultCredentials_errorWritingFile(t *testing.T) {
 	err := repo.WriteDefaultCredentials("{\"credentials\":\"json\"}")
 	test.ExpectHttpError(t, err, 500, "error writing file")
 
+	defaultCredentialJson := "{\"credentials\":\"json\"}"
+	expectedFile := fmt.Sprintf("WriteToFile(%v, %v)", expectedDefaultCredentialsFilePath,
+		[]byte(defaultCredentialJson))
 	verifyExpectedCalls(t, []string{"IsWindows()", "GetEnvironmentVariable(APPDATA)"},
-		[]string{}, []string{}, []string{})
+		[]string{expectedFile}, []string{}, []string{})
 }
 
 func TestRemoveDefaultCredentials(t *testing.T) {
@@ -370,18 +383,20 @@ func TestRemoveDefaultCredentials_errorGettingHomeDir(t *testing.T) {
 	err := repo.RemoveDefaultCredentials()
 	test.ExpectHttpError(t, err, 500, "error getting home dir")
 
-	verifyExpectedCalls(t, []string{"IsWindows()"}, []string{}, []string{}, []string{})
+	verifyExpectedCalls(t, []string{"IsWindows()"}, []string{"GetHomeDir()"}, []string{}, []string{})
 }
 
 func TestRemoveDefaultCredentials_errorRemovingFile(t *testing.T) {
 	gcpConfigurationRepositorySetup()
+	gcpEnvMock.ExpIsWindows = true
 	gcpFsMock.ExpErrorOnRemoveFile = true
 
 	err := repo.RemoveDefaultCredentials()
 	test.ExpectHttpError(t, err, 500, "error removing file")
 
-	verifyExpectedCalls(t, []string{"IsWindows()"}, []string{"GetHomeDir()"}, []string{},
-		[]string{})
+	expectedRemoveFileCall := fmt.Sprintf("RemoveFile(%v)", expectedDefaultCredentialsFilePath)
+	verifyExpectedCalls(t, []string{"IsWindows()", "GetEnvironmentVariable(APPDATA)"},
+		[]string{expectedRemoveFileCall}, []string{}, []string{})
 }
 
 func TestWriteCredentialsToDb(t *testing.T) {
@@ -410,7 +425,7 @@ func TestWriteCredentialsToDb_errorGettingHomeDir(t *testing.T) {
 	err := repo.WriteCredentialsToDb(accountId, defaultCredentialJson)
 	test.ExpectHttpError(t, err, 500, "error getting home dir")
 
-	verifyExpectedCalls(t, []string{"IsWindows()"}, []string{}, []string{}, []string{})
+	verifyExpectedCalls(t, []string{"IsWindows()"}, []string{"GetHomeDir()"}, []string{}, []string{})
 }
 
 func TestWriteCredentialsToDb_errorWritingCredentials(t *testing.T) {
@@ -470,7 +485,7 @@ func TestRemoveCredentialsFromDb_errorGettingHomeDir(t *testing.T) {
 	err := repo.RemoveCredentialsFromDb(accountId)
 	test.ExpectHttpError(t, err, 500, "error getting home dir")
 
-	verifyExpectedCalls(t, []string{"IsWindows()"}, []string{}, []string{}, []string{})
+	verifyExpectedCalls(t, []string{"IsWindows()"}, []string{"GetHomeDir()"}, []string{}, []string{})
 }
 
 func TestRemoveCredentialsFromDb_errorRemovingCredentialsFromDb(t *testing.T) {
@@ -531,7 +546,7 @@ func TestRemoveAccessTokensFromDb_errorGettingHomeDir(t *testing.T) {
 	err := repo.RemoveAccessTokensFromDb(accountId)
 	test.ExpectHttpError(t, err, 500, "error getting home dir")
 
-	verifyExpectedCalls(t, []string{"IsWindows()"}, []string{}, []string{}, []string{})
+	verifyExpectedCalls(t, []string{"IsWindows()"}, []string{"GetHomeDir()"}, []string{}, []string{})
 }
 
 func TestRemoveAccessTokensFromDb_errorRemovingCredentialsFromDb(t *testing.T) {
