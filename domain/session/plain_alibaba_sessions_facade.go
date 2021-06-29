@@ -36,11 +36,11 @@ func (fac *plainAlibabaSessionsFacade) Subscribe(observer PlainAlibabaSessionsOb
 	fac.observers = append(fac.observers, observer)
 }
 
-func (fac *plainAlibabaSessionsFacade) GetPlainAlibabaSessions() []PlainAlibabaSession {
+func (fac *plainAlibabaSessionsFacade) GetSessions() []PlainAlibabaSession {
 	return fac.plainAlibabaSessions
 }
 
-func (fac *plainAlibabaSessionsFacade) SetPlainAlibabaSessions(newPlainAlibabaSessions []PlainAlibabaSession) error {
+func (fac *plainAlibabaSessionsFacade) SetSessions(newPlainAlibabaSessions []PlainAlibabaSession) error {
 	fac.plainAlibabaSessions = newPlainAlibabaSessions
 
 	err := fac.updateState(newPlainAlibabaSessions)
@@ -51,13 +51,13 @@ func (fac *plainAlibabaSessionsFacade) SetPlainAlibabaSessions(newPlainAlibabaSe
 }
 
 func (fac *plainAlibabaSessionsFacade) UpdatePlainAlibabaSession(newSession PlainAlibabaSession) error {
-	allSessions := fac.GetPlainAlibabaSessions()
+	allSessions := fac.GetSessions()
 	for i, plainAlibabaSession := range allSessions {
 		if plainAlibabaSession.Id == newSession.Id {
 			allSessions[i] = newSession
 		}
 	}
-	err := fac.SetPlainAlibabaSessions(allSessions)
+	err := fac.SetSessions(allSessions)
 	return err
 }
 
@@ -65,7 +65,7 @@ func (fac *plainAlibabaSessionsFacade) AddPlainAlibabaSession(plainAlibabaSessio
 	plainAlibabaSessionsLock.Lock()
 	defer plainAlibabaSessionsLock.Unlock()
 
-	oldPlainAlibabaSessions := fac.GetPlainAlibabaSessions()
+	oldPlainAlibabaSessions := fac.GetSessions()
 	newPlainAlibabaSessions := make([]PlainAlibabaSession, 0)
 
 	for i := range oldPlainAlibabaSessions {
@@ -101,7 +101,7 @@ func (fac *plainAlibabaSessionsFacade) RemovePlainAlibabaSession(id string) erro
 	plainAlibabaSessionsLock.Lock()
 	defer plainAlibabaSessionsLock.Unlock()
 
-	oldPlainAlibabaSessions := fac.GetPlainAlibabaSessions()
+	oldPlainAlibabaSessions := fac.GetSessions()
 	newPlainAlibabaSessions := make([]PlainAlibabaSession, 0)
 
 	for i := range oldPlainAlibabaSessions {
@@ -118,7 +118,7 @@ func (fac *plainAlibabaSessionsFacade) RemovePlainAlibabaSession(id string) erro
 		}
 	}
 
-	if len(fac.GetPlainAlibabaSessions()) == len(newPlainAlibabaSessions) {
+	if len(fac.GetSessions()) == len(newPlainAlibabaSessions) {
 		return http_error.NewNotFoundError(fmt.Errorf("plain Alibaba session with id %s not found", id))
 	}
 
@@ -130,8 +130,8 @@ func (fac *plainAlibabaSessionsFacade) RemovePlainAlibabaSession(id string) erro
 	return nil
 }
 
-func (fac *plainAlibabaSessionsFacade) GetPlainAlibabaSessionById(id string) (*PlainAlibabaSession, error) {
-	for _, plainAlibabaSession := range fac.GetPlainAlibabaSessions() {
+func (fac *plainAlibabaSessionsFacade) GetSessionById(id string) (*PlainAlibabaSession, error) {
+	for _, plainAlibabaSession := range fac.GetSessions() {
 		if plainAlibabaSession.Id == id {
 			return &plainAlibabaSession, nil
 		}
@@ -139,11 +139,11 @@ func (fac *plainAlibabaSessionsFacade) GetPlainAlibabaSessionById(id string) (*P
 	return nil, http_error.NewNotFoundError(fmt.Errorf("plain Alibaba session with id %s not found", id))
 }
 
-func (fac *plainAlibabaSessionsFacade) SetPlainAlibabaSessionStatusToPending(id string) error {
+func (fac *plainAlibabaSessionsFacade) SetStatusToPending(id string) error {
 	plainAlibabaSessionsLock.Lock()
 	defer plainAlibabaSessionsLock.Unlock()
 
-	plainAlibabaSession, err := fac.GetPlainAlibabaSessionById(id)
+	plainAlibabaSession, err := fac.GetSessionById(id)
 	if err != nil {
 		return err
 	}
@@ -152,7 +152,7 @@ func (fac *plainAlibabaSessionsFacade) SetPlainAlibabaSessionStatusToPending(id 
 		return http_error.NewUnprocessableEntityError(fmt.Errorf("plain Alibaba session with id " + id + "cannot be started because it's in pending or active state"))
 	}
 
-	oldPlainAlibabaSessions := fac.GetPlainAlibabaSessions()
+	oldPlainAlibabaSessions := fac.GetSessions()
 	newPlainAlibabaSessions := make([]PlainAlibabaSession, 0)
 
 	for i := range oldPlainAlibabaSessions {
@@ -176,11 +176,11 @@ func (fac *plainAlibabaSessionsFacade) SetPlainAlibabaSessionStatusToPending(id 
 	return nil
 }
 
-func (fac *plainAlibabaSessionsFacade) SetPlainAlibabaSessionStatusToActive(id string) error {
+func (fac *plainAlibabaSessionsFacade) SetStatusToActive(id string) error {
 	plainAlibabaSessionsLock.Lock()
 	defer plainAlibabaSessionsLock.Unlock()
 
-	plainAlibabaSession, err := fac.GetPlainAlibabaSessionById(id)
+	plainAlibabaSession, err := fac.GetSessionById(id)
 	if err != nil {
 		return err
 	}
@@ -189,7 +189,7 @@ func (fac *plainAlibabaSessionsFacade) SetPlainAlibabaSessionStatusToActive(id s
 		return http_error.NewUnprocessableEntityError(fmt.Errorf("plain Alibaba session with id " + id + "cannot be started because it's not in pending state"))
 	}
 
-	oldPlainAlibabaSessions := fac.GetPlainAlibabaSessions()
+	oldPlainAlibabaSessions := fac.GetSessions()
 	newPlainAlibabaSessions := make([]PlainAlibabaSession, 0)
 
 	for i := range oldPlainAlibabaSessions {
@@ -213,11 +213,11 @@ func (fac *plainAlibabaSessionsFacade) SetPlainAlibabaSessionStatusToActive(id s
 	return nil
 }
 
-func (fac *plainAlibabaSessionsFacade) SetPlainAlibabaSessionStatusToNotActive(id string) error {
+func (fac *plainAlibabaSessionsFacade) SetStatusToInactive(id string) error {
 	plainAlibabaSessionsLock.Lock()
 	defer plainAlibabaSessionsLock.Unlock()
 
-	plainAlibabaSession, err := fac.GetPlainAlibabaSessionById(id)
+	plainAlibabaSession, err := fac.GetSessionById(id)
 	if err != nil {
 		return err
 	}
@@ -226,7 +226,7 @@ func (fac *plainAlibabaSessionsFacade) SetPlainAlibabaSessionStatusToNotActive(i
 		return http_error.NewUnprocessableEntityError(fmt.Errorf("plain Alibaba session with id " + id + "cannot be started because it's not in active state"))
 	}
 
-	oldPlainAlibabaSessions := fac.GetPlainAlibabaSessions()
+	oldPlainAlibabaSessions := fac.GetSessions()
 	newPlainAlibabaSessions := make([]PlainAlibabaSession, 0)
 
 	for i := range oldPlainAlibabaSessions {
@@ -251,7 +251,7 @@ func (fac *plainAlibabaSessionsFacade) SetPlainAlibabaSessionStatusToNotActive(i
 }
 
 func (fac *plainAlibabaSessionsFacade) updateState(newState []PlainAlibabaSession) error {
-	oldPlainAlibabaSessions := fac.GetPlainAlibabaSessions()
+	oldPlainAlibabaSessions := fac.GetSessions()
 	fac.plainAlibabaSessions = newState
 
 	for _, observer := range fac.observers {

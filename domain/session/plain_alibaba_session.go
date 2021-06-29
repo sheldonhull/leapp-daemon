@@ -17,3 +17,11 @@ type PlainAlibabaAccount struct {
 	Region         string
 	NamedProfileId string
 }
+
+func (sess *PlainAlibabaSession) GetId() string {
+	return sess.Id
+}
+
+func (sess *PlainAlibabaSession) GetTypeString() string {
+	return "plain"
+}

@@ -96,7 +96,7 @@ func (service *FederatedAlibabaSessionService) Create(name string, accountNumber
 		Profile: profileName,
 	}
 
-	err := session.GetFederatedAlibabaSessionsFacade().AddFederatedAlibabaSession(sess)
+	err := session.GetFederatedAlibabaSessionsFacade().AddSession(sess)
 	if err != nil {
 		return err
 	}
@@ -122,7 +122,7 @@ func (service *FederatedAlibabaSessionService) Create(name string, accountNumber
 }
 
 func (service *FederatedAlibabaSessionService) Get(id string) (*session.FederatedAlibabaSession, error) {
-	return session.GetFederatedAlibabaSessionsFacade().GetFederatedAlibabaSessionById(id)
+	return session.GetFederatedAlibabaSessionsFacade().GetSessionById(id)
 }
 
 func (service *FederatedAlibabaSessionService) Update(sessionId string, name string, accountNumber string, roleName string, roleArn string,
@@ -155,12 +155,12 @@ func (service *FederatedAlibabaSessionService) Update(sessionId string, name str
 		Profile: profileName,
 	}
 
-	session.GetFederatedAlibabaSessionsFacade().SetFederatedAlibabaSessionById(sess)
+	session.GetFederatedAlibabaSessionsFacade().SetSessionById(sess)
 	return nil
 }
 
 func (service *FederatedAlibabaSessionService) Delete(sessionId string) error {
-	err := session.GetFederatedAlibabaSessionsFacade().RemoveFederatedAlibabaSession(sessionId)
+	err := session.GetFederatedAlibabaSessionsFacade().RemoveSession(sessionId)
 	if err != nil {
 		return http_error.NewInternalServerError(err)
 	}
@@ -169,12 +169,12 @@ func (service *FederatedAlibabaSessionService) Delete(sessionId string) error {
 
 func (service *FederatedAlibabaSessionService) Start(sessionId string) error {
 
-	err := session.GetFederatedAlibabaSessionsFacade().SetFederatedAlibabaSessionStatusToPending(sessionId)
+	err := session.GetFederatedAlibabaSessionsFacade().SetStatusToPending(sessionId)
 	if err != nil {
 		return err
 	}
 
-	err = session.GetFederatedAlibabaSessionsFacade().SetFederatedAlibabaSessionStatusToActive(sessionId)
+	err = session.GetFederatedAlibabaSessionsFacade().SetStatusToActive(sessionId)
 	if err != nil {
 		return err
 	}
@@ -184,7 +184,7 @@ func (service *FederatedAlibabaSessionService) Start(sessionId string) error {
 
 func (service *FederatedAlibabaSessionService) Stop(sessionId string) error {
 	
-	err := session.GetFederatedAlibabaSessionsFacade().SetFederatedAlibabaSessionStatusToNotActive(sessionId)
+	err := session.GetFederatedAlibabaSessionsFacade().SetStatusToInactive(sessionId)
 	if err != nil {
 		return err
 	}

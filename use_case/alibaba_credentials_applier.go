@@ -73,13 +73,7 @@ func (alibabaCredentialsApplier *AlibabaCredentialsApplier) UpdatePlainAlibabaSe
 			}
 
 			if oldSess.Status == session.Active && newSess.Status == session.NotActive {
-				homeDir, err := alibabaCredentialsApplier.FileSystem.GetHomeDir()
-				if err != nil {
-					return err
-				}
-
-				credentialsFilePath := homeDir + "/" + constant.AlibabaCredentialsFilePath
-				err = os.Remove(credentialsFilePath)
+				err := alibabaCredentialsApplier.deleteConfig()
 				if err != nil {
 					return err
 				}
@@ -119,13 +113,7 @@ func (alibabaCredentialsApplier *AlibabaCredentialsApplier) UpdateFederatedAliba
 			}
 
 			if oldSess.Status == session.Active && newSess.Status == session.NotActive {
-				homeDir, err := alibabaCredentialsApplier.FileSystem.GetHomeDir()
-				if err != nil {
-					return err
-				}
-
-				credentialsFilePath := homeDir + "/" + constant.AlibabaCredentialsFilePath
-				err = os.Remove(credentialsFilePath)
+				err := alibabaCredentialsApplier.deleteConfig()
 				if err != nil {
 					return err
 				}
@@ -152,7 +140,7 @@ func (alibabaCredentialsApplier *AlibabaCredentialsApplier) UpdateTrustedAlibaba
 				profileName := newSess.Account.Name
 				region := newSess.Account.Region
 
-				accessKeyId, secretAccessKey, stsToken, err := alibabaCredentialsApplier.getFederatedCreds(newSess.Id)
+				accessKeyId, secretAccessKey, stsToken, err := alibabaCredentialsApplier.getTrustedCreds(newSess.Id)
 				if err != nil {
 					return err
 				}
@@ -162,6 +150,13 @@ func (alibabaCredentialsApplier *AlibabaCredentialsApplier) UpdateTrustedAlibaba
 				config := CredentialsFile{Current: namedProfileSection.Name, Profiles: profiles}
 				out, _ := json.MarshalIndent(config, "", "  ")
 				alibabaCredentialsApplier.overwriteFile(out, credentialsFilePath)
+			}
+
+			if oldSess.Status == session.Active && newSess.Status == session.NotActive {
+				err := alibabaCredentialsApplier.deleteConfig()
+				if err != nil {
+					return err
+				}
 			}
 		}
 	}
@@ -212,11 +207,52 @@ func (alibabaCredentialsApplier *AlibabaCredentialsApplier) getFederatedCreds(se
 	return accessKeyId, secretAccessKey, stsToken, nil
 }
 
+func (alibabaCredentialsApplier *AlibabaCredentialsApplier) getTrustedCreds(sessionId string) (accessKeyId string, secretAccessKey string, stsToken string, err error) {
+	accessKeyId = ""
+	secretAccessKey = ""
+
+	accessKeyIdSecretName := sessionId + "-trusted-alibaba-session-access-key-id"
+	accessKeyId, err = alibabaCredentialsApplier.Keychain.GetSecret(accessKeyIdSecretName)
+	if err != nil {
+		return accessKeyId, secretAccessKey, stsToken, http_error.NewUnprocessableEntityError(err)
+	}
+
+	secretAccessKeySecretName := sessionId + "-trusted-alibaba-session-secret-access-key"
+	secretAccessKey, err = alibabaCredentialsApplier.Keychain.GetSecret(secretAccessKeySecretName)
+	if err != nil {
+		return accessKeyId, secretAccessKey, stsToken, http_error.NewUnprocessableEntityError(err)
+	}
+
+	stsTokenName := sessionId + "-trusted-alibaba-session-sts-token"
+	stsToken, err = alibabaCredentialsApplier.Keychain.GetSecret(stsTokenName)
+	if err != nil {
+		return accessKeyId, secretAccessKey, stsToken, http_error.NewUnprocessableEntityError(err)
+	}
+
+	return accessKeyId, secretAccessKey, stsToken, nil
+}
+
 func (alibabaCredentialsApplier *AlibabaCredentialsApplier) overwriteFile(content []byte, path string) error {
 
 	err := ioutil.WriteFile(path, content, 0644)
 	if err != nil {
 		return http_error.NewUnprocessableEntityError(err)
+	}
+
+	return nil
+}
+
+func (alibabaCredentialsApplier *AlibabaCredentialsApplier) deleteConfig() error {
+
+	homeDir, err := alibabaCredentialsApplier.FileSystem.GetHomeDir()
+	if err != nil {
+		return err
+	}
+
+	credentialsFilePath := homeDir + "/" + constant.AlibabaCredentialsFilePath
+	err = os.Remove(credentialsFilePath)
+	if err != nil {
+		return err
 	}
 
 	return nil

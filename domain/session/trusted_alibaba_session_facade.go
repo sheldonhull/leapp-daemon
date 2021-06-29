@@ -202,6 +202,49 @@ func (fac *trustedAlibabaSessionsFacade) SetTrustedAlibabaSessionStatusToActive(
 		newTrustedAlibabaSessions = append(newTrustedAlibabaSessions, newTrustedAlibabaSession)
 	}
 
+	for i, session := range newTrustedAlibabaSessions {
+		if session.Id == id {
+			newTrustedAlibabaSessions[i].Status = Active
+		}
+	}
+
+	err = fac.updateState(newTrustedAlibabaSessions)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (fac *trustedAlibabaSessionsFacade) SetTrustedAlibabaSessionStatusToInactive(id string) error {
+	trustedAlibabaSessionsLock.Lock()
+	defer trustedAlibabaSessionsLock.Unlock()
+
+	trustedAlibabaSession, err := fac.GetTrustedAlibabaSessionById(id)
+	if err != nil {
+		return err
+	}
+	if trustedAlibabaSession.Status != Active {
+		fmt.Println(trustedAlibabaSession.Status)
+		return http_error.NewUnprocessableEntityError(fmt.Errorf("trusted Alibaba session with id " + id + "cannot be stopped because it's not in active state"))
+	}
+
+	oldTrustedAlibabaSessions := fac.GetTrustedAlibabaSessions()
+	newTrustedAlibabaSessions := make([]TrustedAlibabaSession, 0)
+
+	for i := range oldTrustedAlibabaSessions {
+		newTrustedAlibabaSession := oldTrustedAlibabaSessions[i]
+		newTrustedAlibabaSessionAccount := *oldTrustedAlibabaSessions[i].Account
+		newTrustedAlibabaSession.Account = &newTrustedAlibabaSessionAccount
+		newTrustedAlibabaSessions = append(newTrustedAlibabaSessions, newTrustedAlibabaSession)
+	}
+
+	for i, session := range newTrustedAlibabaSessions {
+		if session.Id == id {
+			newTrustedAlibabaSessions[i].Status = NotActive
+		}
+	}
+
 	err = fac.updateState(newTrustedAlibabaSessions)
 	if err != nil {
 		return err
@@ -212,7 +255,7 @@ func (fac *trustedAlibabaSessionsFacade) SetTrustedAlibabaSessionStatusToActive(
 
 func (fac *trustedAlibabaSessionsFacade) updateState(newState []TrustedAlibabaSession) error {
 	oldTrustedAlibabaSessions := fac.GetTrustedAlibabaSessions()
-	fac.SetTrustedAlibabaSessions(newState)
+	fac.trustedAlibabaSessions = newState
 
 	for _, observer := range fac.observers {
 		err := observer.UpdateTrustedAlibabaSessions(oldTrustedAlibabaSessions, newState)

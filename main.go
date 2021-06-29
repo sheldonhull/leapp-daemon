@@ -88,7 +88,7 @@ func main() {
 	plainAlibabaSessions := config.PlainAlibabaSessions
 	logging.Info(fmt.Sprintf("%+v", plainAlibabaSessions))
 	plainAlibabaSessionFacade := session.GetPlainAlibabaSessionsFacade()
-	plainAlibabaSessionFacade.SetPlainAlibabaSessions(plainAlibabaSessions)
+	plainAlibabaSessionFacade.SetSessions(plainAlibabaSessions)
 	plainAlibabaSessionFacade.Subscribe(&use_case.SessionsWriter{
 		ConfigurationRepository: &fileConfigurationRepository,
 	})
@@ -100,7 +100,7 @@ func main() {
 	federatedAlibabaSessions := config.FederatedAlibabaSessions
 	logging.Info(fmt.Sprintf("%+v", federatedAlibabaSessions))
 	federatedAlibabaSessionFacade := session.GetFederatedAlibabaSessionsFacade()
-	federatedAlibabaSessionFacade.SetFederatedAlibabaSessions(federatedAlibabaSessions)
+	federatedAlibabaSessionFacade.SetSessions(federatedAlibabaSessions)
 	federatedAlibabaSessionFacade.Subscribe(&use_case.SessionsWriter{
 		ConfigurationRepository: &fileConfigurationRepository,
 	})

@@ -40,6 +40,14 @@ func (sess *FederatedAlibabaSession) IsRotationIntervalExpired() (bool, error) {
 	return int64(secondsPassedFromStart) > constant.RotationIntervalInSeconds, nil
 }
 
+func (sess *FederatedAlibabaSession) GetId() string {
+	return sess.Id
+}
+
+func (sess *FederatedAlibabaSession) GetTypeString() string {
+	return "federated"
+}
+
 /*
 func CreateFederatedAlibabaSession(sessionContainer Container, name string, accountNumber string, roleName string, roleArn string, idpArn string,
 	region string, ssoUrl string, profile string) error {

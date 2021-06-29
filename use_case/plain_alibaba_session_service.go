@@ -77,7 +77,7 @@ func (service *PlainAlibabaSessionService) Create(alias string, alibabaAccessKey
 
 func (service *PlainAlibabaSessionService) Get(id string) (*session.PlainAlibabaSession, error) {
 	var sess *session.PlainAlibabaSession
-	sess, err := session.GetPlainAlibabaSessionsFacade().GetPlainAlibabaSessionById(id)
+	sess, err := session.GetPlainAlibabaSessionsFacade().GetSessionById(id)
 	return sess, err
 }
 
@@ -131,12 +131,12 @@ func (service *PlainAlibabaSessionService) Delete(sessionId string) error {
 
 func (service *PlainAlibabaSessionService) Start(sessionId string) error {
 
-	err := session.GetPlainAlibabaSessionsFacade().SetPlainAlibabaSessionStatusToPending(sessionId)
+	err := session.GetPlainAlibabaSessionsFacade().SetStatusToPending(sessionId)
 	if err != nil {
 		return err
 	}
 
-	err = session.GetPlainAlibabaSessionsFacade().SetPlainAlibabaSessionStatusToActive(sessionId)
+	err = session.GetPlainAlibabaSessionsFacade().SetStatusToActive(sessionId)
 	if err != nil {
 		return err
 	}
@@ -146,7 +146,7 @@ func (service *PlainAlibabaSessionService) Start(sessionId string) error {
 
 func (service *PlainAlibabaSessionService) Stop(sessionId string) error {
 
-	err := session.GetPlainAlibabaSessionsFacade().SetPlainAlibabaSessionStatusToNotActive(sessionId)
+	err := session.GetPlainAlibabaSessionsFacade().SetStatusToInactive(sessionId)
 	if err != nil {
 		return err
 	}
