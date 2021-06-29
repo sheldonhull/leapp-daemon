@@ -17,15 +17,15 @@ type FederatedAlibabaSessionService struct {
 }
 
 // TODO: mettere da qualche parte questa funzione
-func SAMLAuth(region string, assertion string) (key string, secret string, token string) {
+func SAMLAuth(region string, idpArn string, roleArn string, assertion string) (key string, secret string, token string) {
 	// I'm using this since NewClient() method returns a panic saying literally "not support yet"
 	// This method actually never use the credentials so I placed 2 placeholders
 	client, _ := sts.NewClientWithAccessKey(region, "", "")
 
 	request := sts.CreateAssumeRoleWithSAMLRequest()
 	request.Scheme = "https"
-	request.SAMLProviderArn = "acs:ram::5097921239869425:saml-provider/okta-provider"
-	request.RoleArn = "acs:ram::5097921239869425:role/admin"
+	request.SAMLProviderArn = idpArn
+	request.RoleArn = roleArn
 	request.SAMLAssertion = assertion
 	response, err := client.AssumeRoleWithSAML(request)
 	if err != nil {
@@ -101,7 +101,7 @@ func (service *FederatedAlibabaSessionService) Create(name string, accountNumber
 		return err
 	}
 
-	alibabaAccessKeyId, alibabaSecretAccessKey, alibabaStsToken := SAMLAuth(regionName, ssoUrl)
+	alibabaAccessKeyId, alibabaSecretAccessKey, alibabaStsToken := SAMLAuth(regionName, idpArn, roleArn, ssoUrl)
 
 	err = service.Keychain.SetSecret(alibabaAccessKeyId, sess.Id+"-federated-alibaba-session-access-key-id")
 	if err != nil {
@@ -183,7 +183,7 @@ func (service *FederatedAlibabaSessionService) Start(sessionId string) error {
 }
 
 func (service *FederatedAlibabaSessionService) Stop(sessionId string) error {
-	
+
 	err := session.GetFederatedAlibabaSessionsFacade().SetStatusToInactive(sessionId)
 	if err != nil {
 		return err
