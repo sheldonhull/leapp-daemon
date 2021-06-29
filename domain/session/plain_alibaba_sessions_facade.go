@@ -50,7 +50,7 @@ func (fac *plainAlibabaSessionsFacade) SetSessions(newPlainAlibabaSessions []Pla
 	return nil
 }
 
-func (fac *plainAlibabaSessionsFacade) UpdatePlainAlibabaSession(newSession PlainAlibabaSession) error {
+func (fac *plainAlibabaSessionsFacade) UpdateSession(newSession PlainAlibabaSession) error {
 	allSessions := fac.GetSessions()
 	for i, plainAlibabaSession := range allSessions {
 		if plainAlibabaSession.Id == newSession.Id {
@@ -61,7 +61,7 @@ func (fac *plainAlibabaSessionsFacade) UpdatePlainAlibabaSession(newSession Plai
 	return err
 }
 
-func (fac *plainAlibabaSessionsFacade) AddPlainAlibabaSession(plainAlibabaSession PlainAlibabaSession) error {
+func (fac *plainAlibabaSessionsFacade) AddSession(plainAlibabaSession PlainAlibabaSession) error {
 	plainAlibabaSessionsLock.Lock()
 	defer plainAlibabaSessionsLock.Unlock()
 
@@ -97,7 +97,7 @@ func (fac *plainAlibabaSessionsFacade) AddPlainAlibabaSession(plainAlibabaSessio
 	return nil
 }
 
-func (fac *plainAlibabaSessionsFacade) RemovePlainAlibabaSession(id string) error {
+func (fac *plainAlibabaSessionsFacade) RemoveSession(id string) error {
 	plainAlibabaSessionsLock.Lock()
 	defer plainAlibabaSessionsLock.Unlock()
 

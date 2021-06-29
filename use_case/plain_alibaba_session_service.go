@@ -57,7 +57,7 @@ func (service *PlainAlibabaSessionService) Create(alias string, alibabaAccessKey
 		Account: &plainAlibabaAccount,
 	}
 
-	err := session.GetPlainAlibabaSessionsFacade().AddPlainAlibabaSession(sess)
+	err := session.GetPlainAlibabaSessionsFacade().AddSession(sess)
 	if err != nil {
 		return err
 	}
@@ -81,7 +81,7 @@ func (service *PlainAlibabaSessionService) Get(id string) (*session.PlainAlibaba
 	return sess, err
 }
 
-func (service *PlainAlibabaSessionService) Update(id string, alias string, regionName string, /*user string,*/
+func (service *PlainAlibabaSessionService) Update(id string, alias string, regionName string,
 	alibabaAccessKeyId string, alibabaSecretAccessKey string, profileName string) error {
 
 	isRegionValid := region.IsAlibabaRegionValid(regionName)
@@ -89,9 +89,14 @@ func (service *PlainAlibabaSessionService) Update(id string, alias string, regio
 		return http_error.NewUnprocessableEntityError(fmt.Errorf("Region " + regionName + " not valid"))
 	}
 
+	oldSess, err := session.GetPlainAlibabaSessionsFacade().GetSessionById(id)
+	if err != nil {
+		return http_error.NewInternalServerError(err)
+	}
+	
 	plainAlibabaAccount := session.PlainAlibabaAccount{
 		Region:         regionName,
-		NamedProfileId: "", //TODO: temp fix
+		NamedProfileId: oldSess.Account.NamedProfileId,
 	}
 
 	sess := session.PlainAlibabaSession{
@@ -101,7 +106,7 @@ func (service *PlainAlibabaSessionService) Update(id string, alias string, regio
 		Account: &plainAlibabaAccount,
 	}
 
-	err := session.GetPlainAlibabaSessionsFacade().UpdatePlainAlibabaSession(sess)
+	err = session.GetPlainAlibabaSessionsFacade().UpdateSession(sess)
 	if err != nil {
 		return http_error.NewInternalServerError(err)
 	}
@@ -121,7 +126,7 @@ func (service *PlainAlibabaSessionService) Update(id string, alias string, regio
 
 func (service *PlainAlibabaSessionService) Delete(sessionId string) error {
 
-	err := session.GetPlainAlibabaSessionsFacade().RemovePlainAlibabaSession(sessionId)
+	err := session.GetPlainAlibabaSessionsFacade().RemoveSession(sessionId)
 	if err != nil {
 		return http_error.NewInternalServerError(err)
 	}

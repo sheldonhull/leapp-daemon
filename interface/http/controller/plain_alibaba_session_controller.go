@@ -135,7 +135,7 @@ func DeletePlainAlibabaSessionController(context *gin.Context) {
 		return
 	}
 
-	err = session.GetPlainAlibabaSessionsFacade().RemovePlainAlibabaSession(requestDto.Id)
+	err = session.GetPlainAlibabaSessionsFacade().RemoveSession(requestDto.Id)
 	if err != nil {
 		_ = context.Error(err)
 		return
