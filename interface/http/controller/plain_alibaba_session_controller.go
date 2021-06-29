@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"leapp_daemon/domain/session"
 	"leapp_daemon/infrastructure/keychain"
 	"leapp_daemon/infrastructure/logging"
 	plain_alibaba_session_request_dto "leapp_daemon/interface/http/controller/dto/request_dto/plain_alibaba_session_dto"
@@ -135,7 +134,11 @@ func DeletePlainAlibabaSessionController(context *gin.Context) {
 		return
 	}
 
-	err = session.GetPlainAlibabaSessionsFacade().RemoveSession(requestDto.Id)
+	plainAlibabaSessionService := use_case.PlainAlibabaSessionService{
+		Keychain: &keychain.Keychain{},
+	}
+
+	err = plainAlibabaSessionService.Delete(requestDto.Id)
 	if err != nil {
 		_ = context.Error(err)
 		return

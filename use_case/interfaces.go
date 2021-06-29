@@ -12,4 +12,5 @@ type Keychain interface {
   DoesSecretExist(label string) (bool, error)
   GetSecret(label string) (string, error)
   SetSecret(secret string, label string) error
+  DeleteSecret(label string) error
 }

@@ -135,6 +135,15 @@ func (service *PlainAlibabaSessionService) Delete(sessionId string) error {
 		return http_error.NewInternalServerError(err)
 	}
 
+	err = service.Keychain.DeleteSecret(sessionId + constant.PlainAlibabaKeyIdSuffix)
+	if err != nil {
+		return err
+	}
+
+	err = service.Keychain.DeleteSecret(sessionId + constant.PlainAlibabaSecretAccessKeySuffix)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
