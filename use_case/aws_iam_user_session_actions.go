@@ -15,7 +15,7 @@ type AwsIamUserSessionActions struct {
 	AwsIamUserSessionsFacade AwsIamUserSessionsFacade
 }
 
-func (actions *AwsIamUserSessionActions) Create(name string, awsAccessKeyId string, awsSecretAccessKey string,
+func (actions *AwsIamUserSessionActions) CreateSession(name string, awsAccessKeyId string, awsSecretAccessKey string,
 	mfaDevice string, region string, profileName string) error {
 
 	namedProfile, err := actions.NamedProfilesActions.GetOrCreateNamedProfile(profileName)

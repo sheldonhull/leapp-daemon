@@ -27,8 +27,7 @@ func (controller *EngineController) CreateAwsIamUserSession(context *gin.Context
 	}
 
 	actions := controller.Providers.GetAwsIamUserSessionActions()
-
-	err = actions.Create(requestDto.Name, requestDto.AwsAccessKeyId, requestDto.AwsSecretAccessKey,
+	err = actions.CreateSession(requestDto.Name, requestDto.AwsAccessKeyId, requestDto.AwsSecretAccessKey,
 		requestDto.MfaDevice, requestDto.Region, requestDto.ProfileName)
 	if err != nil {
 		_ = context.Error(err)
@@ -55,7 +54,6 @@ func (controller *EngineController) GetAwsIamUserSession(context *gin.Context) {
 	}
 
 	actions := controller.Providers.GetAwsIamUserSessionActions()
-
 	sess, err := actions.GetAwsIamUserSession(requestDto.Id)
 	if err != nil {
 		_ = context.Error(err)

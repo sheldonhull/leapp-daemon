@@ -42,6 +42,9 @@ func (facade *AwsIamUserSessionsFacade) GetSessionById(sessionId string) (AwsIam
 }
 
 func (facade *AwsIamUserSessionsFacade) SetSessions(sessions []AwsIamUserSession) {
+	awsIamUserSessionsLock.Lock()
+	defer awsIamUserSessionsLock.Unlock()
+
 	facade.awsIamUserSessions = sessions
 }
 

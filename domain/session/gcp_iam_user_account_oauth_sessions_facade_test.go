@@ -8,226 +8,226 @@ import (
 )
 
 var (
-	facade               *GcpIamUserAccountOauthSessionsFacade
-	sessionsBeforeUpdate []GcpIamUserAccountOauthSession
-	sessionsAfterUpdate  []GcpIamUserAccountOauthSession
+	gcpIamUserSessionFacade        *GcpIamUserAccountOauthSessionsFacade
+	gcpIamUserSessionsBeforeUpdate []GcpIamUserAccountOauthSession
+	gcpIamUserSessionsAfterUpdate  []GcpIamUserAccountOauthSession
 )
 
 func gcpIamUserAccountOauthSessionFacadeSetup() {
-	facade = NewGcpIamUserAccountOauthSessionsFacade()
-	sessionsBeforeUpdate = []GcpIamUserAccountOauthSession{}
-	sessionsAfterUpdate = []GcpIamUserAccountOauthSession{}
+	gcpIamUserSessionFacade = NewGcpIamUserAccountOauthSessionsFacade()
+	gcpIamUserSessionsBeforeUpdate = []GcpIamUserAccountOauthSession{}
+	gcpIamUserSessionsAfterUpdate = []GcpIamUserAccountOauthSession{}
 }
 
-func TestGetSessions(t *testing.T) {
+func TestGcpIamUserSessionFacade_GetSessions(t *testing.T) {
 	gcpIamUserAccountOauthSessionFacadeSetup()
 
 	newSessions := []GcpIamUserAccountOauthSession{{Id: "id"}}
-	facade.gcpIamUserAccountOauthSessions = newSessions
+	gcpIamUserSessionFacade.gcpIamUserAccountOauthSessions = newSessions
 
-	if !reflect.DeepEqual(facade.GetSessions(), newSessions) {
+	if !reflect.DeepEqual(gcpIamUserSessionFacade.GetSessions(), newSessions) {
 		t.Errorf("unexpected sessions")
 	}
 }
 
-func TestSetSessions(t *testing.T) {
+func TestGcpIamUserSessionFacade_SetSessions(t *testing.T) {
 	gcpIamUserAccountOauthSessionFacadeSetup()
 
 	newSessions := []GcpIamUserAccountOauthSession{{Id: "id"}}
-	facade.SetSessions(newSessions)
+	gcpIamUserSessionFacade.SetSessions(newSessions)
 
-	if !reflect.DeepEqual(facade.gcpIamUserAccountOauthSessions, newSessions) {
+	if !reflect.DeepEqual(gcpIamUserSessionFacade.gcpIamUserAccountOauthSessions, newSessions) {
 		t.Errorf("unexpected sessions")
 	}
 }
 
-func TestAddSession(t *testing.T) {
+func TestGcpIamUserSessionFacade_AddSession(t *testing.T) {
 	gcpIamUserAccountOauthSessionFacadeSetup()
-	facade.Subscribe(FakeObserver{})
+	gcpIamUserSessionFacade.Subscribe(FakeGcpIamUserSessionObserver{})
 
 	newSession := GcpIamUserAccountOauthSession{Id: "id"}
-	facade.AddSession(newSession)
+	gcpIamUserSessionFacade.AddSession(newSession)
 
-	if !reflect.DeepEqual(sessionsBeforeUpdate, []GcpIamUserAccountOauthSession{}) {
+	if !reflect.DeepEqual(gcpIamUserSessionsBeforeUpdate, []GcpIamUserAccountOauthSession{}) {
 		t.Errorf("sessions were not empty")
 	}
 
-	if !reflect.DeepEqual(sessionsAfterUpdate, []GcpIamUserAccountOauthSession{newSession}) {
+	if !reflect.DeepEqual(gcpIamUserSessionsAfterUpdate, []GcpIamUserAccountOauthSession{newSession}) {
 		t.Errorf("unexpected session")
 	}
 }
 
-func TestAddSession_alreadyExistentId(t *testing.T) {
+func TestGcpIamUserSessionFacade_AddSession_alreadyExistentId(t *testing.T) {
 	gcpIamUserAccountOauthSessionFacadeSetup()
-	facade.Subscribe(FakeObserver{})
+	gcpIamUserSessionFacade.Subscribe(FakeGcpIamUserSessionObserver{})
 
 	newSession := GcpIamUserAccountOauthSession{Id: "ID"}
-	facade.gcpIamUserAccountOauthSessions = []GcpIamUserAccountOauthSession{newSession}
+	gcpIamUserSessionFacade.gcpIamUserAccountOauthSessions = []GcpIamUserAccountOauthSession{newSession}
 
-	err := facade.AddSession(newSession)
+	err := gcpIamUserSessionFacade.AddSession(newSession)
 	test.ExpectHttpError(t, err, http.StatusConflict, "a session with id ID is already present")
 
-	if len(sessionsBeforeUpdate) > 0 || len(sessionsAfterUpdate) > 0 {
+	if len(gcpIamUserSessionsBeforeUpdate) > 0 || len(gcpIamUserSessionsAfterUpdate) > 0 {
 		t.Errorf("sessions was unexpectedly changed")
 	}
 }
 
-func TestAddSession_alreadyExistentName(t *testing.T) {
+func TestGcpIamUserSessionFacade_AddSession_alreadyExistentName(t *testing.T) {
 	gcpIamUserAccountOauthSessionFacadeSetup()
-	facade.Subscribe(FakeObserver{})
+	gcpIamUserSessionFacade.Subscribe(FakeGcpIamUserSessionObserver{})
 
-	facade.gcpIamUserAccountOauthSessions = []GcpIamUserAccountOauthSession{{Id: "1", Name: "NAME"}}
+	gcpIamUserSessionFacade.gcpIamUserAccountOauthSessions = []GcpIamUserAccountOauthSession{{Id: "1", Name: "NAME"}}
 
-	err := facade.AddSession(GcpIamUserAccountOauthSession{Id: "2", Name: "NAME"})
+	err := gcpIamUserSessionFacade.AddSession(GcpIamUserAccountOauthSession{Id: "2", Name: "NAME"})
 	test.ExpectHttpError(t, err, http.StatusConflict, "a session named NAME is already present")
 
-	if len(sessionsBeforeUpdate) > 0 || len(sessionsAfterUpdate) > 0 {
+	if len(gcpIamUserSessionsBeforeUpdate) > 0 || len(gcpIamUserSessionsAfterUpdate) > 0 {
 		t.Errorf("sessions was unexpectedly changed")
 	}
 }
 
-func TestRemoveSession(t *testing.T) {
+func TestGcpIamUserSessionFacade_RemoveSession(t *testing.T) {
 	gcpIamUserAccountOauthSessionFacadeSetup()
-	facade.Subscribe(FakeObserver{})
+	gcpIamUserSessionFacade.Subscribe(FakeGcpIamUserSessionObserver{})
 
 	session1 := GcpIamUserAccountOauthSession{Id: "ID1"}
 	session2 := GcpIamUserAccountOauthSession{Id: "ID2"}
-	facade.gcpIamUserAccountOauthSessions = []GcpIamUserAccountOauthSession{session1, session2}
+	gcpIamUserSessionFacade.gcpIamUserAccountOauthSessions = []GcpIamUserAccountOauthSession{session1, session2}
 
-	facade.RemoveSession("ID1")
+	gcpIamUserSessionFacade.RemoveSession("ID1")
 
-	if !reflect.DeepEqual(sessionsBeforeUpdate, []GcpIamUserAccountOauthSession{session1, session2}) {
+	if !reflect.DeepEqual(gcpIamUserSessionsBeforeUpdate, []GcpIamUserAccountOauthSession{session1, session2}) {
 		t.Errorf("unexpected session")
 	}
 
-	if !reflect.DeepEqual(sessionsAfterUpdate, []GcpIamUserAccountOauthSession{session2}) {
+	if !reflect.DeepEqual(gcpIamUserSessionsAfterUpdate, []GcpIamUserAccountOauthSession{session2}) {
 		t.Errorf("sessions were not empty")
 	}
 }
 
-func TestRemoveSession_notFound(t *testing.T) {
+func TestGcpIamUserSessionFacade_RemoveSession_notFound(t *testing.T) {
 	gcpIamUserAccountOauthSessionFacadeSetup()
-	facade.Subscribe(FakeObserver{})
+	gcpIamUserSessionFacade.Subscribe(FakeGcpIamUserSessionObserver{})
 
-	err := facade.RemoveSession("ID")
+	err := gcpIamUserSessionFacade.RemoveSession("ID")
 	test.ExpectHttpError(t, err, http.StatusNotFound, "session with id ID not found")
 
-	if len(sessionsBeforeUpdate) > 0 || len(sessionsAfterUpdate) > 0 {
+	if len(gcpIamUserSessionsBeforeUpdate) > 0 || len(gcpIamUserSessionsAfterUpdate) > 0 {
 		t.Errorf("sessions was unexpectedly changed")
 	}
 }
 
-func TestStartSession(t *testing.T) {
+func TestGcpIamUserSessionFacade_StartSession(t *testing.T) {
 	gcpIamUserAccountOauthSessionFacadeSetup()
-	facade.Subscribe(FakeObserver{})
+	gcpIamUserSessionFacade.Subscribe(FakeGcpIamUserSessionObserver{})
 
 	newSession := GcpIamUserAccountOauthSession{Id: "ID", Status: NotActive}
-	facade.gcpIamUserAccountOauthSessions = []GcpIamUserAccountOauthSession{newSession}
+	gcpIamUserSessionFacade.gcpIamUserAccountOauthSessions = []GcpIamUserAccountOauthSession{newSession}
 
-	facade.StartSession("ID", "start-time")
+	gcpIamUserSessionFacade.StartSession("ID", "start-time")
 
-	if !reflect.DeepEqual(sessionsBeforeUpdate, []GcpIamUserAccountOauthSession{newSession}) {
+	if !reflect.DeepEqual(gcpIamUserSessionsBeforeUpdate, []GcpIamUserAccountOauthSession{newSession}) {
 		t.Errorf("unexpected session")
 	}
 
-	if !reflect.DeepEqual(sessionsAfterUpdate, []GcpIamUserAccountOauthSession{{Id: "ID", Status: Active, StartTime: "start-time"}}) {
+	if !reflect.DeepEqual(gcpIamUserSessionsAfterUpdate, []GcpIamUserAccountOauthSession{{Id: "ID", Status: Active, StartTime: "start-time"}}) {
 		t.Errorf("sessions were not updated")
 	}
 }
 
-func TestStartSession_notFound(t *testing.T) {
+func TestGcpIamUserSessionFacade_StartSession_notFound(t *testing.T) {
 	gcpIamUserAccountOauthSessionFacadeSetup()
-	facade.Subscribe(FakeObserver{})
+	gcpIamUserSessionFacade.Subscribe(FakeGcpIamUserSessionObserver{})
 
-	err := facade.StartSession("ID", "start-time")
+	err := gcpIamUserSessionFacade.StartSession("ID", "start-time")
 	test.ExpectHttpError(t, err, http.StatusNotFound, "session with id ID not found")
 
-	if len(sessionsBeforeUpdate) > 0 || len(sessionsAfterUpdate) > 0 {
+	if len(gcpIamUserSessionsBeforeUpdate) > 0 || len(gcpIamUserSessionsAfterUpdate) > 0 {
 		t.Errorf("sessions was unexpectedly changed")
 	}
 }
 
-func TestStopSession(t *testing.T) {
+func TestGcpIamUserSessionFacade_StopSession(t *testing.T) {
 	gcpIamUserAccountOauthSessionFacadeSetup()
-	facade.Subscribe(FakeObserver{})
+	gcpIamUserSessionFacade.Subscribe(FakeGcpIamUserSessionObserver{})
 
 	newSession := GcpIamUserAccountOauthSession{Id: "ID", Status: Active}
-	facade.gcpIamUserAccountOauthSessions = []GcpIamUserAccountOauthSession{newSession}
+	gcpIamUserSessionFacade.gcpIamUserAccountOauthSessions = []GcpIamUserAccountOauthSession{newSession}
 
-	facade.StopSession("ID", "stop-time")
+	gcpIamUserSessionFacade.StopSession("ID", "stop-time")
 
-	if !reflect.DeepEqual(sessionsBeforeUpdate, []GcpIamUserAccountOauthSession{newSession}) {
+	if !reflect.DeepEqual(gcpIamUserSessionsBeforeUpdate, []GcpIamUserAccountOauthSession{newSession}) {
 		t.Errorf("unexpected session")
 	}
 
-	if !reflect.DeepEqual(sessionsAfterUpdate, []GcpIamUserAccountOauthSession{{Id: "ID", Status: NotActive, LastStopTime: "stop-time"}}) {
+	if !reflect.DeepEqual(gcpIamUserSessionsAfterUpdate, []GcpIamUserAccountOauthSession{{Id: "ID", Status: NotActive, LastStopTime: "stop-time"}}) {
 		t.Errorf("sessions were not updated")
 	}
 }
 
-func TestStopSession_notFound(t *testing.T) {
+func TestGcpIamUserSessionFacade_StopSession_notFound(t *testing.T) {
 	gcpIamUserAccountOauthSessionFacadeSetup()
-	facade.Subscribe(FakeObserver{})
+	gcpIamUserSessionFacade.Subscribe(FakeGcpIamUserSessionObserver{})
 
-	err := facade.StopSession("ID", "stop-time")
+	err := gcpIamUserSessionFacade.StopSession("ID", "stop-time")
 	test.ExpectHttpError(t, err, http.StatusNotFound, "session with id ID not found")
 
-	if len(sessionsBeforeUpdate) > 0 || len(sessionsAfterUpdate) > 0 {
+	if len(gcpIamUserSessionsBeforeUpdate) > 0 || len(gcpIamUserSessionsAfterUpdate) > 0 {
 		t.Errorf("sessions was unexpectedly changed")
 	}
 }
 
-func TestEditSession(t *testing.T) {
+func TestGcpIamUserSessionFacade_EditSession(t *testing.T) {
 	gcpIamUserAccountOauthSessionFacadeSetup()
-	facade.Subscribe(FakeObserver{})
+	gcpIamUserSessionFacade.Subscribe(FakeGcpIamUserSessionObserver{})
 
 	session1 := GcpIamUserAccountOauthSession{Id: "ID1", Name: "Name1", ProjectName: "Project1"}
 	session2 := GcpIamUserAccountOauthSession{Id: "ID2", Name: "Name2", ProjectName: "Project2"}
-	facade.gcpIamUserAccountOauthSessions = []GcpIamUserAccountOauthSession{session1, session2}
+	gcpIamUserSessionFacade.gcpIamUserAccountOauthSessions = []GcpIamUserAccountOauthSession{session1, session2}
 
-	facade.EditSession("ID1", "NewName", "NewProject")
+	gcpIamUserSessionFacade.EditSession("ID1", "NewName", "NewProject")
 
-	if !reflect.DeepEqual(sessionsBeforeUpdate, []GcpIamUserAccountOauthSession{session1, session2}) {
+	if !reflect.DeepEqual(gcpIamUserSessionsBeforeUpdate, []GcpIamUserAccountOauthSession{session1, session2}) {
 		t.Errorf("unexpected session")
 	}
 
-	if !reflect.DeepEqual(sessionsAfterUpdate, []GcpIamUserAccountOauthSession{
+	if !reflect.DeepEqual(gcpIamUserSessionsAfterUpdate, []GcpIamUserAccountOauthSession{
 		{Id: "ID1", Name: "NewName", ProjectName: "NewProject"}, session2}) {
 		t.Errorf("sessions were not updated")
 	}
 }
 
-func TestEditSession_DuplicateSessionNameAttempt(t *testing.T) {
+func TestGcpIamUserSessionFacade_EditSession_DuplicateSessionNameAttempt(t *testing.T) {
 	gcpIamUserAccountOauthSessionFacadeSetup()
-	facade.Subscribe(FakeObserver{})
+	gcpIamUserSessionFacade.Subscribe(FakeGcpIamUserSessionObserver{})
 
 	session1 := GcpIamUserAccountOauthSession{Id: "ID1", Name: "Name1", ProjectName: "Project1"}
 	session2 := GcpIamUserAccountOauthSession{Id: "ID2", Name: "Name2", ProjectName: "Project2"}
-	facade.gcpIamUserAccountOauthSessions = []GcpIamUserAccountOauthSession{session1, session2}
+	gcpIamUserSessionFacade.gcpIamUserAccountOauthSessions = []GcpIamUserAccountOauthSession{session1, session2}
 
-	err := facade.EditSession("ID1", "Name2", "NewProject")
+	err := gcpIamUserSessionFacade.EditSession("ID1", "Name2", "NewProject")
 	test.ExpectHttpError(t, err, http.StatusConflict, "a session named Name2 is already present")
 
-	err = facade.EditSession("ID2", "Name1", "NewProject")
+	err = gcpIamUserSessionFacade.EditSession("ID2", "Name1", "NewProject")
 	test.ExpectHttpError(t, err, http.StatusConflict, "a session named Name1 is already present")
 }
 
-func TestEditSession_notFound(t *testing.T) {
+func TestGcpIamUserSessionFacade_EditSession_notFound(t *testing.T) {
 	gcpIamUserAccountOauthSessionFacadeSetup()
-	facade.Subscribe(FakeObserver{})
+	gcpIamUserSessionFacade.Subscribe(FakeGcpIamUserSessionObserver{})
 
-	err := facade.EditSession("ID", "", "")
+	err := gcpIamUserSessionFacade.EditSession("ID", "", "")
 	test.ExpectHttpError(t, err, http.StatusNotFound, "session with id ID not found")
 
-	if len(sessionsBeforeUpdate) > 0 || len(sessionsAfterUpdate) > 0 {
+	if len(gcpIamUserSessionsBeforeUpdate) > 0 || len(gcpIamUserSessionsAfterUpdate) > 0 {
 		t.Errorf("sessions was unexpectedly changed")
 	}
 }
 
-type FakeObserver struct {
+type FakeGcpIamUserSessionObserver struct {
 }
 
-func (observer FakeObserver) UpdateGcpIamUserAccountOauthSessions(oldSessions []GcpIamUserAccountOauthSession, newSessions []GcpIamUserAccountOauthSession) {
-	sessionsBeforeUpdate = oldSessions
-	sessionsAfterUpdate = newSessions
+func (observer FakeGcpIamUserSessionObserver) UpdateGcpIamUserAccountOauthSessions(oldSessions []GcpIamUserAccountOauthSession, newSessions []GcpIamUserAccountOauthSession) {
+	gcpIamUserSessionsBeforeUpdate = oldSessions
+	gcpIamUserSessionsAfterUpdate = newSessions
 }
