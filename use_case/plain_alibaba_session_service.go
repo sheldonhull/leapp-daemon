@@ -93,7 +93,7 @@ func (service *PlainAlibabaSessionService) Update(id string, alias string, regio
 	if err != nil {
 		return http_error.NewInternalServerError(err)
 	}
-	
+
 	plainAlibabaAccount := session.PlainAlibabaAccount{
 		Region:         regionName,
 		NamedProfileId: oldSess.Account.NamedProfileId,
@@ -110,6 +110,10 @@ func (service *PlainAlibabaSessionService) Update(id string, alias string, regio
 	if err != nil {
 		return http_error.NewInternalServerError(err)
 	}
+
+	oldNamedProfile := named_profile.GetNamedProfilesFacade().GetNamedProfileById(oldSess.Account.NamedProfileId)
+	oldNamedProfile.Name = profileName
+	named_profile.GetNamedProfilesFacade().UpdateNamedProfileName(oldNamedProfile)
 
 	err = service.Keychain.SetSecret(alibabaAccessKeyId, sess.Id+constant.PlainAlibabaKeyIdSuffix)
 	if err != nil {
