@@ -17,7 +17,7 @@ type FederatedAlibabaSessionService struct {
 }
 
 // TODO: mettere da qualche parte questa funzione
-func SAMLAuth(region string, idpArn string, roleArn string, assertion string) (key string, secret string, token string) {
+func SAMLAuth(region string, idpArn string, roleArn string, assertion string) (key string, secret string, token string, err error) {
 	// I'm using this since NewClient() method returns a panic saying literally "not support yet"
 	// This method actually never use the credentials so I placed 2 placeholders
 	client, _ := sts.NewClientWithAccessKey(region, "", "")
@@ -29,15 +29,8 @@ func SAMLAuth(region string, idpArn string, roleArn string, assertion string) (k
 	request.SAMLAssertion = assertion
 	response, err := client.AssumeRoleWithSAML(request)
 	if err != nil {
-		fmt.Print(err.Error())
+		return "", "", "", err
 	}
-	/*
-		fmt.Println("Response")
-		fmt.Printf("AcessKey ID: %v\n", response.Credentials.AccessKeyId)
-		fmt.Printf("AcessKey Secret: %v\n", response.Credentials.AccessKeySecret)
-		fmt.Printf("STS Token: %v\n", response.Credentials.SecurityToken)
-		fmt.Printf("Expiration: %v\n\n", response.Credentials.Expiration)
-	*/
 	key = response.Credentials.AccessKeyId
 	secret = response.Credentials.AccessKeySecret
 	token = response.Credentials.SecurityToken
