@@ -129,8 +129,14 @@ func (service *PlainAlibabaSessionService) Update(id string, alias string, regio
 }
 
 func (service *PlainAlibabaSessionService) Delete(sessionId string) error {
+	oldSess, err := session.GetPlainAlibabaSessionsFacade().GetSessionById(sessionId)
+	if err != nil {
+		return http_error.NewInternalServerError(err)
+	}
+	oldNamedProfile := named_profile.GetNamedProfilesFacade().GetNamedProfileById(oldSess.Account.NamedProfileId)
+	named_profile.GetNamedProfilesFacade().DeleteNamedProfile(oldNamedProfile.Id)
 
-	err := session.GetPlainAlibabaSessionsFacade().RemoveSession(sessionId)
+	err = session.GetPlainAlibabaSessionsFacade().RemoveSession(sessionId)
 	if err != nil {
 		return http_error.NewInternalServerError(err)
 	}

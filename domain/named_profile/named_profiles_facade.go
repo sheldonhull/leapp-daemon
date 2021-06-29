@@ -100,6 +100,16 @@ func (fac *namedProfilesFacade) UpdateNamedProfileName(updatedProfile *NamedProf
 	}
 }
 
+func (fac *namedProfilesFacade) DeleteNamedProfile(id string) {
+	namedProfiles := fac.namedProfiles
+	for i, np := range namedProfiles {
+		if np.Id == id {
+			namedProfiles = append(namedProfiles[:i], namedProfiles[i+1:]...)
+			fac.updateState(namedProfiles)
+		}
+	}
+}
+
 func (fac *namedProfilesFacade) updateState(newState []NamedProfile) error {
 	oldNamedProfiles := fac.GetNamedProfiles()
 	fac.SetNamedProfiles(newState)
