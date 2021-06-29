@@ -94,7 +94,10 @@ func (service *FederatedAlibabaSessionService) Create(name string, accountNumber
 		return err
 	}
 
-	alibabaAccessKeyId, alibabaSecretAccessKey, alibabaStsToken := SAMLAuth(regionName, idpArn, roleArn, ssoUrl)
+	alibabaAccessKeyId, alibabaSecretAccessKey, alibabaStsToken, err := SAMLAuth(regionName, idpArn, roleArn, ssoUrl)
+	if err != nil {
+		return err
+	}
 
 	err = service.Keychain.SetSecret(alibabaAccessKeyId, sess.Id+"-federated-alibaba-session-access-key-id")
 	if err != nil {
