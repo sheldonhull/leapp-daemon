@@ -100,17 +100,17 @@ func (service *FederatedAlibabaSessionService) Create(name string, accountNumber
 		return err
 	}
 
-	err = service.Keychain.SetSecret(alibabaAccessKeyId, sess.Id+"-federated-alibaba-session-access-key-id")
+	err = service.Keychain.SetSecret(alibabaAccessKeyId, sess.Id+constant.FederatedAlibabaKeyIdSuffix)
 	if err != nil {
 		return http_error.NewInternalServerError(err)
 	}
 
-	err = service.Keychain.SetSecret(alibabaSecretAccessKey, sess.Id+"-federated-alibaba-session-secret-access-key")
+	err = service.Keychain.SetSecret(alibabaSecretAccessKey, sess.Id+constant.FederatedAlibabaSecretAccessKeySuffix)
 	if err != nil {
 		return http_error.NewInternalServerError(err)
 	}
 
-	err = service.Keychain.SetSecret(alibabaStsToken, sess.Id+"-federated-alibaba-session-sts-token")
+	err = service.Keychain.SetSecret(alibabaStsToken, sess.Id+constant.FederatedAlibabaStsTokenSuffix)
 	if err != nil {
 		return http_error.NewInternalServerError(err)
 	}
@@ -171,17 +171,17 @@ func (service *FederatedAlibabaSessionService) Update(id string, name string, ac
 		return err
 	}
 
-	err = service.Keychain.SetSecret(alibabaAccessKeyId, id+"-federated-alibaba-session-access-key-id")
+	err = service.Keychain.SetSecret(alibabaAccessKeyId, id+constant.FederatedAlibabaKeyIdSuffix)
 	if err != nil {
 		return http_error.NewInternalServerError(err)
 	}
 
-	err = service.Keychain.SetSecret(alibabaSecretAccessKey, id+"-federated-alibaba-session-secret-access-key")
+	err = service.Keychain.SetSecret(alibabaSecretAccessKey, id+constant.FederatedAlibabaSecretAccessKeySuffix)
 	if err != nil {
 		return http_error.NewInternalServerError(err)
 	}
 
-	err = service.Keychain.SetSecret(alibabaStsToken, id+"-federated-alibaba-session-sts-token")
+	err = service.Keychain.SetSecret(alibabaStsToken, id+constant.FederatedAlibabaStsTokenSuffix)
 	if err != nil {
 		return http_error.NewInternalServerError(err)
 	}
