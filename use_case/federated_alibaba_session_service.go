@@ -2,6 +2,7 @@ package use_case
 
 import (
 	"fmt"
+	"leapp_daemon/domain/constant"
 	"leapp_daemon/domain/named_profile"
 	"leapp_daemon/domain/region"
 	"leapp_daemon/domain/session"
@@ -121,12 +122,17 @@ func (service *FederatedAlibabaSessionService) Get(id string) (*session.Federate
 	return session.GetFederatedAlibabaSessionsFacade().GetSessionById(id)
 }
 
-func (service *FederatedAlibabaSessionService) Update(sessionId string, name string, accountNumber string, roleName string, roleArn string,
+func (service *FederatedAlibabaSessionService) Update(id string, name string, accountNumber string, roleName string, roleArn string,
 	idpArn string, regionName string, ssoUrl string, profileName string) error {
 
 	isRegionValid := region.IsAlibabaRegionValid(regionName)
 	if !isRegionValid {
 		return http_error.NewUnprocessableEntityError(fmt.Errorf("Region " + regionName + " not valid"))
+	}
+
+	oldSess, err := session.GetFederatedAlibabaSessionsFacade().GetSessionById(id)
+	if err != nil {
+		return http_error.NewInternalServerError(err)
 	}
 
 	federatedAlibabaRole := session.FederatedAlibabaRole{
@@ -141,24 +147,82 @@ func (service *FederatedAlibabaSessionService) Update(sessionId string, name str
 		IdpArn:        idpArn,
 		Region:        regionName,
 		/*SsoUrl:        ssoUrl,*/
-		NamedProfileId: profileName,
+		NamedProfileId: oldSess.Account.NamedProfileId,
 	}
 
 	sess := session.FederatedAlibabaSession{
-		Id:      sessionId,
+		Id:      id,
 		Status:  session.NotActive,
 		Account: &federatedAlibabaAccount,
 		Profile: profileName,
 	}
 
-	session.GetFederatedAlibabaSessionsFacade().SetSessionById(sess)
+	err = session.GetFederatedAlibabaSessionsFacade().UpdateSession(sess)
+	if err != nil {
+		return http_error.NewInternalServerError(err)
+	}
+
+	oldNamedProfile := named_profile.GetNamedProfilesFacade().GetNamedProfileById(oldSess.Account.NamedProfileId)
+	oldNamedProfile.Name = profileName
+	named_profile.GetNamedProfilesFacade().UpdateNamedProfileName(oldNamedProfile)
+
+	alibabaAccessKeyId, alibabaSecretAccessKey, alibabaStsToken, err := SAMLAuth(regionName, idpArn, roleArn, ssoUrl)
+	if err != nil {
+		return err
+	}
+
+	err = service.Keychain.SetSecret(alibabaAccessKeyId, id+"-federated-alibaba-session-access-key-id")
+	if err != nil {
+		return http_error.NewInternalServerError(err)
+	}
+
+	err = service.Keychain.SetSecret(alibabaSecretAccessKey, id+"-federated-alibaba-session-secret-access-key")
+	if err != nil {
+		return http_error.NewInternalServerError(err)
+	}
+
+	err = service.Keychain.SetSecret(alibabaStsToken, id+"-federated-alibaba-session-sts-token")
+	if err != nil {
+		return http_error.NewInternalServerError(err)
+	}
+
 	return nil
 }
 
 func (service *FederatedAlibabaSessionService) Delete(sessionId string) error {
-	err := session.GetFederatedAlibabaSessionsFacade().RemoveSession(sessionId)
+	sess, err := session.GetFederatedAlibabaSessionsFacade().GetSessionById(sessionId)
 	if err != nil {
 		return http_error.NewInternalServerError(err)
+	}
+
+	if sess.Status != session.NotActive {
+		err = service.Stop(sessionId)
+		if err != nil {
+			return err
+		}
+	}
+
+	oldNamedProfile := named_profile.GetNamedProfilesFacade().GetNamedProfileById(sess.Account.NamedProfileId)
+	named_profile.GetNamedProfilesFacade().DeleteNamedProfile(oldNamedProfile.Id)
+
+	err = session.GetFederatedAlibabaSessionsFacade().RemoveSession(sessionId)
+	if err != nil {
+		return http_error.NewInternalServerError(err)
+	}
+
+	err = service.Keychain.DeleteSecret(sessionId + constant.FederatedAlibabaKeyIdSuffix)
+	if err != nil {
+		return err
+	}
+
+	err = service.Keychain.DeleteSecret(sessionId + constant.FederatedAlibabaSecretAccessKeySuffix)
+	if err != nil {
+		return err
+	}
+
+	err = service.Keychain.DeleteSecret(sessionId + constant.FederatedAlibabaStsTokenSuffix)
+	if err != nil {
+		return err
 	}
 	return nil
 }

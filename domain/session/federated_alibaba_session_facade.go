@@ -50,6 +50,17 @@ func (fac *federatedAlibabaSessionsFacade) SetSessions(newFederatedAlibabaSessio
 	return nil
 }
 
+func (fac *federatedAlibabaSessionsFacade) UpdateSession(newSession FederatedAlibabaSession) error {
+	allSessions := fac.GetSessions()
+	for i, federatedAlibabaSession := range allSessions {
+		if federatedAlibabaSession.Id == newSession.Id {
+			allSessions[i] = newSession
+		}
+	}
+	err := fac.SetSessions(allSessions)
+	return err
+}
+
 func (fac *federatedAlibabaSessionsFacade) AddSession(federatedAlibabaSession FederatedAlibabaSession) error {
 	federatedAlibabaSessionsLock.Lock()
 	defer federatedAlibabaSessionsLock.Unlock()
