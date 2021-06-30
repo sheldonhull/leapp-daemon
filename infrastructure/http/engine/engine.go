@@ -6,7 +6,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"leapp_daemon/infrastructure/http/middleware"
 	"leapp_daemon/infrastructure/logging"
-	"leapp_daemon/interface/http/controller"
+	"leapp_daemon/interface/http_controller"
 	"leapp_daemon/providers"
 )
 
@@ -53,7 +53,7 @@ func (engineWrapper *engineWrapper) Serve(port int) {
 }
 
 func initializeRoutes(ginEngine *gin.Engine, providers *providers.Providers) {
-	contr := controller.EngineController{Providers: providers}
+	contr := http_controller.EngineController{Providers: providers}
 
 	v1 := ginEngine.Group("/api/v1")
 	{
@@ -66,9 +66,9 @@ func initializeRoutes(ginEngine *gin.Engine, providers *providers.Providers) {
 		v1.PUT("aws/sessions/:id/region", contr.EditAwsRegion)
 
 		// AWS IAM User sessions
-		v1.GET("aws/iam-user-sessions/:id", contr.GetAwsIamUserSession)
 		v1.POST("aws/iam-user-sessions", contr.CreateAwsIamUserSession)
-		v1.PUT("aws/iam-user-sessions/:id", contr.UpdateAwsIamUserSession)
+		v1.PUT("aws/iam-user-sessions/:id", contr.EditAwsIamUserSession)
+		v1.GET("aws/iam-user-sessions/:id", contr.GetAwsIamUserSession)
 		v1.DELETE("aws/iam-user-sessions/:id", contr.DeleteAwsIamUserSession)
 		v1.POST("aws/iam-user-sessions/:id/confirm-mfa-token", contr.ConfirmMfaToken)
 		v1.POST("aws/iam-user-sessions/:id/start", contr.StartAwsIamUserSession)

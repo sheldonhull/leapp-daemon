@@ -1,7 +1,8 @@
 package use_case
 
 import (
-	"leapp_daemon/domain/session"
+	"leapp_daemon/domain/aws"
+	"leapp_daemon/domain/aws/aws_iam_user"
 	"leapp_daemon/infrastructure/logging"
 	"leapp_daemon/interface/repository"
 )
@@ -12,11 +13,11 @@ type AwsCredentialsApplier struct {
 	AwsConfigurationRepository AwsConfigurationRepository
 }
 
-func (applier *AwsCredentialsApplier) UpdateAwsIamUserSessions(oldSessions []session.AwsIamUserSession, newSessions []session.AwsIamUserSession) {
+func (applier *AwsCredentialsApplier) UpdateAwsIamUserSessions(oldSessions []aws_iam_user.AwsIamUserSession, newSessions []aws_iam_user.AwsIamUserSession) {
 
 	activeCredentials := make([]repository.AwsTempCredentials, 0)
 	for _, newSession := range newSessions {
-		if newSession.Status != session.Active {
+		if newSession.Status != aws.Active {
 			continue
 		}
 

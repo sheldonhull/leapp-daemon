@@ -2,7 +2,8 @@ package use_case
 
 import (
 	"golang.org/x/oauth2"
-	"leapp_daemon/domain/session"
+	"leapp_daemon/domain/gcp"
+	"leapp_daemon/domain/gcp/gcp_iam_user_account_oauth"
 	"leapp_daemon/test"
 	"leapp_daemon/test/mock"
 	"net/http"
@@ -49,7 +50,7 @@ func gcpIamUserAccountOauthSessionActionsVerifyExpectedCalls(t *testing.T, gcpAp
 func TestGetSession(t *testing.T) {
 	gcpIamUserAccountOauthSessionActionsSetup()
 
-	session := session.GcpIamUserAccountOauthSession{Name: "test_session"}
+	session := gcp_iam_user_account_oauth.GcpIamUserAccountOauthSession{Name: "test_session"}
 	gcpIamUserAccountOauthSessionFacadeMock.ExpGetSessionById = session
 
 	actualSession, err := gcpIamUserAccountOauthSessionActions.GetSession("ID")
@@ -164,7 +165,7 @@ func TestCreateSession_FacadeAddSessionReturnsError(t *testing.T) {
 
 func TestStartSession_NoPreviousActiveSession(t *testing.T) {
 	gcpIamUserAccountOauthSessionActionsSetup()
-	gcpIamUserAccountOauthSessionFacadeMock.ExpGetSessions = []session.GcpIamUserAccountOauthSession{{Id: "ID2", Status: session.NotActive}}
+	gcpIamUserAccountOauthSessionFacadeMock.ExpGetSessions = []gcp_iam_user_account_oauth.GcpIamUserAccountOauthSession{{Id: "ID2", Status: gcp.NotActive}}
 	envMock.ExpTime = "start-time"
 	sessionId := "ID1"
 
@@ -177,7 +178,7 @@ func TestStartSession_NoPreviousActiveSession(t *testing.T) {
 
 func TestStartSession_PreviousActiveSessionDiffersFromNewActiveSession(t *testing.T) {
 	gcpIamUserAccountOauthSessionActionsSetup()
-	gcpIamUserAccountOauthSessionFacadeMock.ExpGetSessions = []session.GcpIamUserAccountOauthSession{{Id: "ID2", Status: session.Active}}
+	gcpIamUserAccountOauthSessionFacadeMock.ExpGetSessions = []gcp_iam_user_account_oauth.GcpIamUserAccountOauthSession{{Id: "ID2", Status: gcp.Active}}
 	envMock.ExpTime = "start-time"
 	sessionId := "ID1"
 
@@ -190,7 +191,7 @@ func TestStartSession_PreviousActiveSessionDiffersFromNewActiveSession(t *testin
 
 func TestStartSession_SessionWasAlreadyActive(t *testing.T) {
 	gcpIamUserAccountOauthSessionActionsSetup()
-	gcpIamUserAccountOauthSessionFacadeMock.ExpGetSessions = []session.GcpIamUserAccountOauthSession{{Id: "ID1", Status: session.Active}}
+	gcpIamUserAccountOauthSessionFacadeMock.ExpGetSessions = []gcp_iam_user_account_oauth.GcpIamUserAccountOauthSession{{Id: "ID1", Status: gcp.Active}}
 	envMock.ExpTime = "start-time"
 	sessionId := "ID1"
 
@@ -203,7 +204,7 @@ func TestStartSession_SessionWasAlreadyActive(t *testing.T) {
 
 func TestStartSession_PreviousActiveSessionDifferentAndFacadeSetSessionStatusReturnsError(t *testing.T) {
 	gcpIamUserAccountOauthSessionActionsSetup()
-	gcpIamUserAccountOauthSessionFacadeMock.ExpGetSessions = []session.GcpIamUserAccountOauthSession{{Id: "ID2", Status: session.Active}}
+	gcpIamUserAccountOauthSessionFacadeMock.ExpGetSessions = []gcp_iam_user_account_oauth.GcpIamUserAccountOauthSession{{Id: "ID2", Status: gcp.Active}}
 	gcpIamUserAccountOauthSessionFacadeMock.ExpErrorOnStopSession = true
 	envMock.ExpTime = "start-time"
 	sessionId := "ID1"
@@ -215,7 +216,7 @@ func TestStartSession_PreviousActiveSessionDifferentAndFacadeSetSessionStatusRet
 
 func TestStartSession_FacadeSetSessionStatusReturnsError(t *testing.T) {
 	gcpIamUserAccountOauthSessionActionsSetup()
-	gcpIamUserAccountOauthSessionFacadeMock.ExpGetSessions = []session.GcpIamUserAccountOauthSession{{Id: "ID2", Status: session.NotActive}}
+	gcpIamUserAccountOauthSessionFacadeMock.ExpGetSessions = []gcp_iam_user_account_oauth.GcpIamUserAccountOauthSession{{Id: "ID2", Status: gcp.NotActive}}
 	gcpIamUserAccountOauthSessionFacadeMock.ExpErrorOnStartSession = true
 	envMock.ExpTime = "start-time"
 	sessionId := "ID1"
@@ -250,7 +251,7 @@ func TestDeleteSession(t *testing.T) {
 	gcpIamUserAccountOauthSessionActionsSetup()
 	sessionId := "ID"
 	credentialsLabel := "credentialLabel"
-	gcpIamUserAccountOauthSessionFacadeMock.ExpGetSessionById = session.GcpIamUserAccountOauthSession{Id: "ID", CredentialsLabel: credentialsLabel}
+	gcpIamUserAccountOauthSessionFacadeMock.ExpGetSessionById = gcp_iam_user_account_oauth.GcpIamUserAccountOauthSession{Id: "ID", CredentialsLabel: credentialsLabel}
 
 	err := gcpIamUserAccountOauthSessionActions.DeleteSession(sessionId)
 	if err != nil {
@@ -273,7 +274,7 @@ func TestDeleteSession_KeychainDeleteSecretReturnsError(t *testing.T) {
 	gcpIamUserAccountOauthSessionActionsSetup()
 	sessionId := "ID"
 	credentialsLabel := "credentialLabel"
-	gcpIamUserAccountOauthSessionFacadeMock.ExpGetSessionById = session.GcpIamUserAccountOauthSession{Id: "ID", CredentialsLabel: credentialsLabel}
+	gcpIamUserAccountOauthSessionFacadeMock.ExpGetSessionById = gcp_iam_user_account_oauth.GcpIamUserAccountOauthSession{Id: "ID", CredentialsLabel: credentialsLabel}
 	gcpIamUserAccountOauthSessionActionsKeychainMock.ExpErrorOnDeleteSecret = true
 
 	err := gcpIamUserAccountOauthSessionActions.DeleteSession(sessionId)
@@ -287,7 +288,7 @@ func TestDeleteSession_FacadeRemoveSessionReturnsError(t *testing.T) {
 	gcpIamUserAccountOauthSessionActionsSetup()
 	sessionId := "ID"
 	credentialsLabel := "credentialLabel"
-	gcpIamUserAccountOauthSessionFacadeMock.ExpGetSessionById = session.GcpIamUserAccountOauthSession{Id: "ID", CredentialsLabel: credentialsLabel}
+	gcpIamUserAccountOauthSessionFacadeMock.ExpGetSessionById = gcp_iam_user_account_oauth.GcpIamUserAccountOauthSession{Id: "ID", CredentialsLabel: credentialsLabel}
 	gcpIamUserAccountOauthSessionFacadeMock.ExpErrorOnRemoveSession = true
 
 	err := gcpIamUserAccountOauthSessionActions.DeleteSession(sessionId)

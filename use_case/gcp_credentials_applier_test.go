@@ -1,7 +1,8 @@
 package use_case
 
 import (
-	"leapp_daemon/domain/session"
+	"leapp_daemon/domain/gcp"
+	"leapp_daemon/domain/gcp/gcp_iam_user_account_oauth"
 	"leapp_daemon/test/mock"
 	"reflect"
 	"testing"
@@ -40,8 +41,8 @@ func gcpCredentialsApplierVerifyExpectedCalls(t *testing.T, keychainMockCalls []
 
 func TestUpdateGcpIamUserAccountOauthSessions_OldActiveSessionAndNoNewActiveSessions(t *testing.T) {
 	gcpCredentialsApplierSetup()
-	oldSessions := []session.GcpIamUserAccountOauthSession{{Status: session.Active}}
-	newSessions := []session.GcpIamUserAccountOauthSession{}
+	oldSessions := []gcp_iam_user_account_oauth.GcpIamUserAccountOauthSession{{Status: gcp.Active}}
+	newSessions := []gcp_iam_user_account_oauth.GcpIamUserAccountOauthSession{}
 
 	gcpCredentialsApplier.UpdateGcpIamUserAccountOauthSessions(oldSessions, newSessions)
 	gcpCredentialsApplierVerifyExpectedCalls(t, []string{}, expectedDeactivationCalls)
@@ -50,9 +51,9 @@ func TestUpdateGcpIamUserAccountOauthSessions_OldActiveSessionAndNoNewActiveSess
 func TestUpdateGcpIamUserAccountOauthSessions_OldAndNewActiveSessionWithDifferentIds(t *testing.T) {
 	gcpCredentialsApplierSetup()
 	keychainMock.ExpGetSecret = "credentials"
-	oldSessions := []session.GcpIamUserAccountOauthSession{{Id: "ID1", Status: session.Active}}
-	newSessions := []session.GcpIamUserAccountOauthSession{{Id: "ID2", CredentialsLabel: "credentialsLabel", AccountId: "accountId",
-		Name: "sessionName", ProjectName: "projectName", Status: session.Active}}
+	oldSessions := []gcp_iam_user_account_oauth.GcpIamUserAccountOauthSession{{Id: "ID1", Status: gcp.Active}}
+	newSessions := []gcp_iam_user_account_oauth.GcpIamUserAccountOauthSession{{Id: "ID2", CredentialsLabel: "credentialsLabel", AccountId: "accountId",
+		Name: "sessionName", ProjectName: "projectName", Status: gcp.Active}}
 
 	gcpCredentialsApplier.UpdateGcpIamUserAccountOauthSessions(oldSessions, newSessions)
 	expectedRepositoryCalls := append(expectedDeactivationCalls, expectedActivationCalls...)
@@ -61,8 +62,8 @@ func TestUpdateGcpIamUserAccountOauthSessions_OldAndNewActiveSessionWithDifferen
 
 func TestUpdateGcpIamUserAccountOauthSessions_OldAndNewActiveSessionAreEqual(t *testing.T) {
 	gcpCredentialsApplierSetup()
-	oldSessions := []session.GcpIamUserAccountOauthSession{{Id: "ID1", Status: session.Active}}
-	newSessions := []session.GcpIamUserAccountOauthSession{{Id: "ID1", Status: session.Active}}
+	oldSessions := []gcp_iam_user_account_oauth.GcpIamUserAccountOauthSession{{Id: "ID1", Status: gcp.Active}}
+	newSessions := []gcp_iam_user_account_oauth.GcpIamUserAccountOauthSession{{Id: "ID1", Status: gcp.Active}}
 
 	gcpCredentialsApplier.UpdateGcpIamUserAccountOauthSessions(oldSessions, newSessions)
 	gcpCredentialsApplierVerifyExpectedCalls(t, []string{}, []string{})
@@ -71,10 +72,10 @@ func TestUpdateGcpIamUserAccountOauthSessions_OldAndNewActiveSessionAreEqual(t *
 func TestUpdateGcpIamUserAccountOauthSessions_OldAndNewActiveSessionWithSameIdsButDifferentParams(t *testing.T) {
 	gcpCredentialsApplierSetup()
 	keychainMock.ExpGetSecret = "credentials"
-	oldSessions := []session.GcpIamUserAccountOauthSession{{Id: "ID1", CredentialsLabel: "credentialsLabel", AccountId: "accountId",
-		Name: "sessionName", ProjectName: "oldProjectName", Status: session.Active}}
-	newSessions := []session.GcpIamUserAccountOauthSession{{Id: "ID1", CredentialsLabel: "credentialsLabel", AccountId: "accountId",
-		Name: "sessionName", ProjectName: "projectName", Status: session.Active}}
+	oldSessions := []gcp_iam_user_account_oauth.GcpIamUserAccountOauthSession{{Id: "ID1", CredentialsLabel: "credentialsLabel", AccountId: "accountId",
+		Name: "sessionName", ProjectName: "oldProjectName", Status: gcp.Active}}
+	newSessions := []gcp_iam_user_account_oauth.GcpIamUserAccountOauthSession{{Id: "ID1", CredentialsLabel: "credentialsLabel", AccountId: "accountId",
+		Name: "sessionName", ProjectName: "projectName", Status: gcp.Active}}
 
 	gcpCredentialsApplier.UpdateGcpIamUserAccountOauthSessions(oldSessions, newSessions)
 	gcpCredentialsApplierVerifyExpectedCalls(t, []string{"GetSecret(credentialsLabel)"}, expectedActivationCalls)
@@ -83,9 +84,9 @@ func TestUpdateGcpIamUserAccountOauthSessions_OldAndNewActiveSessionWithSameIdsB
 func TestUpdateGcpIamUserAccountOauthSessions_NoOldActiveSessionButNewActiveSessionPresent(t *testing.T) {
 	gcpCredentialsApplierSetup()
 	keychainMock.ExpGetSecret = "credentials"
-	oldSessions := []session.GcpIamUserAccountOauthSession{{Id: "ID1", Status: session.NotActive}}
-	newSessions := []session.GcpIamUserAccountOauthSession{{Id: "ID1", CredentialsLabel: "credentialsLabel", AccountId: "accountId",
-		Name: "sessionName", ProjectName: "projectName", Status: session.Active}}
+	oldSessions := []gcp_iam_user_account_oauth.GcpIamUserAccountOauthSession{{Id: "ID1", Status: gcp.NotActive}}
+	newSessions := []gcp_iam_user_account_oauth.GcpIamUserAccountOauthSession{{Id: "ID1", CredentialsLabel: "credentialsLabel", AccountId: "accountId",
+		Name: "sessionName", ProjectName: "projectName", Status: gcp.Active}}
 
 	gcpCredentialsApplier.UpdateGcpIamUserAccountOauthSessions(oldSessions, newSessions)
 	gcpCredentialsApplierVerifyExpectedCalls(t, []string{"GetSecret(credentialsLabel)"}, expectedActivationCalls)
@@ -94,8 +95,8 @@ func TestUpdateGcpIamUserAccountOauthSessions_NoOldActiveSessionButNewActiveSess
 func TestUpdateGcpIamUserAccountOauthSessions_NoActiveSessions(t *testing.T) {
 	gcpCredentialsApplierSetup()
 	keychainMock.ExpGetSecret = "credentials"
-	oldSessions := []session.GcpIamUserAccountOauthSession{{Id: "ID1", Status: session.NotActive}}
-	newSessions := []session.GcpIamUserAccountOauthSession{{Id: "ID1", Status: session.Pending}}
+	oldSessions := []gcp_iam_user_account_oauth.GcpIamUserAccountOauthSession{{Id: "ID1", Status: gcp.NotActive}}
+	newSessions := []gcp_iam_user_account_oauth.GcpIamUserAccountOauthSession{{Id: "ID1", Status: gcp.NotActive}}
 
 	gcpCredentialsApplier.UpdateGcpIamUserAccountOauthSessions(oldSessions, newSessions)
 	gcpCredentialsApplierVerifyExpectedCalls(t, []string{}, []string{})

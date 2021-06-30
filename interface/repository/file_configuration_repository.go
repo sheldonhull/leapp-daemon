@@ -3,7 +3,7 @@ package repository
 import (
 	"encoding/json"
 	"fmt"
-	"leapp_daemon/domain/configuration"
+	"leapp_daemon/domain"
 	"leapp_daemon/infrastructure/http/http_error"
 	"sync"
 )
@@ -31,7 +31,7 @@ type FileConfigurationRepository struct {
 	Encryption Encryption
 }
 
-func (repository *FileConfigurationRepository) CreateConfiguration(config configuration.Configuration) error {
+func (repository *FileConfigurationRepository) CreateConfiguration(config domain.Configuration) error {
 	configurationFileMutex.Lock()
 	defer configurationFileMutex.Unlock()
 
@@ -67,8 +67,8 @@ func (repository *FileConfigurationRepository) CreateConfiguration(config config
 	return nil
 }
 
-func (repository *FileConfigurationRepository) GetConfiguration() (configuration.Configuration, error) {
-	var config configuration.Configuration
+func (repository *FileConfigurationRepository) GetConfiguration() (domain.Configuration, error) {
+	var config domain.Configuration
 
 	homeDir, err := repository.FileSystem.GetHomeDir()
 	if err != nil {
@@ -78,7 +78,7 @@ func (repository *FileConfigurationRepository) GetConfiguration() (configuration
 	configurationFilePath := fmt.Sprintf("%s/%s", homeDir, configurationFilePath)
 
 	if !repository.FileSystem.DoesFileExist(configurationFilePath) {
-		return configuration.GetDefaultConfiguration(), nil
+		return domain.GetDefaultConfiguration(), nil
 	}
 
 	encryptedText, err := repository.FileSystem.ReadFile(configurationFilePath)
@@ -91,11 +91,11 @@ func (repository *FileConfigurationRepository) GetConfiguration() (configuration
 		return config, http_error.NewInternalServerError(err)
 	}
 
-	config = configuration.FromJson(plainText)
+	config = domain.FromJson(plainText)
 	return config, nil
 }
 
-func (repository *FileConfigurationRepository) UpdateConfiguration(config configuration.Configuration) error {
+func (repository *FileConfigurationRepository) UpdateConfiguration(config domain.Configuration) error {
 	configurationFileMutex.Lock()
 	defer configurationFileMutex.Unlock()
 

@@ -1,22 +1,22 @@
 package use_case
 
 import (
-	"leapp_daemon/domain/session"
+	"leapp_daemon/domain/gcp/gcp_iam_user_account_oauth"
 	"leapp_daemon/test/mock"
 	"reflect"
 	"testing"
 )
 
 var (
-	oldSessions       []session.GcpIamUserAccountOauthSession
-	newSessions       []session.GcpIamUserAccountOauthSession
+	oldSessions       []gcp_iam_user_account_oauth.GcpIamUserAccountOauthSession
+	newSessions       []gcp_iam_user_account_oauth.GcpIamUserAccountOauthSession
 	fileRepoMock      mock.FileConfigurationRepositoryMock
 	gcpSessionsWriter *GcpSessionsWriter
 )
 
 func gcpSessionsWriterSetup() {
-	oldSessions = []session.GcpIamUserAccountOauthSession{}
-	newSessions = []session.GcpIamUserAccountOauthSession{{Id: "ID"}}
+	oldSessions = []gcp_iam_user_account_oauth.GcpIamUserAccountOauthSession{}
+	newSessions = []gcp_iam_user_account_oauth.GcpIamUserAccountOauthSession{{Id: "ID"}}
 
 	fileRepoMock = mock.NewFileConfigurationRepositoryMock()
 	gcpSessionsWriter = &GcpSessionsWriter{

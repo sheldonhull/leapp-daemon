@@ -3,7 +3,7 @@ package mock
 import (
 	"errors"
 	"fmt"
-	"leapp_daemon/domain/named_profile"
+	"leapp_daemon/domain/aws/named_profile"
 	"leapp_daemon/infrastructure/http/http_error"
 )
 

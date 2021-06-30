@@ -437,9 +437,12 @@ func TestWriteCredentialsToDb_errorWritingCredentials(t *testing.T) {
 	defaultCredentialJson := "{\"credentials\":\"json\"}"
 	err := repo.WriteCredentialsToDb(accountId, defaultCredentialJson)
 	test.ExpectHttpError(t, err, 500, "error executing insert query")
+	expectedWriteCall := fmt.Sprintf("WriteCredentials(%v, %v, %v)", expectedCredentialsDbFilePath, accountId, defaultCredentialJson)
 
 	verifyExpectedCalls(t,
-		[]string{"IsWindows()", "GetEnvironmentVariable(APPDATA)"}, []string{}, []string{},
+		[]string{"IsWindows()", "GetEnvironmentVariable(APPDATA)"},
+		[]string{},
+		[]string{expectedWriteCall},
 		[]string{})
 }
 
@@ -498,10 +501,11 @@ func TestRemoveCredentialsFromDb_errorRemovingCredentialsFromDb(t *testing.T) {
 	err := repo.RemoveCredentialsFromDb(accountId)
 	test.ExpectHttpError(t, err, 500, "error executing delete query")
 
+	expectedRemoveCall := fmt.Sprintf("RemoveCredentials(%v, %v)", expectedCredentialsDbFilePath, accountId)
 	verifyExpectedCalls(t,
 		[]string{"IsWindows()", "GetEnvironmentVariable(APPDATA)"},
 		[]string{fmt.Sprintf("DoesFileExist(%v)", expectedCredentialsDbFilePath)},
-		[]string{}, []string{})
+		[]string{expectedRemoveCall}, []string{})
 }
 
 func TestRemoveAccessTokensFromDb(t *testing.T) {
@@ -558,9 +562,10 @@ func TestRemoveAccessTokensFromDb_errorRemovingCredentialsFromDb(t *testing.T) {
 	accountId := "account_id@domain.com"
 	err := repo.RemoveAccessTokensFromDb(accountId)
 	test.ExpectHttpError(t, err, 500, "error executing delete query")
+	expectedRemoveCall := fmt.Sprintf("RemoveAccessToken(%v, %v)", expectedAccessTokensDbFilePath, accountId)
 
 	verifyExpectedCalls(t,
 		[]string{"IsWindows()", "GetEnvironmentVariable(APPDATA)"},
 		[]string{fmt.Sprintf("DoesFileExist(%v)", expectedAccessTokensDbFilePath)},
-		[]string{}, []string{})
+		[]string{}, []string{expectedRemoveCall})
 }

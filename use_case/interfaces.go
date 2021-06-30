@@ -1,10 +1,12 @@
 package use_case
 
 import (
+	"github.com/aws/aws-sdk-go/service/sts"
 	"golang.org/x/oauth2"
-	"leapp_daemon/domain/configuration"
-	"leapp_daemon/domain/named_profile"
-	"leapp_daemon/domain/session"
+	"leapp_daemon/domain"
+	"leapp_daemon/domain/aws/aws_iam_user"
+	"leapp_daemon/domain/aws/named_profile"
+	"leapp_daemon/domain/gcp/gcp_iam_user_account_oauth"
 	"leapp_daemon/interface/repository"
 )
 
@@ -25,6 +27,10 @@ type Keychain interface {
 	SetSecret(secret string, label string) error
 }
 
+type StsApi interface {
+	GenerateNewSessionToken(accessKeyId string, secretKey string, region string, mfaDevice string, mfaToken *string) (*sts.Credentials, error)
+}
+
 type GcpApi interface {
 	GetOauthUrl() (string, error)
 	GetOauthToken(authCode string) (*oauth2.Token, error)
@@ -32,9 +38,13 @@ type GcpApi interface {
 }
 
 type ConfigurationRepository interface {
-	CreateConfiguration(configuration.Configuration) error
-	GetConfiguration() (configuration.Configuration, error)
-	UpdateConfiguration(configuration.Configuration) error
+	CreateConfiguration(domain.Configuration) error
+	GetConfiguration() (domain.Configuration, error)
+	UpdateConfiguration(domain.Configuration) error
+}
+
+type AwsConfigurationRepository interface {
+	WriteCredentials(credentials []repository.AwsTempCredentials) error
 }
 
 type GcpConfigurationRepository interface {
@@ -50,10 +60,6 @@ type GcpConfigurationRepository interface {
 	RemoveAccessTokensFromDb(accountId string) error
 }
 
-type AwsConfigurationRepository interface {
-	WriteCredentials(credentials []repository.AwsTempCredentials) error
-}
-
 type NamedProfilesFacade interface {
 	GetNamedProfiles() []named_profile.NamedProfile
 	GetNamedProfileById(id string) (named_profile.NamedProfile, error)
@@ -66,14 +72,13 @@ type NamedProfilesActionsInterface interface {
 }
 
 type AwsIamUserSessionsFacade interface {
-	Subscribe(observer session.AwsIamUserSessionsObserver)
-	GetSessions() []session.AwsIamUserSession
-	GetSessionById(sessionId string) (session.AwsIamUserSession, error)
-	SetSessions(sessions []session.AwsIamUserSession)
-	AddSession(session session.AwsIamUserSession) error
+	Subscribe(observer aws_iam_user.AwsIamUserSessionsObserver)
+	GetSessions() []aws_iam_user.AwsIamUserSession
+	GetSessionById(sessionId string) (aws_iam_user.AwsIamUserSession, error)
+	SetSessions(sessions []aws_iam_user.AwsIamUserSession)
+	AddSession(session aws_iam_user.AwsIamUserSession) error
 	RemoveSession(sessionId string) error
-	EditSession(sessionId string, sessionName string, region string, accessKeyIdLabel string, secretKeyLabel string,
-		sessionTokenLabel string, mfaDevice string, sessionTokenExpiration string, namedProfileId string) error
+	EditSession(sessionId string, sessionName string, region string, mfaDevice string, namedProfileId string) error
 	SetSessionTokenExpiration(sessionId string, sessionTokenExpiration string) error
 	StartingSession(sessionId string) error
 	StartSession(sessionId string, startTime string) error
@@ -81,9 +86,9 @@ type AwsIamUserSessionsFacade interface {
 }
 
 type GcpIamUserAccountOauthSessionsFacade interface {
-	GetSessions() []session.GcpIamUserAccountOauthSession
-	GetSessionById(sessionId string) (session.GcpIamUserAccountOauthSession, error)
-	AddSession(session session.GcpIamUserAccountOauthSession) error
+	GetSessions() []gcp_iam_user_account_oauth.GcpIamUserAccountOauthSession
+	GetSessionById(sessionId string) (gcp_iam_user_account_oauth.GcpIamUserAccountOauthSession, error)
+	AddSession(session gcp_iam_user_account_oauth.GcpIamUserAccountOauthSession) error
 	StartSession(sessionId string, startTime string) error
 	StopSession(sessionId string, stopTime string) error
 	RemoveSession(sessionId string) error

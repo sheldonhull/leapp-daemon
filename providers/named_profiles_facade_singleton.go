@@ -1,7 +1,7 @@
 package providers
 
 import (
-	"leapp_daemon/domain/named_profile"
+	"leapp_daemon/domain/aws/named_profile"
 	"sync"
 )
 
