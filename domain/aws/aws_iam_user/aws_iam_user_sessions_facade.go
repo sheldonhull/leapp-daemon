@@ -93,8 +93,7 @@ func (facade *AwsIamUserSessionsFacade) RemoveSession(sessionId string) error {
 }
 
 func (facade *AwsIamUserSessionsFacade) EditSession(sessionId string, sessionName string, region string,
-	accessKeyIdLabel string, secretKeyLabel string, sessionTokenLabel string, mfaDevice string,
-	sessionTokenExpiration string, namedProfileId string) error {
+	accountNumber string, userName string, mfaDevice string, namedProfileId string) error {
 	awsIamUserSessionsLock.Lock()
 	defer awsIamUserSessionsLock.Unlock()
 
@@ -113,12 +112,11 @@ func (facade *AwsIamUserSessionsFacade) EditSession(sessionId string, sessionNam
 
 	sessionToEdit.Name = sessionName
 	sessionToEdit.Region = region
-	sessionToEdit.AccessKeyIdLabel = accessKeyIdLabel
-	sessionToEdit.SecretKeyLabel = secretKeyLabel
-	sessionToEdit.SessionTokenLabel = sessionTokenLabel
+	sessionToEdit.AccountNumber = accountNumber
+	sessionToEdit.UserName = userName
 	sessionToEdit.MfaDevice = mfaDevice
-	sessionToEdit.SessionTokenExpiration = sessionTokenExpiration
 	sessionToEdit.NamedProfileId = namedProfileId
+	sessionToEdit.SessionTokenExpiration = ""
 	return facade.replaceSession(sessionId, sessionToEdit)
 }
 

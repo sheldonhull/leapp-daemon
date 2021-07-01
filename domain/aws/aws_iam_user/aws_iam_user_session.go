@@ -13,20 +13,16 @@ type AwsIamUserSessionContainer interface {
 type AwsIamUserSession struct {
 	Id                     string
 	Name                   string
+	Region                 string
+	AccountNumber          string
+	UserName               string
 	AccessKeyIdLabel       string
 	SecretKeyLabel         string
 	SessionTokenLabel      string
 	MfaDevice              string
-	Region                 string
 	NamedProfileId         string
 	Status                 aws.AwsSessionStatus
 	StartTime              string
 	LastStopTime           string
 	SessionTokenExpiration string
-}
-
-type AwsSessionToken struct {
-	AccessKeyId     string
-	SecretAccessKey string
-	SessionToken    string
 }

@@ -9,6 +9,7 @@ import (
 	"net/http"
 )
 
+//TODO: Blast this struct and refactor in accord with the server architecture!
 func (controller *EngineController) ListSession(context *gin.Context) {
 	logging.SetContext(context)
 
@@ -22,7 +23,9 @@ func (controller *EngineController) ListSession(context *gin.Context) {
 	  listType := requestDto.Type
 	  query := requestDto.Query*/
 
-	sessionList, err := use_case.ListAllSessions(controller.Providers.GetGcpIamUserAccountOauthSessionFacade())
+	sessionList, err := use_case.ListAllSessions(
+		controller.Providers.GetGcpIamUserAccountOauthSessionFacade(),
+		controller.Providers.GetAwsIamUserSessionFacade())
 	if err != nil {
 		_ = context.Error(err)
 		return

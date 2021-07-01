@@ -5,6 +5,7 @@ import (
 	"leapp_daemon/domain/aws"
 	"leapp_daemon/domain/aws/aws_iam_user"
 	"leapp_daemon/infrastructure/http/http_error"
+	"leapp_daemon/infrastructure/logging"
 	"time"
 )
 
@@ -20,8 +21,11 @@ func (actions *AwsIamUserSessionActions) GetSession(sessionId string) (aws_iam_u
 	return actions.AwsIamUserSessionsFacade.GetSessionById(sessionId)
 }
 
-func (actions *AwsIamUserSessionActions) CreateSession(name string, awsAccessKeyId string, awsSecretKey string,
-	mfaDevice string, region string, profileName string) error {
+// (sessionId string, sessionName string, region string,
+//	accountNumber string, userName string, awsAccessKeyId string, awsSecretKey string, mfaDevice string, profileName string)
+
+func (actions *AwsIamUserSessionActions) CreateSession(sessionName string, region string, accountNumber string,
+	userName string, awsAccessKeyId string, awsSecretKey string, mfaDevice string, profileName string) error {
 
 	newSessionId := actions.Environment.GenerateUuid()
 	accessKeyIdLabel := newSessionId + "-aws-iam-user-session-access-key-id"
@@ -34,17 +38,19 @@ func (actions *AwsIamUserSessionActions) CreateSession(name string, awsAccessKey
 
 	sess := aws_iam_user.AwsIamUserSession{
 		Id:                     newSessionId,
-		Name:                   name,
+		Name:                   sessionName,
 		Region:                 region,
-		NamedProfileId:         namedProfile.Id,
-		MfaDevice:              mfaDevice,
+		AccountNumber:          accountNumber,
+		UserName:               userName,
 		AccessKeyIdLabel:       accessKeyIdLabel,
 		SecretKeyLabel:         secretKeyLabel,
 		SessionTokenLabel:      sessionTokenExpirationLabel,
+		MfaDevice:              mfaDevice,
+		NamedProfileId:         namedProfile.Id,
 		Status:                 aws.NotActive,
-		SessionTokenExpiration: "",
 		StartTime:              "",
 		LastStopTime:           "",
+		SessionTokenExpiration: "",
 	}
 
 	err = actions.Keychain.SetSecret(awsAccessKeyId, accessKeyIdLabel)
@@ -109,27 +115,43 @@ func (actions *AwsIamUserSessionActions) DeleteSession(sessionId string) error {
 	return facade.RemoveSession(sessionId)
 }
 
-func (actions *AwsIamUserSessionActions) EditAwsIamUserSession(sessionId string, sessionName string, accountNumber string,
-	region string, user string, awsAccessKeyId string, awsSecretKey string, mfaDevice string, namedProfile string) error {
-	/*
-		return actions.AwsIamUserSessionsFacade.EditSession(sessionId, sessionName, region, mfaDevice, namedProfile)
+func (actions *AwsIamUserSessionActions) EditAwsIamUserSession(sessionId string, sessionName string, region string,
+	accountNumber string, userName string, awsAccessKeyId string, awsSecretKey string, mfaDevice string, profileName string) error {
 
-			config, err := configuration.ReadConfiguration()
-			if err != nil {
-				return err
-			}
+	currentSession, err := actions.AwsIamUserSessionsFacade.GetSessionById(sessionId)
+	if err != nil {
+		return err
+	}
 
-			err = session.UpdateAwsIamUserSession(config, sessionId, name, accountNumber, region, user, awsAccessKeyId, awsSecretAccessKey, mfaDevice, profile)
-			if err != nil {
-				return err
-			}
+	err = actions.Keychain.SetSecret(awsAccessKeyId, currentSession.AccessKeyIdLabel)
+	if err != nil {
+		return err
+	}
+	err = actions.Keychain.SetSecret(awsSecretKey, currentSession.SecretKeyLabel)
+	if err != nil {
+		return err
+	}
+	profile, err := actions.NamedProfilesActions.GetOrCreateNamedProfile(profileName)
+	if err != nil {
+		return err
+	}
 
-			err = config.Update()
-			if err != nil {
-				return err
-			}
-	*/
-	return nil
+	return actions.AwsIamUserSessionsFacade.EditSession(sessionId, sessionName, region, accountNumber, userName, mfaDevice, profile.Id)
+}
+
+func (actions *AwsIamUserSessionActions) RotateSessionTokens() {
+	facade := actions.AwsIamUserSessionsFacade
+
+	for _, awsSession := range facade.GetSessions() {
+		if awsSession.Status != aws.Active {
+			continue
+		}
+		currentTime := actions.Environment.GetTime()
+		err := actions.refreshSessionTokenIfNeeded(awsSession, currentTime)
+		if err != nil {
+			logging.Entry().Errorf("error rotating session id: %v", awsSession.Id)
+		}
+	}
 }
 
 func (actions *AwsIamUserSessionActions) refreshSessionTokenIfNeeded(session aws_iam_user.AwsIamUserSession, currentTime string) error {

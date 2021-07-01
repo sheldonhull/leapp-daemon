@@ -44,7 +44,7 @@ func CreateAwsIamRoleFederatedSession(sessionContainer Container, name string, a
 
 	for _, session := range sessions {
 		account := session.Account
-		if account.AccountNumber == accountNumber && account.Role.Name == roleName {
+		if account.AccountNumber == accountNumber && account.Role.SessionName == roleName {
 			err = http_error2.NewUnprocessableEntityError(fmt.Errorf("an account with the same account number and " +
 				"role name is already present"))
 			return err
@@ -52,13 +52,13 @@ func CreateAwsIamRoleFederatedSession(sessionContainer Container, name string, a
 	}
 
 	role := AwsIamRoleFederatedRole{
-		Name: roleName,
+		SessionName: roleName,
 		Arn:  roleArn,
 	}
 
 	federatedAwsAccount := AwsIamRoleFederatedAccount{
 		AccountNumber: accountNumber,
-		Name:          name,
+		SessionName:          name,
 		Role:          &role,
 		IdpArn:        idpArn,
 		Region:        region,
@@ -116,12 +116,12 @@ func ListFederatedAwsSession(sessionContainer Container, query string) ([]*AwsIa
 		for _, session := range sessions {
 			if  strings.Contains(session.Id, query) ||
 				strings.Contains(session.Profile, query) ||
-				strings.Contains(session.Account.Name, query) ||
+				strings.Contains(session.Account.SessionName, query) ||
 				strings.Contains(session.Account.IdpArn, query) ||
 				strings.Contains(session.Account.SsoUrl, query) ||
 				strings.Contains(session.Account.Region, query) ||
 				strings.Contains(session.Account.AccountNumber, query) ||
-				strings.Contains(session.Account.Role.Name, query) ||
+				strings.Contains(session.Account.Role.SessionName, query) ||
 				strings.Contains(session.Account.Role.Arn, query) {
 
 				filteredList = append(filteredList, session)
@@ -147,14 +147,14 @@ func UpdateFederatedAwsSession(sessionContainer Container, id string, name strin
 			sessions[index].Profile = namedProfileId
 			sessions[index].Account = &AwsIamRoleFederatedAccount{
 				AccountNumber: accountNumber,
-				Name:          name,
+				SessionName:          name,
 				Region:        region,
 				IdpArn: 	   idpArn,
 				SsoUrl:        ssoUrl,
 			}
 
 			sessions[index].Account.Role = &AwsIamRoleFederatedRole{
-				Name: roleName,
+				SessionName: roleName,
 				Arn:  roleArn,
 			}
 

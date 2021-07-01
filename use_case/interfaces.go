@@ -78,7 +78,8 @@ type AwsIamUserSessionsFacade interface {
 	SetSessions(sessions []aws_iam_user.AwsIamUserSession)
 	AddSession(session aws_iam_user.AwsIamUserSession) error
 	RemoveSession(sessionId string) error
-	EditSession(sessionId string, sessionName string, region string, mfaDevice string, namedProfileId string) error
+	EditSession(sessionId string, sessionName string, region string, accountNumber string, userName string,
+		mfaDevice string, namedProfileId string) error
 	SetSessionTokenExpiration(sessionId string, sessionTokenExpiration string) error
 	StartingSession(sessionId string) error
 	StartSession(sessionId string, startTime string) error

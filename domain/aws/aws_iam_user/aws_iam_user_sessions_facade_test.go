@@ -250,18 +250,18 @@ func TestAwsIamUserSessionsFacade_EditSession(t *testing.T) {
 		SessionTokenExpiration: "sessionTokenExpiration2", NamedProfileId: "ProfileId2"}
 	facade.awsIamUserSessions = []AwsIamUserSession{session1, session2}
 
-	facade.EditSession("ID1", "NewName", "NewRegion", "newAccessKeyIdLabel",
-		"newSecretKeyLabel", "newSessionTokenLabel", "newMfaDevice",
-		"newSessionTokenExpiration", "newProfileId")
+	facade.EditSession("ID1", "newName", "newRegion", "newAccountNumber",
+		"newUserName", "newMfaDevice", "newProfileId")
 
 	if !reflect.DeepEqual(sessionsBeforeUpdate, []AwsIamUserSession{session1, session2}) {
 		t.Errorf("unexpected session")
 	}
 
 	if !reflect.DeepEqual(sessionsAfterUpdate, []AwsIamUserSession{
-		{Id: "ID1", Name: "NewName", Region: "NewRegion", AccessKeyIdLabel: "newAccessKeyIdLabel",
-			SecretKeyLabel: "newSecretKeyLabel", SessionTokenLabel: "newSessionTokenLabel", MfaDevice: "newMfaDevice",
-			SessionTokenExpiration: "newSessionTokenExpiration", NamedProfileId: "newProfileId"}, session2}) {
+		{Id: "ID1", Name: "newName", Region: "newRegion", AccountNumber: "newAccountNumber", UserName: "newUserName",
+			AccessKeyIdLabel: "accessKeyIdLabel", SecretKeyLabel: "secretKeyLabel", SessionTokenLabel: "sessionTokenLabel",
+			MfaDevice: "newMfaDevice", NamedProfileId: "newProfileId", Status: aws.NotActive, StartTime: "",
+			LastStopTime: "", SessionTokenExpiration: ""}, session2}) {
 		t.Errorf("sessions were not updated")
 	}
 }
@@ -278,14 +278,12 @@ func TestAwsIamUserSessionsFacade_EditSession_DuplicateSessionNameAttempt(t *tes
 		SessionTokenExpiration: "sessionTokenExpiration2", NamedProfileId: "ProfileId2"}
 	facade.awsIamUserSessions = []AwsIamUserSession{session1, session2}
 
-	err := facade.EditSession("ID1", "Name2", "NewRegion", "newAccessKeyIdLabel",
-		"newSecretKeyLabel", "newSessionTokenLabel", "newMfaDevice",
-		"newSessionTokenExpiration", "newProfileId")
+	err := facade.EditSession("ID1", "Name2", "newRegion", "newAccountNumber",
+		"newUserName", "newMfaDevice", "newProfileId")
 	test.ExpectHttpError(t, err, http.StatusConflict, "a session named Name2 is already present")
 
-	err = facade.EditSession("ID2", "Name1", "NewRegion", "newAccessKeyIdLabel",
-		"newSecretKeyLabel", "newSessionTokenLabel", "newMfaDevice",
-		"newSessionTokenExpiration", "newProfileId")
+	err = facade.EditSession("ID2", "Name1", "newRegion", "newAccountNumber",
+		"newUserName", "newMfaDevice", "newProfileId")
 	test.ExpectHttpError(t, err, http.StatusConflict, "a session named Name1 is already present")
 }
 
@@ -293,9 +291,8 @@ func TestAwsIamUserSessionsFacade_EditSession_notFound(t *testing.T) {
 	facadeSetup()
 	facade.Subscribe(fakeSessionsObserver{})
 
-	err := facade.EditSession("ID", "Name2", "NewRegion", "newAccessKeyIdLabel",
-		"newSecretKeyLabel", "newSessionTokenLabel", "newMfaDevice",
-		"newSessionTokenExpiration", "newProfileId")
+	err := facade.EditSession("ID", "Name2", "NewRegion", "newAccountNumber",
+		"newUserName", "newMfaDevice", "newProfileId")
 	test.ExpectHttpError(t, err, http.StatusNotFound, "session with id ID not found")
 
 	if len(sessionsBeforeUpdate) > 0 || len(sessionsAfterUpdate) > 0 {

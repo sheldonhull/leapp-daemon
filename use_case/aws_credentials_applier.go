@@ -1,6 +1,7 @@
 package use_case
 
 import (
+	"encoding/json"
 	"leapp_daemon/domain/aws"
 	"leapp_daemon/domain/aws/aws_iam_user"
 	"leapp_daemon/infrastructure/logging"
@@ -11,6 +12,13 @@ type AwsCredentialsApplier struct {
 	Keychain                   Keychain
 	NamedProfilesFacade        NamedProfilesFacade
 	AwsConfigurationRepository AwsConfigurationRepository
+}
+
+type AwsSessionToken struct {
+	AccessKeyId     string
+	SecretAccessKey string
+	SessionToken    string
+	Expiration      string
 }
 
 func (applier *AwsCredentialsApplier) UpdateAwsIamUserSessions(oldSessions []aws_iam_user.AwsIamUserSession, newSessions []aws_iam_user.AwsIamUserSession) {
@@ -27,19 +35,14 @@ func (applier *AwsCredentialsApplier) UpdateAwsIamUserSessions(oldSessions []aws
 			return
 		}
 
-		accessKeyId, err := applier.Keychain.GetSecret(newSession.AccessKeyIdLabel)
+		sessionTokenJson, err := applier.Keychain.GetSecret(newSession.SessionTokenLabel)
 		if err != nil {
 			logging.Entry().Error(err)
 			return
 		}
 
-		secretKey, err := applier.Keychain.GetSecret(newSession.SecretKeyLabel)
-		if err != nil {
-			logging.Entry().Error(err)
-			return
-		}
-
-		sessionToken, err := applier.Keychain.GetSecret(newSession.SessionTokenLabel)
+		sessionToken := AwsSessionToken{}
+		err = json.Unmarshal([]byte(sessionTokenJson), &sessionToken)
 		if err != nil {
 			logging.Entry().Error(err)
 			return
@@ -47,9 +50,10 @@ func (applier *AwsCredentialsApplier) UpdateAwsIamUserSessions(oldSessions []aws
 
 		tempCredentials := repository.AwsTempCredentials{
 			ProfileName:  namedProfile.Name,
-			AccessKeyId:  accessKeyId,
-			SecretKey:    secretKey,
-			SessionToken: sessionToken,
+			AccessKeyId:  sessionToken.AccessKeyId,
+			SecretKey:    sessionToken.SecretAccessKey,
+			SessionToken: sessionToken.SessionToken,
+			Expiration:   sessionToken.Expiration,
 			Region:       newSession.Region,
 		}
 		activeCredentials = append(activeCredentials, tempCredentials)

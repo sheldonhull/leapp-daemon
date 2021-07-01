@@ -33,6 +33,7 @@ type AwsTempCredentials struct {
 	AccessKeyId  string
 	SecretKey    string
 	SessionToken string
+	Expiration   string
 	Region       string
 }
 
@@ -83,6 +84,11 @@ func (repo *AwsConfigurationRepository) createProfileSection(credentialsIniFile 
 	}
 
 	_, err = section.NewKey("aws_session_token", credentials.SessionToken)
+	if err != nil {
+		return http_error.NewInternalServerError(err)
+	}
+
+	_, err = section.NewKey("expiration", credentials.Expiration)
 	if err != nil {
 		return http_error.NewInternalServerError(err)
 	}

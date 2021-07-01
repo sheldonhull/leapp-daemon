@@ -39,7 +39,7 @@ func CreateTrusterAwsSession(AccountName string, AccountNumber string, RoleName 
 
   for _, sess := range sessions {
     account := sess.Account
-    if account.AccountNumber == accountNumber && account.User == user {
+    if account.AccountNumber == accountNumber && account.UserName == user {
       err := http_error.NewUnprocessableEntityError(fmt.Errorf("a session with the same account number and user is already present"))
       return err
     }
@@ -47,11 +47,11 @@ func CreateTrusterAwsSession(AccountName string, AccountNumber string, RoleName 
 
   awsIamUserAccount := AwsIamUserAccount{
     AccountNumber: accountNumber,
-    Name:          name,
+    SessionName:          name,
     Region:        region,
-    User:          user,
+    UserName:          user,
     AwsAccessKeyId: awsAccessKeyId,
-    AwsSecretAccessKey: awsSecretAccessKey,
+    AwsSecretKey: awsSecretAccessKey,
     MfaDevice:     mfaDevice,
 
   }

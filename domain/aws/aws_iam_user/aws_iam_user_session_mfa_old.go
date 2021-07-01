@@ -36,19 +36,19 @@ func(sess *AwsIamUserSession) Rotate(rotateConfiguration *RotateConfiguration) e
 }
 
 func(sess *AwsIamUserSession) RotateAwsIamUserSessionCredentials(mfaToken *string) error {
-	doSessionTokenExist, err := session_token.DoExist(sess.Account.Name)
+	doSessionTokenExist, err := session_token.DoExist(sess.Account.SessionName)
 	if err != nil {
 		return err
 	}
 
 	if doSessionTokenExist {
-		isSessionTokenExpired, err := session_token.IsExpired(sess.Account.Name)
+		isSessionTokenExpired, err := session_token.IsExpired(sess.Account.SessionName)
 		if err != nil {
 			return err
 		}
 
 		if isSessionTokenExpired {
-			logging.Entry().Error("AWS Iam User session token no more valid")
+			logging.Entry().Error("AWS Iam UserName session token no more valid")
 
 			isMfaTokenRequired, err := sess.IsMfaRequired()
 			if err != nil {
@@ -66,12 +66,12 @@ func(sess *AwsIamUserSession) RotateAwsIamUserSessionCredentials(mfaToken *strin
 				return nil
 			}
 
-			credentials, err := session_token.Generate(sess.Account.Name, sess.Account.Region, sess.Account.MfaDevice, mfaToken)
+			credentials, err := session_token.Generate(sess.Account.SessionName, sess.Account.Region, sess.Account.MfaDevice, mfaToken)
 			if err != nil {
 				return err
 			}
 
-			err = session_token.SaveInKeychain(sess.Account.Name, credentials)
+			err = session_token.SaveInKeychain(sess.Account.SessionName, credentials)
 			if err != nil {
 				return err
 			}
@@ -85,7 +85,7 @@ func(sess *AwsIamUserSession) RotateAwsIamUserSessionCredentials(mfaToken *strin
 			sess.AwsSessionStatus = Active
 			sess.StartTime = time.Now().Format(time.RFC3339)
 		} else {
-			logging.Entry().Error("AWS Iam User session token still valid")
+			logging.Entry().Error("AWS Iam UserName session token still valid")
 
 			data, err := sess.unmarshallSessionToken()
 			if err != nil {
@@ -107,12 +107,12 @@ func(sess *AwsIamUserSession) RotateAwsIamUserSessionCredentials(mfaToken *strin
 
 		return nil
 	} else {
-		credentials, err := session_token.Generate(sess.Account.Name, sess.Account.Region, sess.Account.MfaDevice, mfaToken)
+		credentials, err := session_token.Generate(sess.Account.SessionName, sess.Account.Region, sess.Account.MfaDevice, mfaToken)
 		if err != nil {
 			return err
 		}
 
-		err = session_token.SaveInKeychain(sess.Account.Name, credentials)
+		err = session_token.SaveInKeychain(sess.Account.SessionName, credentials)
 		if err != nil {
 			return err
 		}
@@ -131,7 +131,7 @@ func(sess *AwsIamUserSession) RotateAwsIamUserSessionCredentials(mfaToken *strin
 }
 
 func (sess *AwsIamUserSession) unmarshallSessionToken() (AwsSessionToken, error) {
-	sessionTokenJson, _, err := access_keys.Get(sess.Account.Name)
+	sessionTokenJson, _, err := access_keys.Get(sess.Account.SessionName)
 
 	var data AwsSessionToken
 
@@ -155,7 +155,7 @@ func getById(sessionContainer Container, id string) (*AwsIamUserSession, error) 
 		}
 	}
 
-	err = http_error.NewNotFoundError(fmt.Errorf("AWS Iam User session with id " + id + " not found"))
+	err = http_error.NewNotFoundError(fmt.Errorf("AWS Iam UserName session with id " + id + " not found"))
 	return sess, err
 }
 
@@ -192,7 +192,7 @@ func CreateAwsIamUserSession(sessionContainer Container, name string, accountNum
 
 	for _, sess := range sessions {
 		account := sess.Account
-		if account.AccountNumber == accountNumber && account.User == user {
+		if account.AccountNumber == accountNumber && account.UserName == user {
 			err := http_error.NewUnprocessableEntityError(fmt.Errorf("a session with the same account number and user is already present"))
 			return err
 		}
@@ -200,11 +200,11 @@ func CreateAwsIamUserSession(sessionContainer Container, name string, accountNum
 
 	awsIamUserAccount := AwsIamUserAccount{
 		AccountNumber: accountNumber,
-		Name:          name,
+		SessionName:          name,
 		Region:        region,
-		User:          user,
+		UserName:          user,
 		AwsAccessKeyId: awsAccessKeyId,
-		AwsSecretAccessKey: awsSecretAccessKey,
+		AwsSecretKey: awsSecretAccessKey,
 		MfaDevice:     mfaDevice,
 	}
 
@@ -253,9 +253,9 @@ func ListAwsIamUserSession(sessionContainer Container, query string) ([]*AwsIamU
 		for _, sess := range allSessions {
 			if  strings.Contains(sess.Id, query) ||
 				strings.Contains(sess.Profile, query) ||
-				strings.Contains(sess.Account.Name, query) ||
+				strings.Contains(sess.Account.SessionName, query) ||
 				strings.Contains(sess.Account.MfaDevice, query) ||
-				strings.Contains(sess.Account.User, query) ||
+				strings.Contains(sess.Account.UserName, query) ||
 				strings.Contains(sess.Account.Region, query) ||
 				strings.Contains(sess.Account.AccountNumber, query) {
 
@@ -282,11 +282,11 @@ func UpdateAwsIamUserSession(sessionContainer Container, id string, name string,
 			sessions[index].Profile = namedProfileId
 			sessions[index].Account = &AwsIamUserAccount{
 				AccountNumber: accountNumber,
-				Name:          name,
+				SessionName:          name,
 				Region:        region,
-				User:          user,
+				UserName:          user,
 				AwsAccessKeyId: awsAccessKeyId,
-				AwsSecretAccessKey: awsSecretAccessKey,
+				AwsSecretKey: awsSecretAccessKey,
 				MfaDevice:     mfaDevice,
 			}
 			found = true
@@ -294,7 +294,7 @@ func UpdateAwsIamUserSession(sessionContainer Container, id string, name string,
 	}
 
 	if found == false {
-		err = http_error.NewNotFoundError(fmt.Errorf("AWS Iam User session with id " + id + " not found"))
+		err = http_error.NewNotFoundError(fmt.Errorf("AWS Iam UserName session with id " + id + " not found"))
 		return err
 	}
 
@@ -320,7 +320,7 @@ func DeleteAwsIamUserSession(sessionContainer Container, id string) error {
 	}
 
 	if found == false {
-		err = http_error.NewNotFoundError(fmt.Errorf("AWS Iam User session with id " + id + " not found"))
+		err = http_error.NewNotFoundError(fmt.Errorf("AWS Iam UserName session with id " + id + " not found"))
 		return err
 	}
 

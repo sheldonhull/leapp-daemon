@@ -11,7 +11,7 @@ import (
 
 func (controller *EngineController) CreateAwsIamUserSession(context *gin.Context) {
 	// swagger:route POST /aws/iam-user-sessions awsIamUserSession createAwsIamUserSession
-	// Create a new AWS IAM User Session
+	// Create a new AWS IAM UserName Session
 	//   Responses:
 	//     200: MessageResponse
 
@@ -25,8 +25,8 @@ func (controller *EngineController) CreateAwsIamUserSession(context *gin.Context
 	}
 
 	actions := controller.Providers.GetAwsIamUserSessionActions()
-	err = actions.CreateSession(requestDto.Name, requestDto.AwsAccessKeyId, requestDto.AwsSecretAccessKey,
-		requestDto.MfaDevice, requestDto.Region, requestDto.ProfileName)
+	err = actions.CreateSession(requestDto.SessionName, requestDto.Region, requestDto.AccountNumber, requestDto.UserName,
+		requestDto.AwsAccessKeyId, requestDto.AwsSecretKey, requestDto.MfaDevice, requestDto.ProfileName)
 	if err != nil {
 		_ = context.Error(err)
 		return
@@ -38,7 +38,7 @@ func (controller *EngineController) CreateAwsIamUserSession(context *gin.Context
 
 func (controller *EngineController) GetAwsIamUserSession(context *gin.Context) {
 	// swagger:route GET /aws/iam-user-sessions/{id} awsIamUserSession getAwsIamUserSession
-	// Get a AWS IAM User Session
+	// Get a AWS IAM UserName Session
 	//   Responses:
 	//     200: AwsGetIamUserSessionResponse
 
@@ -68,7 +68,7 @@ func (controller *EngineController) GetAwsIamUserSession(context *gin.Context) {
 
 func (controller *EngineController) StartAwsIamUserSession(context *gin.Context) {
 	// swagger:route POST /aws/iam-user-sessions/{id}/start awsIamUserSession startAwsIamUserSession
-	// Start an AWS IAM User Session
+	// Start an AWS IAM UserName Session
 	//   Responses:
 	//     200: MessageResponse
 
@@ -94,7 +94,7 @@ func (controller *EngineController) StartAwsIamUserSession(context *gin.Context)
 
 func (controller *EngineController) StopAwsIamUserSession(context *gin.Context) {
 	// swagger:route POST /aws/iam-user-sessions/{id}/stop awsIamUserSession stopAwsIamUserSession
-	// Stop an AWS IAM User Session
+	// Stop an AWS IAM UserName Session
 	//   Responses:
 	//     200: MessageResponse
 
@@ -120,7 +120,7 @@ func (controller *EngineController) StopAwsIamUserSession(context *gin.Context) 
 
 func (controller *EngineController) EditAwsIamUserSession(context *gin.Context) {
 	// swagger:route PUT /aws/iam-user-sessions/{id} awsIamUserSession editAwsIamUserSession
-	// Edit a AWS IAM User Session
+	// Edit a AWS IAM UserName Session
 	//   Responses:
 	//     200: MessageResponse
 
@@ -141,9 +141,8 @@ func (controller *EngineController) EditAwsIamUserSession(context *gin.Context) 
 	}
 
 	actions := controller.Providers.GetAwsIamUserSessionActions()
-	err = actions.EditAwsIamUserSession(requestUriDto.Id, requestDto.Name, requestDto.AccountNumber, requestDto.Region,
-		requestDto.User, requestDto.AwsAccessKeyId, requestDto.AwsSecretAccessKey, requestDto.MfaDevice,
-		requestDto.ProfileName)
+	err = actions.EditAwsIamUserSession(requestUriDto.Id, requestDto.Name, requestDto.Region, requestDto.AccountNumber,
+		requestDto.User, requestDto.AwsAccessKeyId, requestDto.AwsSecretAccessKey, requestDto.MfaDevice, requestDto.ProfileName)
 	if err != nil {
 		_ = context.Error(err)
 		return
@@ -155,7 +154,7 @@ func (controller *EngineController) EditAwsIamUserSession(context *gin.Context) 
 
 func (controller *EngineController) DeleteAwsIamUserSession(context *gin.Context) {
 	// swagger:route DELETE /aws/iam-user-sessions/{id} awsIamUserSession deleteAwsIamUserSession
-	// Delete an AWS IAM User Session
+	// Delete an AWS IAM UserName Session
 	//   Responses:
 	//     200: MessageResponse
 

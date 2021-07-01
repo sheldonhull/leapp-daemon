@@ -65,14 +65,14 @@ func initializeRoutes(ginEngine *gin.Engine, providers *providers.Providers) {
 		v1.GET("aws/regions", contr.GetAwsRegionList)
 		v1.PUT("aws/sessions/:id/region", contr.EditAwsRegion)
 
-		// AWS IAM User sessions
+		// AWS IAM UserName sessions
 		v1.POST("aws/iam-user-sessions", contr.CreateAwsIamUserSession)
 		v1.PUT("aws/iam-user-sessions/:id", contr.EditAwsIamUserSession)
 		v1.GET("aws/iam-user-sessions/:id", contr.GetAwsIamUserSession)
 		v1.DELETE("aws/iam-user-sessions/:id", contr.DeleteAwsIamUserSession)
-		v1.POST("aws/iam-user-sessions/:id/confirm-mfa-token", contr.ConfirmMfaToken)
 		v1.POST("aws/iam-user-sessions/:id/start", contr.StartAwsIamUserSession)
 		v1.POST("aws/iam-user-sessions/:id/stop", contr.StopAwsIamUserSession)
+		v1.POST("aws/iam-user-sessions/:id/confirm-mfa-token", contr.ConfirmMfaToken) //TODO: this method must belong to AWS_IAM_USER_SESSION_CONTROLLER!!!
 
 		// AWS IAM Role Federated sessions
 		v1.GET("aws/iam-role-federated-sessions/:id", contr.GetAwsIamRoleFederatedSession)

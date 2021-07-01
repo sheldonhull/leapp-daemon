@@ -7,17 +7,17 @@ import (
 )
 
 func main() {
+	//TODO: Move under providers singleton
 	defer logging.CloseLogFile()
 
 	prov := providers.NewProviders()
+	defer prov.Close()
 
 	config := ConfigurationBootstrap(prov)
 	NamedProfilesBootstrap(prov, config)
 	AwsIamUserBootstrap(prov, config)
 	GcpIamUserAccountOauthBootstrap(prov, config)
 
-	//timer.Initialize(1, use_case.RotateAllSessionsCredentials)
-	//defer timer.Close()
 	//go websocket.Hub.Run()
 
 	eng := engine.Engine(prov)

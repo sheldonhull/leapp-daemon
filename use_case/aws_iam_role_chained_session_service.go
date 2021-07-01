@@ -26,7 +26,7 @@ func CreateAwsIamRoleChainedSession(parentId string, accountName string, account
 
 		for _, sess := range sessions {
 			account := sess.Account
-			if sess.ParentId == parentId && account.AccountNumber == accountNumber && account.Role.Name == roleName {
+			if sess.ParentId == parentId && account.AccountNumber == accountNumber && account.Role.SessionName == roleName {
 				err := http_error.NewConflictError(fmt.Errorf("a session with the same parent, account number and role name already exists"))
 				return err
 			}
@@ -34,9 +34,9 @@ func CreateAwsIamRoleChainedSession(parentId string, accountName string, account
 
 		trustedAwsAccount := session2.AwsIamRoleChainedAccount{
 			AccountNumber: accountNumber,
-			Name:          accountName,
+			SessionName:          accountName,
 			Role: &session2.AwsIamRole{
-				Name: roleName,
+				SessionName: roleName,
 				Arn:  fmt.Sprintf("arn:aws:iam::%s:role/%s", accountNumber, roleName),
 			},
 			Region: region,
@@ -122,17 +122,17 @@ func UpdateAwsIamRoleChainedSession(id string, parentId string, accountName stri
 				}
 
 				if accountName != "" {
-					s.Account.Name = accountName
+					s.Account.SessionName = accountName
 				}
 				if roleName != "" {
-					s.Account.Role.Name = roleName
+					s.Account.Role.SessionName = roleName
 				}
 				if region != "" {
 					s.Account.Region = region
 				}
 
 				if accountNumber != "" || roleName != "" {
-					s.Account.Role.Arn = fmt.Sprintf("arn:aws:iam::%s:role/%s", s.Account.AccountNumber, s.Account.Role.Name)
+					s.Account.Role.Arn = fmt.Sprintf("arn:aws:iam::%s:role/%s", s.Account.AccountNumber, s.Account.Role.SessionName)
 				}
 
 				break

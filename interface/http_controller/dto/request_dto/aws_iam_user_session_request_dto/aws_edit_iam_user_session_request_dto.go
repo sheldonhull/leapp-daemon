@@ -7,14 +7,14 @@ import (
 
 // swagger:parameters updateAwsIamUserSession
 type AwsUpdateIamUserSessionUriRequestWrapper struct {
-	// AWS Iam User Session update uri body
+	// AWS Iam UserName Session update uri body
 	// in:body
 	Body AwsEditIamUserSessionUriRequest
 }
 
 // swagger:parameters updateAwsIamUserSession
 type AwsEditIamUserSessionRequestWrapper struct {
-	// AWS Iam User Session update uri body
+	// AWS Iam UserName Session update uri body
 	// in:body
 	Body AwsEditIamUserSessionRequest
 }
