@@ -42,7 +42,12 @@ func CreateTrustedAlibabaSessionController(context *gin.Context) {
 		Keychain: &keychain.Keychain{},
 	}
 
-	err = trustedAlibabaSessionService.Create(requestDto.ParentId, requestDto.AccountName, requestDto.AccountNumber, requestDto.RoleName, requestDto.Region)
+	err = trustedAlibabaSessionService.Create(requestDto.ParentId,
+		requestDto.AccountName,
+		requestDto.AccountNumber,
+		requestDto.RoleName,
+		requestDto.Region,
+		requestDto.ProfileName)
 	if err != nil {
 		_ = context.Error(err)
 		return
@@ -113,7 +118,8 @@ func EditTrustedAlibabaSessionController(context *gin.Context) {
 		requestDto.AccountName,
 		requestDto.AccountNumber,
 		requestDto.RoleName,
-		requestDto.Region)
+		requestDto.Region,
+		requestDto.ProfileName)
 
 	if err != nil {
 		_ = context.Error(err)

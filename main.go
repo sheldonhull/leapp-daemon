@@ -112,7 +112,7 @@ func main() {
 	trustedAlibabaSessions := config.TrustedAlibabaSessions
 	logging.Info(fmt.Sprintf("%+v", trustedAlibabaSessions))
 	trustedAlibabaSessionFacade := session.GetTrustedAlibabaSessionsFacade()
-	trustedAlibabaSessionFacade.SetTrustedAlibabaSessions(trustedAlibabaSessions)
+	trustedAlibabaSessionFacade.SetSessions(trustedAlibabaSessions)
 	trustedAlibabaSessionFacade.Subscribe(&use_case.SessionsWriter{
 		ConfigurationRepository: &fileConfigurationRepository,
 	})

@@ -36,12 +36,12 @@ func (fac *trustedAlibabaSessionsFacade) Subscribe(observer TrustedAlibabaSessio
 	fac.observers = append(fac.observers, observer)
 }
 
-func (fac *trustedAlibabaSessionsFacade) GetTrustedAlibabaSessions() []TrustedAlibabaSession {
+func (fac *trustedAlibabaSessionsFacade) GetSessions() []TrustedAlibabaSession {
 	return fac.trustedAlibabaSessions
 }
 
-func (fac *trustedAlibabaSessionsFacade) SetTrustedAlibabaSessions(trustedAlibabaSessions []TrustedAlibabaSession) error {
-	oldTrustedAlibabaSessions := fac.GetTrustedAlibabaSessions()
+func (fac *trustedAlibabaSessionsFacade) SetSessions(trustedAlibabaSessions []TrustedAlibabaSession) error {
+	oldTrustedAlibabaSessions := fac.GetSessions()
 	fac.trustedAlibabaSessions = trustedAlibabaSessions
 
 	for _, observer := range fac.observers {
@@ -53,11 +53,11 @@ func (fac *trustedAlibabaSessionsFacade) SetTrustedAlibabaSessions(trustedAlibab
 	return nil
 }
 
-func (fac *trustedAlibabaSessionsFacade) AddTrustedAlibabaSession(trustedAlibabaSession TrustedAlibabaSession) error {
+func (fac *trustedAlibabaSessionsFacade) AddSession(trustedAlibabaSession TrustedAlibabaSession) error {
 	trustedAlibabaSessionsLock.Lock()
 	defer trustedAlibabaSessionsLock.Unlock()
 
-	oldTrustedAlibabaSessions := fac.GetTrustedAlibabaSessions()
+	oldTrustedAlibabaSessions := fac.GetSessions()
 	newTrustedAlibabaSessions := make([]TrustedAlibabaSession, 0)
 
 	for i := range oldTrustedAlibabaSessions {
@@ -89,11 +89,11 @@ func (fac *trustedAlibabaSessionsFacade) AddTrustedAlibabaSession(trustedAlibaba
 	return nil
 }
 
-func (fac *trustedAlibabaSessionsFacade) RemoveTrustedAlibabaSession(id string) error {
+func (fac *trustedAlibabaSessionsFacade) RemoveSession(id string) error {
 	trustedAlibabaSessionsLock.Lock()
 	defer trustedAlibabaSessionsLock.Unlock()
 
-	oldTrustedAlibabaSessions := fac.GetTrustedAlibabaSessions()
+	oldTrustedAlibabaSessions := fac.GetSessions()
 	newTrustedAlibabaSessions := make([]TrustedAlibabaSession, 0)
 
 	for i := range oldTrustedAlibabaSessions {
@@ -110,8 +110,8 @@ func (fac *trustedAlibabaSessionsFacade) RemoveTrustedAlibabaSession(id string) 
 		}
 	}
 
-	if len(fac.GetTrustedAlibabaSessions()) == len(newTrustedAlibabaSessions) {
-		return http_error.NewNotFoundError(fmt.Errorf("plain Alibaba session with id %s not found", id))
+	if len(fac.GetSessions()) == len(newTrustedAlibabaSessions) {
+		return http_error.NewNotFoundError(fmt.Errorf("trusted Alibaba session with id %s not found", id))
 	}
 
 	err := fac.updateState(newTrustedAlibabaSessions)
@@ -122,40 +122,40 @@ func (fac *trustedAlibabaSessionsFacade) RemoveTrustedAlibabaSession(id string) 
 	return nil
 }
 
-func (fac *trustedAlibabaSessionsFacade) GetTrustedAlibabaSessionById(id string) (*TrustedAlibabaSession, error) {
-	for _, trustedAlibabaSession := range fac.GetTrustedAlibabaSessions() {
+func (fac *trustedAlibabaSessionsFacade) GetSessionById(id string) (*TrustedAlibabaSession, error) {
+	for _, trustedAlibabaSession := range fac.GetSessions() {
 		if trustedAlibabaSession.Id == id {
 			return &trustedAlibabaSession, nil
 		}
 	}
-	return nil, http_error.NewNotFoundError(fmt.Errorf("plain Alibaba session with id %s not found", id))
+	return nil, http_error.NewNotFoundError(fmt.Errorf("trusted Alibaba session with id %s not found", id))
 }
 
-func (fac *trustedAlibabaSessionsFacade) SetTrustedAlibabaSessionById(newSession TrustedAlibabaSession) {
-	allSessions := fac.GetTrustedAlibabaSessions()
+func (fac *trustedAlibabaSessionsFacade) SetSessionById(newSession TrustedAlibabaSession) {
+	allSessions := fac.GetSessions()
 	for i, trustedAlibabaSession := range allSessions {
 		if trustedAlibabaSession.Id == newSession.Id {
 			allSessions[i] = newSession
 		}
 	}
-	fac.SetTrustedAlibabaSessions(allSessions)
+	fac.SetSessions(allSessions)
 }
 
-func (fac *trustedAlibabaSessionsFacade) SetTrustedAlibabaSessionStatusToPending(id string) error {
+func (fac *trustedAlibabaSessionsFacade) SetSessionStatusToPending(id string) error {
 
 	trustedAlibabaSessionsLock.Lock()
 	defer trustedAlibabaSessionsLock.Unlock()
 
-	trustedAlibabaSession, err := fac.GetTrustedAlibabaSessionById(id)
+	trustedAlibabaSession, err := fac.GetSessionById(id)
 	if err != nil {
 		return err
 	}
 
 	if !(trustedAlibabaSession.Status == NotActive) {
-		return http_error.NewUnprocessableEntityError(fmt.Errorf("plain Alibaba session with id " + id + "cannot be started because it's in pending or active state"))
+		return http_error.NewUnprocessableEntityError(fmt.Errorf("trusted Alibaba session with id " + id + "cannot be started because it's in pending or active state"))
 	}
 
-	oldTrustedAlibabaSessions := fac.GetTrustedAlibabaSessions()
+	oldTrustedAlibabaSessions := fac.GetSessions()
 	newTrustedAlibabaSessions := make([]TrustedAlibabaSession, 0)
 
 	for i := range oldTrustedAlibabaSessions {
@@ -179,20 +179,20 @@ func (fac *trustedAlibabaSessionsFacade) SetTrustedAlibabaSessionStatusToPending
 	return nil
 }
 
-func (fac *trustedAlibabaSessionsFacade) SetTrustedAlibabaSessionStatusToActive(id string) error {
+func (fac *trustedAlibabaSessionsFacade) SetSessionStatusToActive(id string) error {
 	trustedAlibabaSessionsLock.Lock()
 	defer trustedAlibabaSessionsLock.Unlock()
 
-	trustedAlibabaSession, err := fac.GetTrustedAlibabaSessionById(id)
+	trustedAlibabaSession, err := fac.GetSessionById(id)
 	if err != nil {
 		return err
 	}
 
 	if !(trustedAlibabaSession.Status == Pending) {
-		return http_error.NewUnprocessableEntityError(fmt.Errorf("plain Alibaba session with id " + id + "cannot be started because it's not in pending state"))
+		return http_error.NewUnprocessableEntityError(fmt.Errorf("trusted Alibaba session with id " + id + "cannot be started because it's not in pending state"))
 	}
 
-	oldTrustedAlibabaSessions := fac.GetTrustedAlibabaSessions()
+	oldTrustedAlibabaSessions := fac.GetSessions()
 	newTrustedAlibabaSessions := make([]TrustedAlibabaSession, 0)
 
 	for i := range oldTrustedAlibabaSessions {
@@ -216,11 +216,11 @@ func (fac *trustedAlibabaSessionsFacade) SetTrustedAlibabaSessionStatusToActive(
 	return nil
 }
 
-func (fac *trustedAlibabaSessionsFacade) SetTrustedAlibabaSessionStatusToInactive(id string) error {
+func (fac *trustedAlibabaSessionsFacade) SetSessionStatusToInactive(id string) error {
 	trustedAlibabaSessionsLock.Lock()
 	defer trustedAlibabaSessionsLock.Unlock()
 
-	trustedAlibabaSession, err := fac.GetTrustedAlibabaSessionById(id)
+	trustedAlibabaSession, err := fac.GetSessionById(id)
 	if err != nil {
 		return err
 	}
@@ -229,7 +229,7 @@ func (fac *trustedAlibabaSessionsFacade) SetTrustedAlibabaSessionStatusToInactiv
 		return http_error.NewUnprocessableEntityError(fmt.Errorf("trusted Alibaba session with id " + id + "cannot be stopped because it's not in active state"))
 	}
 
-	oldTrustedAlibabaSessions := fac.GetTrustedAlibabaSessions()
+	oldTrustedAlibabaSessions := fac.GetSessions()
 	newTrustedAlibabaSessions := make([]TrustedAlibabaSession, 0)
 
 	for i := range oldTrustedAlibabaSessions {
@@ -254,7 +254,7 @@ func (fac *trustedAlibabaSessionsFacade) SetTrustedAlibabaSessionStatusToInactiv
 }
 
 func (fac *trustedAlibabaSessionsFacade) updateState(newState []TrustedAlibabaSession) error {
-	oldTrustedAlibabaSessions := fac.GetTrustedAlibabaSessions()
+	oldTrustedAlibabaSessions := fac.GetSessions()
 	fac.trustedAlibabaSessions = newState
 
 	for _, observer := range fac.observers {

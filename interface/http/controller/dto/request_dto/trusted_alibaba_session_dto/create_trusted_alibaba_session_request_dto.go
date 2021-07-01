@@ -17,7 +17,7 @@ type CreateTrustedAlibabaSessionRequestDto struct {
 	// the parent session id, can be an alibaba plain or federated session
 	// it's generated with an uuid v4
 	// required: true
-	ParentId string `json:"parentId" binding:"required"`//,uuid4
+	ParentId string `json:"parentId" binding:"required"` //,uuid4
 
 	// the name which will be displayed
 	// required: true
@@ -33,6 +33,8 @@ type CreateTrustedAlibabaSessionRequestDto struct {
 
 	// the region on which the session will be initialized
 	Region string `json:"region" binding:"required"`
+
+	ProfileName string `json:"profileName"`
 }
 
 func (requestDto *CreateTrustedAlibabaSessionRequestDto) Build(context *gin.Context) error {

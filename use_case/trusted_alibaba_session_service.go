@@ -2,6 +2,8 @@ package use_case
 
 import (
 	"fmt"
+	"leapp_daemon/domain/constant"
+	"leapp_daemon/domain/named_profile"
 	"leapp_daemon/domain/region"
 	"leapp_daemon/domain/session"
 	"leapp_daemon/infrastructure/http/http_error"
@@ -15,13 +17,32 @@ type TrustedAlibabaSessionService struct {
 	Keychain Keychain
 }
 
-func (service *TrustedAlibabaSessionService) Create(parentId string, accountName string, accountNumber string, roleName string, region string) error {
+func (service *TrustedAlibabaSessionService) Create(parentId string, accountName string, accountNumber string, roleName string, region string, profileName string) error {
+
+	namedProfile := named_profile.GetNamedProfilesFacade().GetNamedProfileByName(profileName)
+
+	if namedProfile == nil {
+		// TODO: extract UUID generation logic
+		uuidString := uuid.New().String()
+		uuidString = strings.Replace(uuidString, "-", "", -1)
+
+		namedProfile = &named_profile.NamedProfile{
+			Id:   uuidString,
+			Name: profileName,
+		}
+
+		err := named_profile.GetNamedProfilesFacade().AddNamedProfile(*namedProfile)
+		if err != nil {
+			return err
+		}
+	}
+
 	parentSession, err := GetAlibabaParentById(parentId)
 	if err != nil {
 		return err
 	}
 
-	sessions := session.GetTrustedAlibabaSessionsFacade().GetTrustedAlibabaSessions()
+	sessions := session.GetTrustedAlibabaSessionsFacade().GetSessions()
 
 	for _, sess := range sessions {
 		account := sess.Account
@@ -38,7 +59,8 @@ func (service *TrustedAlibabaSessionService) Create(parentId string, accountName
 			Name: roleName,
 			Arn:  fmt.Sprintf("acs:ram::%s:role/%s", accountNumber, roleName),
 		},
-		Region: region,
+		Region:         region,
+		NamedProfileId: namedProfile.Id,
 	}
 
 	// TODO check uuid format
@@ -53,7 +75,7 @@ func (service *TrustedAlibabaSessionService) Create(parentId string, accountName
 		Account:       &trustedAlibabaAccount,
 	}
 
-	err = session.GetTrustedAlibabaSessionsFacade().SetTrustedAlibabaSessions(append(sessions, sess))
+	err = session.GetTrustedAlibabaSessionsFacade().SetSessions(append(sessions, sess))
 	if err != nil {
 		return err
 	}
@@ -62,10 +84,10 @@ func (service *TrustedAlibabaSessionService) Create(parentId string, accountName
 }
 
 func (service *TrustedAlibabaSessionService) Get(id string) (*session.TrustedAlibabaSession, error) {
-	return session.GetTrustedAlibabaSessionsFacade().GetTrustedAlibabaSessionById(id)
+	return session.GetTrustedAlibabaSessionsFacade().GetSessionById(id)
 }
 
-func (service *TrustedAlibabaSessionService) Update(id string, parentId string, accountName string, accountNumber string, roleName string, regionName string) error {
+func (service *TrustedAlibabaSessionService) Update(id string, parentId string, accountName string, accountNumber string, roleName string, regionName string, profileName string) error {
 	parentSession, err := GetAlibabaParentById(parentId)
 	if err != nil {
 		return err
@@ -76,16 +98,22 @@ func (service *TrustedAlibabaSessionService) Update(id string, parentId string, 
 		return http_error.NewUnprocessableEntityError(fmt.Errorf("Region " + regionName + " not valid"))
 	}
 
+	oldSess, err := session.GetTrustedAlibabaSessionsFacade().GetSessionById(id)
+	if err != nil {
+		return http_error.NewInternalServerError(err)
+	}
+
 	trustedAlibabaRole := session.TrustedAlibabaRole{
 		Name: roleName,
 		Arn:  fmt.Sprintf("acs:ram::%s:role/%s", accountNumber, roleName),
 	}
 
 	trustedAlibabaAccount := session.TrustedAlibabaAccount{
-		AccountNumber: accountNumber,
-		Name:          accountName,
-		Role:          &trustedAlibabaRole,
-		Region:        regionName,
+		AccountNumber:  accountNumber,
+		Name:           accountName,
+		Role:           &trustedAlibabaRole,
+		Region:         regionName,
+		NamedProfileId: oldSess.Account.NamedProfileId,
 	}
 
 	sess := session.TrustedAlibabaSession{
@@ -94,17 +122,51 @@ func (service *TrustedAlibabaSessionService) Update(id string, parentId string, 
 		//StartTime string
 		ParentSession: parentSession,
 		Account:       &trustedAlibabaAccount,
-		//Profile   string
+		Profile:       profileName,
 	}
 
-	session.GetTrustedAlibabaSessionsFacade().SetTrustedAlibabaSessionById(sess)
+	oldNamedProfile := named_profile.GetNamedProfilesFacade().GetNamedProfileById(oldSess.Account.NamedProfileId)
+	oldNamedProfile.Name = profileName
+	named_profile.GetNamedProfilesFacade().UpdateNamedProfileName(oldNamedProfile)
+
+	session.GetTrustedAlibabaSessionsFacade().SetSessionById(sess)
 	return nil
 }
 
 func (service *TrustedAlibabaSessionService) Delete(id string) error {
-	err := session.GetTrustedAlibabaSessionsFacade().RemoveTrustedAlibabaSession(id)
+	sess, err := session.GetTrustedAlibabaSessionsFacade().GetSessionById(id)
 	if err != nil {
 		return http_error.NewInternalServerError(err)
+	}
+
+	if sess.Status != session.NotActive {
+		err = service.Stop(id)
+		if err != nil {
+			return err
+		}
+	}
+
+	oldNamedProfile := named_profile.GetNamedProfilesFacade().GetNamedProfileById(sess.Account.NamedProfileId)
+	named_profile.GetNamedProfilesFacade().DeleteNamedProfile(oldNamedProfile.Id)
+
+	err = session.GetTrustedAlibabaSessionsFacade().RemoveSession(id)
+	if err != nil {
+		return http_error.NewInternalServerError(err)
+	}
+
+	err = service.Keychain.DeleteSecret(id + constant.TrustedAlibabaKeyIdSuffix)
+	if err != nil {
+		return err
+	}
+
+	err = service.Keychain.DeleteSecret(id + constant.TrustedAlibabaSecretAccessKeySuffix)
+	if err != nil {
+		return err
+	}
+
+	err = service.Keychain.DeleteSecret(id + constant.TrustedAlibabaStsTokenSuffix)
+	if err != nil {
+		return err
 	}
 
 	return nil
@@ -112,7 +174,7 @@ func (service *TrustedAlibabaSessionService) Delete(id string) error {
 
 func (service *TrustedAlibabaSessionService) Start(sessionId string) error {
 	// call AssumeRole API
-	sess, err := session.GetTrustedAlibabaSessionsFacade().GetTrustedAlibabaSessionById(sessionId)
+	sess, err := session.GetTrustedAlibabaSessionsFacade().GetSessionById(sessionId)
 	if err != nil {
 		return err
 	}
@@ -169,12 +231,12 @@ func (service *TrustedAlibabaSessionService) Start(sessionId string) error {
 		return http_error.NewInternalServerError(err)
 	}
 
-	err = session.GetTrustedAlibabaSessionsFacade().SetTrustedAlibabaSessionStatusToPending(sessionId)
+	err = session.GetTrustedAlibabaSessionsFacade().SetSessionStatusToPending(sessionId)
 	if err != nil {
 		return err
 	}
 
-	err = session.GetTrustedAlibabaSessionsFacade().SetTrustedAlibabaSessionStatusToActive(sessionId)
+	err = session.GetTrustedAlibabaSessionsFacade().SetSessionStatusToActive(sessionId)
 	if err != nil {
 		return err
 	}
@@ -183,7 +245,7 @@ func (service *TrustedAlibabaSessionService) Start(sessionId string) error {
 }
 
 func (service *TrustedAlibabaSessionService) Stop(sessionId string) error {
-	err := session.GetTrustedAlibabaSessionsFacade().SetTrustedAlibabaSessionStatusToInactive(sessionId)
+	err := session.GetTrustedAlibabaSessionsFacade().SetSessionStatusToInactive(sessionId)
 	if err != nil {
 		return err
 	}

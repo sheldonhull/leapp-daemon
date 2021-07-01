@@ -23,6 +23,7 @@ type TrustedAlibabaAccount struct {
 	// Type            string
 	// ParentSessionId string
 	// ParentRole      string
+	NamedProfileId string
 }
 
 type TrustedAlibabaRole struct {

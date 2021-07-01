@@ -37,6 +37,8 @@ type EditTrustedAlibabaSessionRequestDto struct {
 
 	// the region on which the session will be initialized
 	Region string `json:"region"`
+
+	ProfileName string `json:"profileName"`
 }
 
 func (requestDto *EditTrustedAlibabaSessionRequestDto) Build(context *gin.Context) error {
