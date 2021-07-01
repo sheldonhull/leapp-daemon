@@ -46,7 +46,7 @@ func (service *TrustedAlibabaSessionService) Create(parentId string, accountName
 
 	for _, sess := range sessions {
 		account := sess.Account
-		if sess.ParentSession.GetId() == parentId && account.AccountNumber == accountNumber && account.Role.Name == roleName {
+		if sess.ParentId == parentId && account.AccountNumber == accountNumber && account.Role.Name == roleName {
 			err := http_error.NewConflictError(fmt.Errorf("a session with the same parent, account number and role name already exists"))
 			return err
 		}
@@ -68,11 +68,12 @@ func (service *TrustedAlibabaSessionService) Create(parentId string, accountName
 	uuidString = strings.Replace(uuidString, "-", "", -1)
 
 	sess := session.TrustedAlibabaSession{
-		Id:            uuidString,
-		Status:        session.NotActive,
-		StartTime:     "",
-		ParentSession: parentSession,
-		Account:       &trustedAlibabaAccount,
+		Id:         uuidString,
+		Status:     session.NotActive,
+		StartTime:  "",
+		ParentId:   parentSession.GetId(),
+		ParentType: parentSession.GetTypeString(),
+		Account:    &trustedAlibabaAccount,
 	}
 
 	err = session.GetTrustedAlibabaSessionsFacade().SetSessions(append(sessions, sess))
@@ -120,9 +121,10 @@ func (service *TrustedAlibabaSessionService) Update(id string, parentId string, 
 		Id:     id,
 		Status: session.NotActive,
 		//StartTime string
-		ParentSession: parentSession,
-		Account:       &trustedAlibabaAccount,
-		Profile:       profileName,
+		ParentId:   parentId,
+		ParentType: parentSession.GetTypeString(),
+		Account:    &trustedAlibabaAccount,
+		Profile:    profileName,
 	}
 
 	oldNamedProfile := named_profile.GetNamedProfilesFacade().GetNamedProfileById(oldSess.Account.NamedProfileId)
@@ -179,25 +181,25 @@ func (service *TrustedAlibabaSessionService) Start(sessionId string) error {
 		return err
 	}
 	region := sess.Account.Region
-	label := sess.ParentSession.GetId() + "-" + sess.ParentSession.GetTypeString() + "-alibaba-session-access-key-id"
+	label := sess.ParentId + "-" + sess.ParentType + "-alibaba-session-access-key-id"
 	accessKeyId, err := service.Keychain.GetSecret(label)
 	if err != nil {
 		return err
 	}
-	label = sess.ParentSession.GetId() + "-" + sess.ParentSession.GetTypeString() + "-alibaba-session-secret-access-key"
+	label = sess.ParentId + "-" + sess.ParentType + "-alibaba-session-secret-access-key"
 	accessKeySecret, err := service.Keychain.GetSecret(label)
 	if err != nil {
 		return err
 	}
 
 	var client *sts.Client
-	if sess.ParentSession.GetTypeString() == "plain" {
+	if sess.ParentType == "plain" {
 		client, err = sts.NewClientWithAccessKey(region, accessKeyId, accessKeySecret)
 		if err != nil {
 			return err
 		}
 	} else {
-		label = sess.ParentSession.GetId() + "-" + sess.ParentSession.GetTypeString() + "-alibaba-session-sts-token"
+		label = sess.ParentId + "-" + sess.ParentType + "-alibaba-session-sts-token"
 		stsToken, err := service.Keychain.GetSecret(label)
 		if err != nil {
 			return err

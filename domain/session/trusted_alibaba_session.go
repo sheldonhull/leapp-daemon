@@ -7,12 +7,13 @@ type TrustedAlibabaSessionContainer interface {
 }
 
 type TrustedAlibabaSession struct {
-	Id            string
-	Status        Status
-	StartTime     string
-	ParentSession ParentSession
-	Account       *TrustedAlibabaAccount
-	Profile       string
+	Id         string
+	Status     Status
+	StartTime  string
+	ParentId   string
+	ParentType string
+	Account    *TrustedAlibabaAccount
+	Profile    string
 }
 
 type TrustedAlibabaAccount struct {
