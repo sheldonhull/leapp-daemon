@@ -5,8 +5,7 @@ go 1.14
 require (
 	github.com/aws/aws-sdk-go v1.38.11
 	github.com/denisbrodbeck/machineid v1.0.1
-	github.com/gin-gonic/gin v1.6.3
-	github.com/go-playground/validator/v10 v10.4.1 // indirect
+	github.com/gin-gonic/gin v1.7.7
 	github.com/godbus/dbus/v5 v5.0.4 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/uuid v1.2.0
